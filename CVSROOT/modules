@@ -24,4 +24,4 @@
 # character to interpose another module into the current module.  This
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
-1.2	1.2
+1.2	source/1.2
