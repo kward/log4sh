@@ -1,0 +1,27 @@
+#! /bin/sh
+# $Id$
+#
+# Author: Kate Ward <kate.ward@forestent.com>
+#
+
+log_msg()
+{
+  logger_debug "(my debug message) $1"
+  logger_info "(my info message) $1"
+  logger_error "(my error message) $1"
+  logger_warn "(my warn message) $1"
+  logger_fatal "(my fatal message) $1"
+}
+
+#set -x
+
+# load log4sh
+if [ -r log4sh ]; then
+   . ./log4sh
+else
+   echo "error: could not load (log4sh)"
+   exit 1
+fi
+
+log_msg "log4sh now loaded"
+
