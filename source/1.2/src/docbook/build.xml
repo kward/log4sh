@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id$ -->
+
+<project basedir="../.." default="build" name="DocBook">
+  <!-- ========================================================================
+       properties
+       ==================================================================== -->
+
+  <!-- directories -->
+  <property name="build" location="build"/>
+  <property name="doc" location="doc"/>
+  <property name="share" location="share"/>
+  <property name="src" location="src"/>
+
+  <!-- files -->
+  <property name="document" value="log4sh"/>
+  <property name="document.html" value="${document}.html"/>
+  <property name="document.xml" value="${document}.xml"/>
+
+  <!-- dtd references -->
+  <xmlcatalog id="docbookDTDs">
+    <dtd publicId="-//OASIS//DTD DocBook XML V4.3//EN"
+	location="${share}/docbook/xml/4.3/docbookx.dtd"/>
+  </xmlcatalog>
+
+  <!-- ========================================================================
+       targets
+       ==================================================================== -->
+
+  <target name="transform.xml_to_html" unless="document.dontConvert">
+    <!-- uses xslt to do transformation -->
+    <xslt in="${srcdir}/${srcfile}"
+	out="${destdir}/${destfile}"
+	style="${share}/docbook/tldp-xsl/21MAR2004/html/tldp-one-page.xsl">
+      <xmlcatalog refid="docbookDTDs"/>
+    </xslt>
+  </target>
+
+  <target name="transform">
+    <uptodate property="document.dontConvert"
+	targetfile="${destdir}/${destfile}">
+      <srcfiles dir="${srcdir}" includes="${srcfile}"/>
+    </uptodate>
+    <antcall target="transform.${target}"/>
+  </target>
+
+  <target name="build">
+    <tstamp/>
+    <mkdir dir="${doc}"/>
+
+    <!-- perform transformation(s) -->
+    <property name="srcdir" value="${src}/docbook"/>
+    <property name="destdir" value="${doc}"/>
+
+    <antcall target="transform">
+      <param name="target" value="xml_to_html"/>
+      <param name="srcfile" value="${document.xml}"/>
+      <param name="destfile" value="${document.html}"/>
+    </antcall>
+  </target>
+</project>
