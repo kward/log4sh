@@ -1,0 +1,12 @@
+# $Id$
+
+- make logger level's case insensitive??
+
+- support netcat for telnet
+
+- support logger for syslog
+SyslogAppender
+  Facility
+    The facilityName parameter must be one of the strings KERN, USER, MAIL, DAEMON, AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7. Case is unimportant.
+  FacilityPrinting
+  SyslogHost
