@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id$ -->
+<!-- vim:softtabstop=2 shiftwidth=2 -->
+
+<!DOCTYPE article
+  PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+  <!ENTITY myEmail "kate.ward@forestent.com">
+
+  <!ENTITY all "<constant>ALL</constant>">
+  <!ENTITY debug "<constant>DEBUG</constant>">
+  <!ENTITY info "<constant>INFO</constant>">
+  <!ENTITY warn "<constant>WARN</constant>">
+  <!ENTITY error "<constant>ERROR</constant>">
+  <!ENTITY fatal "<constant>FATAL</constant>">
+  <!ENTITY off "<constant>OFF</constant>">
+]>
+
+<article id="index">
+<articleinfo><title>log4sh</title>
+  <author>
+    <firstname>Kate</firstname>
+    <surname>Ward</surname>
+    <affiliation>
+      <address>
+        <!-- Valid email...spamblock/scramble if so desired -->
+        <email>&myEmail;</email>
+      </address>
+    </affiliation>
+  </author>
+
+  <!-- All dates specified in ISO "YYYY-MM-DD" format -->
+  <pubdate>2004-12-31</pubdate>
+
+  <!-- Most recent revision goes at the top; list in descending order -->
+  <revhistory>
+    <revision>
+      <revnumber>1.2.4</revnumber>
+      <date>2004-12-28</date>
+      <authorinitials>kwa</authorinitials>
+      <revremark>Initial DocBook conversion.</revremark>
+    </revision>
+  </revhistory>
+
+  <!-- Provide a good abstract; a couple of sentences is sufficient -->
+  <abstract>
+    <para>log4sh is a logging framework for shell scripts that works similar to the other wonderful <ulink url="http://logging.apache.org/">logging products</ulink> available from the <ulink url="http://www.apache.org/">Apache Software Foundataion</ulink> (eg. log4j, log4perl). Although not as powerful as the others, it can make the task of adding advanced logging to shell scripts easier.  It has much more power than just using simple "echo" commands throughout.  In addition, it can be configured from a properties file so that scripts in a production environment do not need to be altered to change the amount of logging they produce.</para>
+  </abstract>
+</articleinfo>
+
+<!-- Content follows...include introduction, license information, feedback -->
+
+<!-- =========================================================================
+Introduction
+-->
+<section id="intro"><title>Introduction</title>
+  <para>Log4sh has been developed under the Bourne Again Shell (<command>bash</command>) on Linux, but great care has been taken to make sure it works under the default Bourne Shell of Solaris (<command>sh</command>) as this happens to be the primary platform used by myself.</para>
+
+  <para><blockquote><title>Tested Operating Systems</title>
+    <itemizedlist>
+      <listitem><para>Linux</para></listitem>
+      <listitem><para>Solaris 8, 9, 10</para></listitem>
+    </itemizedlist>
+  </blockquote></para>
+
+  <para><blockquote><title>Tested Shells</title>
+    <itemizedlist>
+      <listitem><para>Bourne Shell (<command>sh</command>)</para></listitem>
+      <listitem><para>Bourne Again Shell (<command>bash</command>)</para></listitem>
+    </itemizedlist>
+  </blockquote></para>
+
+  <!-- Give credit where credit is due...very important -->
+  <section id="credits"><title>Credits / Contributors</title>
+    <para>In this document, I have the pleasure of acknowledging:</para>
+
+    <itemizedlist>
+      <!--<listitem><para>Some User <email>some.user@this.place.com</email></para></listitem>-->
+      <listitem><para>Nobody in particular</para></listitem>
+    </itemizedlist>
+  </section>
+
+  <!-- Feedback -->
+  <section id="feedback"><title>Feedback</title>
+    <para>Feedback is most certainly welcome for this document. Send your additions, comments and criticisms to the following email address: <email>&myEmail;</email>.</para>
+  </section>
+</section>
+
+<!-- =========================================================================
+Quickstart
+-->
+<section id="quickstart"><title>Quickstart</title>
+  <para>To get started quickly with log4sh, take a look at the <filename>test-log4sh</filename> sample script in the <filename class="directory">src/test</filename> directory of the distribution.  You will need to copy the <filename>log4sh</filename> script itself from the <filename class="directory">src/shell</filename> directory into the <filename class="directory">test</filename> directory before running the test.  This test script is designed to configure log4sh via code.  Later on, we will configure log4sh with a properties file, very similar to how log4j is configured.</para>
+
+  <para>By default, log4sh is configured with a <constant>ConsoleAppender</constant> which logs to STDOUT using a <constant>SimpleLayout</constant> and a logging level of &error;.  If no configuration file is found, a warning message will be given letting the user know that no configuration file was found.  This warning can be supressed by setting the <varname>LOG4SH_CONFIGURATION</varname> environment variable to <literal>none</literal>.</para>
+
+  <para>Run the first test.</para>
+
+  <example><title>Test #1</title>
+    <screen><![CDATA[
+$ ./test-log4sh
+]]></screen>
+  </example>
+
+  <para>After a first run you will see quite a bit of output to the display, and as well two log files will be created (<filename>log4sh-pattern.log</filename> and <filename>log4sh-simple.log</filename>).  The display contains a mix of output to STDOUT and STDERR, and the files contain various versions of the same data, but with output that changes as various layouts and patterns are tested.  To clean up the display a bit, you could send all of the output of the STDERR appender off to <filename>/dev/null</filename>.</para>
+
+  <para>Run the test again, but redirecting STDERR to <filename>/dev/null</filename>.</para>
+
+  <example><title>Test #2</title>
+    <screen><![CDATA[
+$ ./test-log4sh 2>/dev/null
+]]></screen>
+  </example>
+
+  <para>Go ahead a take a look at the test script to get a feel of what the script is trying to accomplish.  Hopefully, you can see just how simple log4sh is to use and control.</para>
+
+  <para>For our next test, we will configure log4sh with a properties file.  This test is incredibly simple as it is designed to show the power of the properties file.   Copy first example properties file <filename path="src/examples">log4sh.properties.ex1</filename> from the <filename class="directory">src/examples</filename> directory into the <filename class="directory">test</filename> directory, and give it the name <filename>log4sh.properties</filename>.</para>
+
+  <para>Run the second test.</para>
+
+  <example><title>Test #3</title>
+    <screen><![CDATA[
+$ ./test-properties
+]]></screen>
+  </example>
+
+  <para>This test is designed to look very much like one of the log4j examples.  The properties file is taken almost verbatum from the log4j short manual, with only small changes required to make it work for log4sh.  Log4sh is configured with a <constant>ConsoleAppender</constant> that has a <constant>PatternLayout</constant>.  One limitation of log4sh is that it does not have access to a timer with millisecond accuracy, so it logs only with an accuracy of one second.  For most situations, this should be sufficient.</para>
+
+  <para>Copy the second example properties file (<filename path="src/examples">log4sh.properties.ex2</filename>) as <filename>log4sh.properties</filename>, and rerun the test.  This second properties file is only slightly different from the first in that it adds the filename to the output, and removes the <option>%x</option> pattern directive as that directive is not supported by log4sh.</para>
+
+  <para>The next example shows a typical situation where an administrator wants to run a script via a cron job, wants a log of the scripts actions, but only wants an email if the job failed.</para>
+
+  <para>Copy the third example properies file (<filename path="src/examples">log4sh.properties.ex3</filename>) over, and rerun the test.  This time, the output will be sent to two separate locations; STDERR and a file called <filename>example.log</filename>.  The output to STDERR is set to the &error; level, and output sent to the file is at the &info; level.  More output is written to the logfile (as expected) when the test is run.</para>
+
+  <para>In the situation of being run from a cron job, the logfile will always be written, but an email comes only when output from the script came at the &error; or &fatal; level.  An administrator can even configure the <filename>log4sh.properties</filename> file to a &debug; level so that more output is logged for testing or debugging purposes, and this change can happen without making any code changes to the script.  Something very useful in a production environment!</para>
+</section>
+
+<!-- =========================================================================
+Usage Guide
+-->
+<section id="usage"><title>Usage Guide</title>
+  <para>The usage of log4sh is simple.  There are only a few simple steps required to setup and use log4sh in your application.</para>
+
+  <para>
+    <orderedlist spacing="compact">
+      <listitem><para>preconfigure log4sh (properties file)</para></listitem>
+      <listitem><para>source the log4sh script code</para></listitem>
+      <listitem><para>configure log4sh in code (optional)</para></listitem>
+      <listitem><para>call logging statements</para></listitem>
+    </orderedlist>
+  </para>
+
+  <section id="usage-preconfigure"><title>Preconfigure log4sh</title>
+    <para>To preconfigure log4sh, create a properties file (see the <link linkend="properties_file" endterm="properties_file.title" /> later in this document).  Optionally set the <varname>LOG4SH_CONFIGURATION</varname> environment variable to point log4sh to the configuration file.</para>
+  </section>
+
+  <section id="usage-source"><title>Source log4sh</title>
+    <para>To source the code into your script (also known as including), one uses the sourcing ability of shell to source one script into another.  See the following quick example for how easy this is done.</para>
+
+    <example><title>Sourcing external shell code into current program</title>
+      <programlisting><![CDATA[
+#! /bin/sh
+
+# source log4sh from current directory
+. ./log4sh
+]]></programlisting>
+    </example>
+
+    <para>Here is some sample code that looks for log4sh in the same directory as the script is located, as well as the current directory.  If log4sh could not be found, it exits with an error.  If log4sh is found, it is loaded, along with the <filename>log4sh.properties</filename> file in the current directory (see the following example).  It then logs a message at the &info; level to STDOUT.</para>
+
+    <example><title>Hello, world (using properties)</title>
+      <programlisting><![CDATA[
+#! /bin/sh
+#
+# log4sh example: Hello, world
+#
+myDir=`dirname $0`
+
+# find and source log4sh
+if [ -r "$myDir/log4sh" ]; then
+  dir=$myDir
+elif [ -r "./log4sh" ]; then
+  dir=.
+else
+  echo "fatal: could not find log4sh" >&2
+  exit 1
+fi
+. $dir/log4sh
+
+# say Hello to the world
+logger_info "Hello, world"
+]]></programlisting>
+    </example>
+
+    <para>Here is the <filename>log4sh.properties</filename> file for the previous example.  Save it in the same directory you are running the above script from.</para>
+
+    <example><title>Hello, world; properties file</title>
+      <programlisting><![CDATA[
+#
+# log4sh example: Hello, world properties file
+#
+
+# Set root logger level to DEBUG and its only appender to A1
+log4sh.rootLogger=INFO, A1
+
+# A1 is set to be a ConsoleAppender.
+log4sh.appender.A1=ConsoleAppender
+
+# A1 uses a PatternLayout.
+log4sh.appender.A1.layout=PatternLayout
+log4sh.appender.A1.layout.ConversionPattern=%r [%t] %p %c %x - %m%n
+]]></programlisting>
+    </example>
+  </section>
+
+  <section id="usage-code"><title id="usage-code.title">Configure log4sh in code</title>
+    <para>To configure log4sh in code, simply call the appropriate functions in your code.  The following code sample loads log4sh from the current directory, configures it for STDERR output, and the logs a message at the &info; level.</para>
+
+    <example><title>Hello, world (configured in code)</title>
+      <programlisting><![CDATA[
+#! /bin/sh
+#
+# log4sh example: Hello, world
+#
+
+# source log4sh (disabling properties file warning)
+LOG4SH_CONFIGURATION="none" . ./log4sh
+
+# configure log4sh defaults
+logger_setLevel INFO
+
+# configure appenders
+appender_setAppend stdout false
+logger_addAppender stderr
+appender_setAppenderType stderr FileAppender
+appender_setAppenderFile stderr STDERR
+
+# say Hello to the world
+logger_info "Hello, world"
+]]></programlisting>
+    </example>
+  </section>
+
+  <section id="usage-logging"><title>Logging with log4sh</title>
+    <para>Once log4sh is loaded, logging is as simple as calling the appropriate logging function with a message to be logged.  Take a look at the above examples to see just how easy it was to log the statement <literal>"Hello, world"</literal> at an &info; level.</para>
+  </section>
+</section>
+
+<!-- =========================================================================
+Properties File Configuration
+-->
+<section id="properties_file"><title id="properties_file.title">Properties File Configuration</title>
+  <para>Log4sh can be configured with a properties file that is separate from the actual script where the logging takes place.  By default, log4sh looks for its properties file called <filename>log4sh.properties</filename> in the current directory.  If the file is located elsewhere or with a different name, log4sh can be configured by setting the <varname>LOG4SH_CONFIGURATION</varname> environment variable (eg. <varname>LOG4SH_CONFIGURATION="/etc/log4sh.conf"</varname>).</para>
+
+  <para>A <filename>log4sh.properties</filename> file that is completly empty is sufficient to configure log4sh.  There will be absolutely no output however (which might just be what is desired).  Usually though, some output is desired, so there is at least a recommended minimum configuration file.  An explaination of the file follows the example.</para>
+
+  <example><title>Recommended minimum log4sh.properties file</title>
+    <programlisting><![CDATA[
+log4sh.rootLogger=INFO, stdout
+log4sh.appender.stdout=ConsoleAppender
+]]></programlisting>
+  </example>
+
+  <para>In the first line, the root logger is configured by setting the default logging level, and defining the name of an appender.  In the second line, the stdout appender is defined as a <constant>ConsoleAppender</constant>.</para>
+
+  <section id="properties-root_logger"><title>Root Logger</title>
+    <para>(future)</para>
+  </section>
+
+  <section id="levels"><title>Levels</title>
+    <table><title>Logging Levels (from most output to least)</title>
+      <tgroup cols="2">
+	<thead>
+	  <row>
+	    <entry>Level</entry>
+	    <entry>Definition</entry>
+	  </row>
+	</thead>
+	<tbody>
+	  <row>
+	    <entry>&all;</entry>
+	    <entry>The &all; level has the lowest possible rank and is intended to turn on all logging.</entry>
+	  </row><row>
+	    <entry>&debug;</entry>
+	    <entry>The &debug; level designates fine-grained informational events that are most useful to debug an application.</entry>
+	  </row><row>
+	    <entry>&info;</entry>
+	    <entry>The &info; level designates informational messages that highlight the progress of the application at coarse-grained level.</entry>
+	  </row><row>
+	    <entry>&warn;</entry>
+	    <entry>The &warn; level designates potentially harmful situations.</entry>
+	  </row><row>
+	    <entry>&error;</entry>
+	    <entry>The &error; level designates error events that might still allow the application to continue running.</entry>
+	  </row><row>
+	    <entry>&fatal;</entry>
+	    <entry>The &fatal; level designates very severe error events that will presumably lead the application to abort.</entry>
+	  </row><row>
+	    <entry>&off;</entry>
+	    <entry>The &off; level has the highest possible rank and is intended to turn off logging.</entry>
+	  </row>
+	</tbody>
+      </tgroup>
+    </table>
+  </section>
+
+  <section id="appenders"><title>Appenders</title>
+    <para>An appender name can be any alpha-numeric string containing no spaces.</para>
+    
+    <example><title>Sample appender names</title>
+      <para>myAppender - good</para>
+    </example>
+  
+      <section id="types"><title>Types</title>
+	<para>An appender can be set to one of several different types.</para>
+
+      <example><title>Setting an appender type</title>
+	<programlisting><![CDATA[
+  log4sh.appender.A1=FileAppender
+  ]]></programlisting>
+      </example>
+
+      <table><title>Appender Types</title>
+	<tgroup cols="3">
+	  <thead>
+	    <row>
+	      <entry>Type</entry>
+	      <entry>Definition</entry>
+	      <entry>Supported?</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry>ConsoleAppender</entry>
+	      <entry>output sent to console (STDOUT)</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>FileAppender</entry>
+	      <entry>output sent to a file</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>DailyRollingFileAppender</entry>
+	      <entry>output sent to a file that rolls over daily</entry>
+	      <entry>partial</entry>
+	    </row>
+	    <row>
+	      <entry>RollingFileAppender</entry>
+	      <entry>output sent to a file that rolls over by size</entry>
+	      <entry>partial</entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+    </section>
+
+    <section id="options"><title>Options</title>
+      <para>An appender can take several different options.</para>
+
+      <example><title>Setting an appender option</title>
+	<programlisting><![CDATA[
+  log4sh.appender.A1.File=output.log
+  ]]></programlisting>
+      </example>
+
+      <table><title>Appender Options</title>
+	<tgroup cols="3">
+	  <thead>
+	    <row>
+	      <entry>Option</entry>
+	      <entry>Definition</entry>
+	      <entry>Supported?</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry>DatePattern</entry>
+	      <entry>configure a pattern for the output filename</entry>
+	      <entry>no (ignored)</entry>
+	    </row>
+	    <row>
+	      <entry>File</entry>
+	      <entry>output filename (special filename of STDERR used for logging to STDERR)</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>MaxBackupIndex</entry>
+	      <entry>number of old logfiles to keep</entry>
+	      <entry>no (ignored)</entry>
+	    </row>
+	    <row>
+	      <entry>MaxFileSize</entry>
+	      <entry>maximum size of old logfiles</entry>
+	      <entry>no (ignored)</entry>
+	    </row>
+	    <row>
+	      <entry>Threshold</entry>
+	      <entry>logging level of the appender</entry>
+	      <entry>yes</entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+    </section>
+
+    <section id="layouts"><title>Layouts</title>
+      <para>An appender can be configured with various Layouts to customize how the output looks.</para>
+
+      <example><title>Setting an appender's layout</title>
+	<programlisting><![CDATA[
+  log4sh.appender.A1.layout=PatternLayout
+  ]]></programlisting>
+      </example>
+
+      <table><title>Layouts</title>
+	<tgroup cols="3">
+	  <thead>
+	    <row>
+	      <entry>Layout</entry>
+	      <entry>Definition</entry>
+	      <entry>Supported?</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry>HTMLLayout</entry>
+	      <entry>layout using HTML</entry>
+	      <entry>no (same as SimpleLayout)</entry>
+	    </row>
+	    <row>
+	      <entry>SimpleLayout</entry>
+	      <entry>a simple default layout ('%p - %m')</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>PatternLayout</entry>
+	      <entry>a patterned layout (default: '%d %p - %m%n')</entry>
+	      <entry>yes</entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+
+      <para>An layout has many different options to configure how it appears.  These are known as patterns.</para>
+
+      <example><title>Setting an appender's layout pattern</title>
+	<programlisting><![CDATA[
+  log4sh.appender.A1.layout.ConversionPattern=%d [%p] %c - %m%n
+  ]]></programlisting>
+      </example>
+
+      <table><title>Pattern Options</title>
+	<tgroup cols="3">
+	  <thead>
+	    <row>
+	      <entry>Option</entry>
+	      <entry>Definition</entry>
+	      <entry>Supported?</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry>%c</entry>
+	      <entry>current class (not applicable in shell; always returns 'shell')</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>%d</entry>
+	      <entry>current date (see *NIX date man page; '%Y-%m-%d %H:%M:%S')</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>%F</entry>
+	      <entry>current script filename (default: `basename $0`)</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>%L</entry>
+	      <entry>current line number in script</entry>
+	      <entry>no (ignored)</entry>
+	    </row>
+	    <row>
+	      <entry>%m</entry>
+	      <entry>logging message</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>%n</entry>
+	      <entry>OS specific line ending</entry>
+	      <entry>no (ignored)</entry>
+	    </row>
+	    <row>
+	      <entry>%p</entry>
+	      <entry>logging level (aka priority)</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>%r</entry>
+	      <entry>number of seconds since script was started</entry>
+	      <entry>partial (bash)</entry>
+	    </row>
+	    <row>
+	      <entry>%t</entry>
+	      <entry>current executing thread (default: 'main'; code changable)</entry>
+	      <entry>yes</entry>
+	    </row>
+	    <row>
+	      <entry>%x</entry>
+	      <entry>unknown</entry>
+	      <entry>no (ignored)</entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
+    </section>
+  </section>
+</section>
+
+<!-- =========================================================================
+Function Reference
+-->
+<section id="function_reference"><title>Function Reference</title>
+  <section id="function-root_logger"><title>Root Logger</title>
+    <table><title>Configuring the root logger</title>
+      <tgroup cols="3">
+	<thead>
+	  <row>
+	    <entry>Function</entry>
+	    <entry>Definition</entry>
+	    <entry>Example</entry>
+	  </row>
+	</thead>
+	<tbody>
+	  <row>
+	    <entry>logger_addAppender</entry>
+	    <entry>add an appender</entry>
+	    <entry><literal>logger_addAppender stdout</literal></entry>
+	  </row>
+	  <row>
+	    <entry>logger_addAppenderWithPattern</entry>
+	    <entry>shortcut for adding an appender with a specific pattern layout</entry>
+	    <entry><literal>logger_addAppenderWithLayout myPattern '%d [%p] %m'</literal></entry>
+	  </row>
+	  <row>
+	    <entry>logger_setFilename</entry>
+	    <entry>set the script filename for the %F pattern option</entry>
+	    <entry><literal>logger_setFilename "myFilename"</literal></entry>
+	  </row>
+	  <row>
+	    <entry>logger_getLevel</entry>
+	    <entry>get the current root logger priority level</entry>
+	    <entry><literal>level=`logger_getLevel`</literal></entry>
+	  </row>
+	  <row>
+	    <entry>logger_setLevel</entry>
+	    <entry>set the root logger priority level</entry>
+	    <entry><literal>logger_setLevel INFO</literal></entry>
+	  </row>
+	  <row>
+	    <entry>logger_setThreadName</entry>
+	    <entry>set the current thread name for the %t pattern option</entry>
+	    <entry><literal>logger_setThreadName "myThread"</literal></entry>
+	  </row>
+	</tbody>
+      </tgroup>
+    </table>
+  </section>
+
+  <section id="functions-appenders"><title>Appenders</title>
+    <table><title>Configuring appenders</title>
+      <tgroup cols="3">
+	<thead>
+	  <row>
+	    <entry>Function</entry>
+	    <entry>Definition</entry>
+	    <entry>Example</entry>
+	  </row>
+	</thead>
+	<tbody>
+	  <row>
+	    <entry>appender_close</entry>
+	    <entry>close an appender</entry>
+	    <entry><literal>appender_close myAppender</literal></entry>
+	  </row><row>
+	    <entry>appender_setAppenderFile</entry>
+	    <entry>set the output filename for the named appender</entry>
+	    <entry><literal>appender_setAppenderFile myAppender "output.log"</literal></entry>
+	  </row><row>
+	    <entry>appender_setAppenderType</entry>
+	    <entry>set the type of appender for the named appender</entry>
+	    <entry><literal>appender_setAppenderType myAppender FileAppender</literal></entry>
+	  </row><row>
+	    <entry>appender_getLayout</entry>
+	    <entry>get an appender's layout type</entry>
+	    <entry><literal>layout=`appender_getLayout myAppender`</literal></entry>
+	  </row><row>
+	    <entry>appender_setLayout</entry>
+	    <entry>set the layout type for the named appender</entry>
+	    <entry><literal>appender_setLayout myAppender PatternLayout</literal></entry>
+	  </row><row>
+	    <entry>appender_getLevel</entry>
+	    <entry>get an appender's logging priority</entry>
+	    <entry><literal>level=`appender_getLevel myAppender`</literal></entry>
+	  </row><row>
+	    <entry>appender_setLevel</entry>
+	    <entry>set the logging priority for the named appender</entry>
+	    <entry><literal>appender_setLevel myAppender DEBUG</literal></entry>
+	  </row><row>
+	    <entry>appender_setPattern</entry>
+	    <entry>set the output pattern for named appender (appender must be set to a PatternLayout)</entry>
+	    <entry><literal>appender_setPattern myAppender '%d %p - %m%n'</literal></entry>
+	  </row>
+	</tbody>
+      </tgroup>
+    </table>
+  </section>
+
+  <section id="functions-logging"><title>Logging</title>
+    <table><title>Logging statements</title>
+      <tgroup cols="3">
+	<thead>
+	  <row>
+	    <entry>Function</entry>
+	    <entry>Definition</entry>
+	    <entry>Example</entry>
+	  </row>
+	</thead>
+	<tbody>
+	  <row>
+	    <entry>log</entry>
+	    <entry>log a message at a specific level</entry>
+	    <entry><literal>log DEBUG "Hello, world"</literal></entry>
+	  </row><row>
+	    <entry>logger_debug</entry>
+	    <entry>log a message at the DEBUG level</entry>
+	    <entry><literal>logger_debug "This is a test"</literal></entry>
+	  </row><row>
+	    <entry>logger_info</entry>
+	    <entry>log a message at the INFO level</entry>
+	    <entry><literal>logger_info "Did you get it?"</literal></entry>
+	  </row><row>
+	    <entry>logger_error</entry>
+	    <entry>log a message at the ERROR level</entry>
+	    <entry><literal>logger_error "I sure hope you did"</literal></entry>
+	  </row><row>
+	    <entry>logger_warn</entry>
+	    <entry>log a message at the WARN level</entry>
+	    <entry><literal>logger_warn "If not, you might be in trouble"</literal></entry>
+	  </row><row>
+	    <entry>logger_fatal</entry>
+	    <entry>log a message at the FATAL level</entry>
+	    <entry><literal>logger_fatal "The end of the world is here!!!"</literal></entry>
+	  </row>
+	</tbody>
+      </tgroup>
+    </table>
+  </section>
+</section>
+
+<!-- =========================================================================
+Miscellaneous Info
+-->
+<section id="misc_info"><title>Miscellaneous Info</title>
+  <para>Log4sh has been completly developed from scratch by myself, Kate Ward.  I use it in production environments where logging from shell scripts is critical, and where I need more than just a simple "Hello, I worked" type of logging message.  If you like what you see, or have any suggestions on improvements, please feel free to drop me an email at <email>&myEmail;</email>.  If there is enough interest in the project, I will develop it further.</para>
+
+  <para>Log4sh is licensed under the GNU Lesser Public License.  The contents and copyright of this site and all provided source code are owned by Kate Ward.</para>
+</section>
+
+</article>
