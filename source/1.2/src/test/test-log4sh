@@ -1,0 +1,113 @@
+#! /bin/sh
+# $Id$
+#
+# Author: Kate Ward <kate.ward@forestent.com>
+#
+# The spiffy comments were shamelessly pulled from the lf5 examples from log4j.
+#
+
+# load log4sh
+if [ -r log4sh ]; then
+   LOG4SH_CONFIGURATION="none" . ./log4sh
+else
+   echo "error: could not load (log4sh)"
+   exit 1
+fi
+
+#
+# setup the initial logging environment
+#
+
+# set the default logging level to INFO
+logger_setLevel INFO
+
+# add a file appender at the DEBUG level with the default layout
+logger_addAppender mySimple
+appender_setAppenderType mySimple FileAppender
+appender_setAppenderFile mySimple log4sh-simple.log
+appender_setLevel mySimple DEBUG
+
+# add another file appender at the default level, but with a Pattern layout
+logger_addAppenderWithPattern myPattern '%d [%p] (%F) - %m%n'
+appender_setAppenderType myPattern FileAppender
+appender_setAppenderFile myPattern log4sh-pattern.log
+
+#
+# do some logging
+#
+
+# log some at the DEBUG level
+logger_debug "Hello, my name is Homer Simpson."
+logger_debug "Hello, my name is Lisa Simpson."
+logger_debug "Hello, my name is Marge Simpson."
+logger_debug "Hello, my name is Bart Simpson."
+logger_debug "Hello, my name is Maggie Simpson."
+
+# and add a new FileAppender to STDERR
+logger_addAppender mySTDERR
+appender_setAppenderType mySTDERR FileAppender
+appender_setAppenderFile mySTDERR STDERR
+
+# log some at the INFO level
+logger_info "We are the Simpsons!"
+logger_info "Mmmmmm .... Chocolate."
+logger_info "Homer likes chocolate"
+logger_info "Doh!"
+logger_info "We are the Simpsons!"
+
+# close the default ConsoleAppender
+appender_close stdout
+
+# log some at the WARN level
+logger_warn "Bart: I am through with working! Working is for chumps!\
+ Homer: Son, I'm proud of you. I was twice your age before\
+ I figured that out."
+logger_warn "Mmm...forbidden donut."
+logger_warn "D'oh! A deer! A female deer!"
+logger_warn "Truly, yours is a butt that won't quit.\
+ - Bart, writing as Woodrow to Ms. Krabappel."
+
+# set the level of the mySTDERR appender to OFF
+appender_setLevel mySTDERR OFF
+
+# log some at the ERROR level
+logger_error "Dear Baby, Welcome to Dumpsville. Population: you."
+logger_error "Mr. Hutz, are you aware you're not wearing pants?"
+
+# set the mySTDERR level to DEBUG
+appender_setLevel mySTDERR DEBUG
+
+# log some at the FATAL level
+logger_fatal "Eep."
+logger_fatal "Mmm...forbidden donut."
+logger_fatal "D'oh! A deer! A female deer!"
+logger_fatal "Mmmmmm .... Chocolate."
+
+# various setting changes
+appender_setLayout mySTDERR PatternLayout
+logger_info "test of the default pattern layout"
+
+appender_setPattern mySTDERR '%d [%F] %p - %m%n'
+logger_info "test of setting a pattern layout"
+
+appender_setPattern mySTDERR '%d %p - %m%n'
+logger_info "test of setting a pattern layout again"
+
+appender_setPattern mySimple '%d [%F] %p - %m'
+logger_info "setting a pattern for a simple layout logger.  should not change the pattern of the simple logger as it is still set to a simple layout."
+
+# manually set the value of the filename flag
+logger_setFilename "myFilename"
+appender_setPattern myPattern '%d [%F] %p - %m%n'
+logger_info "setting a new pattern for a patterned layout file logger"
+
+appender_setPattern myPattern '%d [%f] %p - %m%n'
+logger_info "setting a pattern for a patterned layout file logger, using an invalid character conversion."
+
+appender_setPattern myPattern '%d %p - %m%n'
+logger_info "setting the pattern for the patterned layout file logger back to a reasonable value."
+
+appender_setPattern mySTDERR '%p [%F:%t]: %m%n'
+logger_info "setting a pattern layout for STDERR that uses the thread name conversion character.  the thread name isn't set yet, so it should be empty..."
+logger_setThreadName myThread
+logger_info "the thread name is now set to the name of this script, so it should show up in output now"
