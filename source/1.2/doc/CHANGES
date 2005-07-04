@@ -1,3 +1,10 @@
+Changes with 1.2.6
+
+*) [kwa] made some variable names in documentation a bit more readable
+
+*) [kwa] fixed bug #1232236 - insecure temporary file creation
+
+
 Changes with 1.2.5
 
 *) [kwa] defined the __LOG4SH_APPENDER_DAILY_ROLLING_FILE variable as it for
