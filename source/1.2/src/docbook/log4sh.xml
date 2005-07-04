@@ -29,15 +29,22 @@
   </author>
 
   <!-- All dates specified in ISO "YYYY-MM-DD" format -->
-  <pubdate>2004-12-31</pubdate>
+  <pubdate>2005-02-01</pubdate>
 
   <!-- Most recent revision goes at the top; list in descending order -->
   <revhistory>
     <revision>
+      <revnumber>1.2.6</revnumber>
+      <date>2005-02-01</date>
+      <authorinitials>kwa</authorinitials>
+      <revremark>improved examples where log4sh is searched for and sourced in</revremark>
+    </revision>
+
+    <revision>
       <revnumber>1.2.4</revnumber>
       <date>2004-12-28</date>
       <authorinitials>kwa</authorinitials>
-      <revremark>Initial DocBook conversion.</revremark>
+      <revremark>initial DocBook conversion</revremark>
     </revision>
   </revhistory>
 
@@ -177,14 +184,14 @@ myDir=`dirname $0`
 
 # find and source log4sh
 if [ -r "$myDir/log4sh" ]; then
-  dir=$myDir
+  log4shDir=$myDir
 elif [ -r "./log4sh" ]; then
-  dir=.
+  log4shDir=.
 else
   echo "fatal: could not find log4sh" >&2
   exit 1
 fi
-. $dir/log4sh
+. $log4shDir/log4sh
 
 # say Hello to the world
 logger_info "Hello, world"
