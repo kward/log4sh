@@ -3,7 +3,7 @@
 <!-- vim:softtabstop=2 shiftwidth=2 -->
 
 <!DOCTYPE article
-  PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+  PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
   <!ENTITY myEmail "kate.ward@forestent.com">
 
   <!ENTITY all "<constant>ALL</constant>">
