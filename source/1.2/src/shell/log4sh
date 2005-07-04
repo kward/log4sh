@@ -1,6 +1,6 @@
 # $Id$
 #
-# log4sh 1.2
+# log4sh 1.2.6
 # 
 # written by Kate Ward <kate.ward@forestent.com>
 # released under the LGPL
@@ -358,6 +358,8 @@ log4sh_readProperties()
   _file=$1
 
   _tmpFile="/tmp/log4sh.$$"
+  touch $_tmpFile
+  chmod 600 $_tmpFile
   grep "^log4sh\." $_file >$_tmpFile
   _rp_count=`wc -l $_tmpFile |awk '{print $1}'`
   _rp_i=1
