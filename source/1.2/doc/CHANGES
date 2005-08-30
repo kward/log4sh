@@ -1,62 +1,68 @@
+Changes with 1.2.7
+
+*) [kwd] implemented logger_getThreadName, logger_pushThreadName, and
+logger_popThreadName based on suggestions and a patch from Dan Johansson.
+
+
 Changes with 1.2.6
 
-*) [kwa] made some variable names in documentation a bit more readable
+*) [kwd] made some variable names in documentation a bit more readable
 
-*) [kwa] fixed bug #1232236 - insecure temporary file creation
+*) [kwd] fixed bug #1232236 - insecure temporary file creation
 
 
 Changes with 1.2.5
 
-*) [kwa] defined the __LOG4SH_APPENDER_DAILY_ROLLING_FILE variable as it for
+*) [kwd] defined the __LOG4SH_APPENDER_DAILY_ROLLING_FILE variable as it for
 some reason was not defined
 
 
 Changes with 1.2.4
 
-*) [kwa] added docbook documentation
+*) [kwd] added docbook documentation
 
-*) [kwa] added documentation and code to build the docbook documentation
+*) [kwd] added documentation and code to build the docbook documentation
 
-*) [kwa] fixed the sample usage comments as they worked only for log4sh 1.1
+*) [kwd] fixed the sample usage comments as they worked only for log4sh 1.1
 
-*) [kwa] set all of the __LOG4SH_* constants to readonly
+*) [kwd] set all of the __LOG4SH_* constants to readonly
 
-*) [kwa] replaced appender_setAppend() function with appender_close() to better
+*) [kwd] replaced appender_setAppend() function with appender_close() to better
 match functionality of log4j
 
-*) [kwa] added ALL logging Level to better match log4j
+*) [kwd] added ALL logging Level to better match log4j
 
-*) [kwa] added return codes to most functions for standardization
+*) [kwd] added return codes to most functions for standardization
 
-*) [kwa] changed how log4sh was sourced in the test scripts so they would work
+*) [kwd] changed how log4sh was sourced in the test scripts so they would work
 under solaris
 
 
 Changes with 1.2.3
 
-*) [kwa] included LGPL-2.1 license for the first official distribution
+*) [kwd] included LGPL-2.1 license for the first official distribution
 
-*) [kwa] fixed the test-log4sh script so it works again
+*) [kwd] fixed the test-log4sh script so it works again
 
-*) [kwa] fixed many small bugs in log4sh found while fixing the test script
+*) [kwd] fixed many small bugs in log4sh found while fixing the test script
 
-*) [kwa] added initial website to source as a means of documentation
+*) [kwd] added initial website to source as a means of documentation
 
 
 Changes with 1.2.2
 
-*) [kwa] changed the configuration environment variable name from
+*) [kwd] changed the configuration environment variable name from
 LOG4SH_PROPERTIES to LOG4SH_CONFIGURATION to match log4j better
 
 
 Changes with 1.2.1
 
-*) [kwa] added support for a log4sh.properties file (not complete)
+*) [kwd] added support for a log4sh.properties file (not complete)
 
-*) [kwa] added support for %r conversion character.  returns seconds as opposed
+*) [kwd] added support for %r conversion character.  returns seconds as opposed
 to milliseconds
 
 
 Changes with 1.2.0
 
-*) [kwa] none; this release is identical to release 1.1.5
+*) [kwd] none; this release is identical to release 1.1.5
