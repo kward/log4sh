@@ -70,6 +70,8 @@ __LOG4SH_LEVEL_CLOSED=255
 
 __LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
 
+__LOG4SH_THREAD_DEFAULT='main'
+
 # set the constants to readonly
 for _const in `set |grep "^__LOG4SH_" |awk -F= '{print $1}'`; do
   readonly $_const
@@ -80,7 +82,6 @@ unset _const
 # variables
 #
 __log4sh_filename="`basename $0`"
-__log4sh_threadName='main'
 
 __log4shAppenders=''
 __log4shAppenderCount=0
@@ -89,6 +90,8 @@ __log4shAppenderLayouts=''
 __log4shAppenderLevels=''
 __log4shAppenderPatterns=''
 __log4shAppenderTypes=''
+
+__log4shThreadName=$__LOG4SH_THREAD_DEFAULT
 
 #
 # private functions
@@ -220,7 +223,7 @@ _log4sh_parsePattern()
 -e 's/%n//' \
 -e "s/%p/$_priority/" \
 -e "s/%r/$SECONDS/" \
--e "s/%t/$__log4sh_threadName/" \
+-e "s/%t/$__log4shThreadName/" \
 -e 's/%x//' \
 -e "s%m$_msg"
   unset _date _pattern _tag _msg
@@ -431,6 +434,16 @@ logger_setLevel()
 }
 
 #
+# gets the thread name
+#
+# @echo  string  the current thread name
+#
+logger_getThreadName()
+{
+  echo $__log4shThreadName
+}
+
+#
 # sets the thread name (eg. the name of the script).  this thread name can be
 # used with the %t conversion character within a pattern layout.
 #
@@ -438,8 +451,52 @@ logger_setLevel()
 #
 logger_setThreadName()
 {
-   __log4sh_threadName=$1
+  __log4shThreadName=$1
 }
+
+#
+# sets the thread name (eg. the name of the script) and pushes the old on to a
+# stack for later use.  This thread name can be used with the %t conversion
+# character within a pattern layout.
+#
+# @param  string  string to use as thread name
+#
+# push thread name
+#
+logger_pushThreadName()
+{
+  _thread=$1
+
+  __log4shThreadArray="$__log4shThreadArray $__log4shThreadName"
+  __log4shThreadName=$_thread
+
+  unset _thread
+}
+
+#
+# Sets the thread name from the top item on the stack (and removes it from the
+# stack). If the stack is empty the default thread name is set.  The default
+# thread name will never be popped from the stack.
+#
+logger_popThreadName()
+{
+  _count=`echo $__log4shThreadArray |wc -w`
+  if [ $_count -gt 0 ]; then
+    _count=`expr $_count - 1`
+    _i=1
+    while [ $_i -lt $_count ]; do
+      _newArray="$_newArray `echo $__log4shThreadArray |awk '{print \$$_i}'`"
+      _i=`expr $_i + 1`
+    done
+    __log4shThreadName="`echo $__log4shThreadArray |awk '{print \$$_i}'`"
+    __log4shThreadArray="$_newArray"
+  else
+    __log4shThreadName=$__LOG4SH_THREAD_DEFAULT
+    __log4shThreadArray=''
+  fi
+
+  unset _count _i _newArray
+} 
 
 #
 # Appenders
