@@ -29,21 +29,28 @@
   </author>
 
   <!-- All dates specified in ISO "YYYY-MM-DD" format -->
-  <pubdate>2005-02-01</pubdate>
+  <pubdate>2005-08-30</pubdate>
 
   <!-- Most recent revision goes at the top; list in descending order -->
   <revhistory>
     <revision>
+      <revnumber>1.2.7</revnumber>
+      <date>2005-08-30</date>
+      <authorinitials>kwd</authorinitials>
+      <revremark>added the new get/push/pop thread name commands</revremark>
+    </revision>
+
+    <revision>
       <revnumber>1.2.6</revnumber>
       <date>2005-02-01</date>
-      <authorinitials>kwa</authorinitials>
+      <authorinitials>kwd</authorinitials>
       <revremark>improved examples where log4sh is searched for and sourced in</revremark>
     </revision>
 
     <revision>
       <revnumber>1.2.4</revnumber>
       <date>2004-12-28</date>
-      <authorinitials>kwa</authorinitials>
+      <authorinitials>kwd</authorinitials>
       <revremark>initial DocBook conversion</revremark>
     </revision>
   </revhistory>
@@ -564,9 +571,24 @@ Function Reference
 	    <entry><literal>logger_setLevel INFO</literal></entry>
 	  </row>
 	  <row>
+	    <entry>logger_getThreadName</entry>
+	    <entry>get the current thread name</entry>
+	    <entry><literal>thread=`logger_getThreadName`</literal></entry>
+	  </row>
+	  <row>
 	    <entry>logger_setThreadName</entry>
 	    <entry>set the current thread name for the %t pattern option</entry>
 	    <entry><literal>logger_setThreadName "myThread"</literal></entry>
+	  </row>
+	  <row>
+	    <entry>logger_pushThreadName</entry>
+	    <entry>push the current thread name to the thread name stack, and set a new thread name</entry>
+	    <entry><literal>logger_pushThreadName "myNewThread"</literal></entry>
+	  </row>
+	  <row>
+	    <entry>logger_popThreadName</entry>
+	    <entry>pop the current thread name from the stack, and discard it</entry>
+	    <entry><literal>logger_popThreadName</literal></entry>
 	  </row>
 	</tbody>
       </tgroup>
