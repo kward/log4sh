@@ -108,6 +108,16 @@ appender_setPattern myPattern '%d %p - %m%n'
 logger_info "setting the pattern for the patterned layout file logger back to a reasonable value."
 
 appender_setPattern mySTDERR '%p [%F:%t]: %m%n'
-logger_info "setting a pattern layout for STDERR that uses the thread name conversion character.  the thread name isn't set yet, so it should be empty..."
+logger_info "setting a pattern layout for STDERR that uses the thread name conversion character.  the thread name isn't set yet, so it should be the default value ('main' as of this writing)..."
 logger_setThreadName myThread
 logger_info "the thread name is now set to the name of this script, so it should show up in output now"
+
+logger_info "will now 'push' a new thread 'myNewThread' on the thread name stack..."
+logger_pushThreadName "myNewThread"
+logger_info "checking to see if the thread name changed.  did it?"
+thread=`logger_getThreadName`
+logger_info "just 'got' the thread name of '$thread'.  does it match what is shown over on the left?"
+logger_popThreadName
+logger_info "I just popped the topmost thread name.  the previous thread name should be shown again.  is it?"
+logger_popThreadName
+logger_info "I just popped again.  the default thread name should be shown now.  is it?"
