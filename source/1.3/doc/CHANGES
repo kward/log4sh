@@ -8,6 +8,11 @@ limited to the localhost
 *) [kwd] implemented a SMTP appender based on code supplied by Mickael Canevet.
 the appender is still in development.
 
+*) [kwd] implemented a new way to handle the string arrays.  the old method
+worked just fine, except for when the data contained space characters.  this
+new method handles spaces as well (which are needed for the SMTP appender
+subjects).
+
 
 Changes with 1.2.6
 
