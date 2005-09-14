@@ -56,6 +56,7 @@ __LOG4SH_APPENDER_CONSOLE='ConsoleAppender'
 __LOG4SH_APPENDER_FILE='FileAppender'
 __LOG4SH_APPENDER_ROLLING_FILE='RollingFileAppender'
 __LOG4SH_APPENDER_DAILY_ROLLING_FILE='DailyRollingFileAppender'
+__LOG4SH_APPENDER_SMTP='SMTPAppender'
 __LOG4SH_APPENDER_SYSLOG='SyslogAppender'
 
 __LOG4SH_LAYOUT_HTML='HTMLLayout'
@@ -72,6 +73,7 @@ __LOG4SH_LEVEL_OFF=6
 __LOG4SH_LEVEL_CLOSED=255
 
 __LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
+__LOG4SH_THREAD_DEFAULT='main'
 
 __LOG4SH_FACILITIES="auth authpriv cron daemon ftp kern lpr mail news syslog user uucp local0 local1 local2 local3 local4 local5 local6 local7"
 __LOG4SH_FACILITY_COUNT=20
@@ -86,7 +88,6 @@ unset _const
 # variables
 #
 __log4sh_filename="`basename $0`"
-__log4sh_threadName='main'
 
 __log4shAppenders=''
 __log4shAppenderCount=0
@@ -96,10 +97,64 @@ __log4shAppenderLayouts=''
 __log4shAppenderLevels=''
 __log4shAppenderPatterns=''
 __log4shAppenderTypes=''
+__log4shAppenderRecipients=''
+__log4shAppenderSubjects=''
+
+__log4shThreadName=$__LOG4SH_THREAD_DEFAULT
+__log4shThreadArray=$__LOG4SH_THREAD_DEFAULT
 
 #
 # private functions
 #
+
+#
+# Append a single element to an array
+#
+# @param  _array    array of values
+# @param  _element  element to be appended
+# @echo   string    array with element appended
+#
+_appendArrayElement()
+{
+  echo "$1
+$2"
+}
+
+#
+# Retrieve an element at a given position from an array
+#
+# @param  _array  array of values
+# @param  _pos    position of element
+# @echo   string  array with element appended
+#
+_getArrayElement()
+{
+  echo "$1" |awk 'NR=r{print $0}' r=$2
+}
+
+#
+# Get the length of an array
+#
+# @param  _array   array of values
+# @echo   integer  length of the given array
+#
+_getArrayLength()
+{
+  echo "$1" |awk 'END{print NR}'
+}
+
+#
+# Set the array element value at the given position
+#
+# @param  _array    array of values
+# @param  _pos      array position to set
+# @param  _element  element to place at the position
+# @echo   string    updated array
+#
+_putArrayElement()
+{
+  echo "$1" |awk 'NR==r{$0=e}{print $0}' r=$2 e="$3"
+}
 
 #
 # Converts an internally used level constant into its external tag equivalent
@@ -192,7 +247,7 @@ _log4sh_arrayReplace()
     _i=`expr $_i + 1`
   done
 
-  echo "$_new"
+  echo "$_new" |sed 's/^ //'
   _return=$_found
   unset _i _found _max _new
   unset _pos _value _array
@@ -228,7 +283,7 @@ _log4sh_parsePattern()
 -e 's/%n//' \
 -e "s/%-*[0-9]*p/$_priority/" \
 -e "s/%-*[0-9]*r/$SECONDS/" \
--e "s/%t/$__log4sh_threadName/" \
+-e "s/%t/$__log4shThreadName/" \
 -e 's/%x//' \
 -e "s%m$_msg"
   unset _date _pattern _tag _msg
@@ -281,6 +336,7 @@ _log4sh_propAppender()
       $__LOG4SH_APPENDER_FILE) appender_setAppenderType $_key $_value ;;
       $__LOG4SH_APPENDER_DAILY_ROLLING_FILE) appender_setAppenderType $_key $_value ;;
       $__LOG4SH_APPENDER_ROLLING_FILE) appender_setAppenderType $_key $_value ;;
+      $__LOG4SH_APPENDER_SMTP) appender_setAppenderType $_key $_value ;;
       *) echo "log4sh:ERROR appender type ($_value) unrecognized" ;;
     esac
     unset _key _value
@@ -297,6 +353,8 @@ _log4sh_propAppender()
       MaxBackupIndex) ;;  # unsupported
       MaxFileSize) ;;  # unsupported
       Threshold) appender_setLevel $_appender "$_value" ;;
+      To) appender_setAppenderRecipient $_appender "$_value" ;;
+      Subject) appender_setAppenderSubject $_appender "$_value" ;;
       layout) appender_setLayout $_appender "$_value" ;;
       *) echo "log4sh:ERROR appender value/method ($_key) unrecognized" ;;
     esac
@@ -439,6 +497,16 @@ logger_setLevel()
 }
 
 #
+# gets the thread name
+#
+# @echo  string  the current thread name
+#
+logger_getThreadName()
+{
+  echo $__log4shThreadName
+}
+
+#
 # sets the thread name (eg. the name of the script).  this thread name can be
 # used with the %t conversion character within a pattern layout.
 #
@@ -446,7 +514,42 @@ logger_setLevel()
 #
 logger_setThreadName()
 {
-   __log4sh_threadName=$1
+  _thread=$1
+
+  _index=`_getArrayLength "$__log4shThreadArray"`
+  __log4shThreadArray=`_putArrayElement "$__log4shThreadArray" $_index $_thread`
+  __log4shThreadName=$_thread
+
+  unset _index _thread
+}
+
+#
+# sets the thread name (eg. the name of the script) and pushes the old on to a
+# stack for later use.  This thread name can be used with the %t conversion
+# character within a pattern layout.
+#
+# @param  string  string to use as thread name
+#
+# push thread name
+#
+logger_pushThreadName()
+{
+  _thread=$1
+
+  __log4shThreadArray=`_appendArrayElement "$__log4shThreadArray" $_thread`
+  __log4shThreadName=$_thread
+
+  unset _thread
+}
+
+#
+# Sets the thread name from the top item on the stack (and removes it from the
+# stack). If the stack is empty the default thread name is set.  The default
+# thread name will never be popped from the stack.
+#
+logger_popThreadName()
+{
+  __log4shThreadName=`echo "$__log4shThreadArray" |awk '{if(s!="")print s;s=$0}'`
 }
 
 #
@@ -492,6 +595,8 @@ logger_addAppender()
   __log4shAppenderLevels="$__log4shAppenderLevels -"
   __log4shAppenderLayouts="$__log4shAppenderLayouts $__LOG4SH_LAYOUT_SIMPLE"
   __log4shAppenderPatterns="${__log4shAppenderPatterns:+$__log4shAppenderPatterns~}$__LOG4SH_PATTERN_DEFAULT"
+  __log4shAppenderRecipients="$__log4shAppenderRecipients -"
+  __log4shAppenderSubjects="$__log4shAppenderSubjects-"
   __log4shAppenderTypes="$__log4shAppenderTypes -"
   __log4shAppenderCount=`expr $__log4shAppenderCount + 1`
 
@@ -525,13 +630,13 @@ logger_addAppenderWithPattern()
 #
 appender_close()
 {
-  _myAppender=$1
+  _appender=$1
 
   # set the appender level to CLOSED
-  appender_setLevel $_myAppender CLOSED
+  appender_setLevel $_appender CLOSED
   _return=$?
 
-  unset _myAppender
+  unset _appender
   return $_return
 }
 
@@ -746,6 +851,50 @@ appender_setPattern()
 }
 
 #
+# sets the recipient for an appender
+#
+# @param   _appender  name of appender
+# @param   _Recipient Recipient for appender
+# @return  boolean    was the operation successful ?
+#
+appender_setAppenderRecipient()
+{
+  _appender=$1
+  _recipient=$2
+
+  # set the Recipient
+  _index=`_appender_getIndex $_appender`
+  __log4shAppenderRecipients=`_log4sh_arrayReplace $_index $_recipient "$__log4shAppenderRecipients"`
+  _return=$?
+
+  unset _index
+  unset _appender _recipient
+  return $_return
+}
+
+#
+# sets the subjects for an appender
+#
+# @param   _appender  name of appender
+# @param   _subject   Subject for appender
+# @return  boolean    was the operation successful ?
+#
+appender_setAppenderSubject()
+{
+  _appender=$1
+  _subject=$2
+
+  # set the Subject
+  _index=`_appender_getIndex $_appender`
+  __log4shAppenderSubjects=`_log4sh_arrayReplace $_index $_subject "$__log4shAppenderSubjects"`
+  _return=$?
+
+  unset _index
+  unset _appender _subject
+  return $_return
+}
+
+#
 # gets the syslog facility of the specified appender
 #
 # @param  _appender  name of appender
@@ -824,7 +973,7 @@ appender_getSyslogHost()
 }
 
 #
-# TODO: setSyslogHost8)
+# TODO: setSyslogHost)
 #
 # @param _appender
 #
@@ -888,13 +1037,22 @@ log()
       $__LOG4SH_APPENDER_SYSLOG)
         _tmpFacility=`echo $__log4shAppenderSyslogFacilities |awk "{print \\$$_myIndex}"`
 	logger -p "$_tmpFacility.info" "$_thisLayout"
+	unset _tmpFacility
 	;;
+      $__LOG4SH_APPENDER_SMTP)
+        _appenderRecipient=`echo $__log4shAppenderRecipients |awk "{print \\$$_myIndex}"`
+        _appenderSubject=`echo $__log4shAppenderSubjects |awk "{print \\$$_myIndex}"`
+        echo "$_thisLayout" |mail -s "$_appenderSubject" $_appenderRecipient
+	unset _appenderRecipient _appenderSubject
+        ;;
       *)
 	_appenderFile=`echo $__log4shAppenderFiles |awk "{print \\$$_myIndex}"`
 	if [ "$_appenderFile" = "STDERR" ]; then
 	  echo "$_thisLayout" >&2
 	elif [ "$_appenderFile" != "-" ]; then
 	  echo "$_thisLayout" >>$_appenderFile
+	else
+	  :
 	fi
 	;;
     esac
