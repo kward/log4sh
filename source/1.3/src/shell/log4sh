@@ -121,6 +121,19 @@ $2"
 }
 
 #
+# Find an element in an array
+#
+# @param  _array    array of values
+# @param  _element  element to be appended
+# @echo   integer   position of element; 0 if not found
+#
+_findArrayElement()
+{
+  pos=`echo "$1" |awk '$0==e{print NR}' e="$2"`
+  [ -n "$pos" ] && echo "$pos" || echo 0
+}
+
+#
 # Retrieve an element at a given position from an array
 #
 # @param  _array  array of values
@@ -129,7 +142,7 @@ $2"
 #
 _getArrayElement()
 {
-  echo "$1" |awk 'NR=r{print $0}' r=$2
+  echo "$1" |awk 'NR==r{print $0}' r=$2
 }
 
 #
@@ -596,7 +609,7 @@ logger_addAppender()
   __log4shAppenderLayouts="$__log4shAppenderLayouts $__LOG4SH_LAYOUT_SIMPLE"
   __log4shAppenderPatterns="${__log4shAppenderPatterns:+$__log4shAppenderPatterns~}$__LOG4SH_PATTERN_DEFAULT"
   __log4shAppenderRecipients="$__log4shAppenderRecipients -"
-  __log4shAppenderSubjects="$__log4shAppenderSubjects-"
+  __log4shAppenderSubjects=`_appendArrayElement "$__log4shAppenderSubjects" -`
   __log4shAppenderTypes="$__log4shAppenderTypes -"
   __log4shAppenderCount=`expr $__log4shAppenderCount + 1`
 
@@ -885,9 +898,15 @@ appender_setAppenderSubject()
   _subject=$2
 
   # set the Subject
+  #_index=`_findArrayElement "$__log4shAppenderSubjects" $_appender`
   _index=`_appender_getIndex $_appender`
-  __log4shAppenderSubjects=`_log4sh_arrayReplace $_index $_subject "$__log4shAppenderSubjects"`
-  _return=$?
+  if [ $_index -gt 0 ]; then
+    __log4shAppenderSubjects=`_putArrayElement "$__log4shAppenderSubjects" $_index "$_subject"`
+    _return=$__LOG4SH_TRUE
+  else
+    echo "log4sh:ERROR could not set Subject for appender ($_appender)"
+    _return=$__LOG4SH_FALSE
+  fi
 
   unset _index
   unset _appender _subject
@@ -1041,7 +1060,7 @@ log()
 	;;
       $__LOG4SH_APPENDER_SMTP)
         _appenderRecipient=`echo $__log4shAppenderRecipients |awk "{print \\$$_myIndex}"`
-        _appenderSubject=`echo $__log4shAppenderSubjects |awk "{print \\$$_myIndex}"`
+        _appenderSubject=`_getArrayElement "$__log4shAppenderSubjects" $_myIndex`
         echo "$_thisLayout" |mail -s "$_appenderSubject" $_appenderRecipient
 	unset _appenderRecipient _appenderSubject
         ;;
