@@ -3,7 +3,7 @@
 <!-- vim:softtabstop=2 shiftwidth=2 -->
 
 <!DOCTYPE article
-  PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+  PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
   <!ENTITY myEmail "kate.ward@forestent.com">
 
   <!ENTITY all "<constant>ALL</constant>">
@@ -649,17 +649,18 @@ Function Reference
 	    <entry>appender_getLevel</entry>
 	    <entry>get an appender's logging priority</entry>
 	    <entry><literal>level=`appender_getLevel myAppender`</literal></entry>
-	  </row><row>
+	  </row>
+	  <row>
 	    <entry>appender_setLevel</entry>
 	    <entry>set the logging priority for the named appender</entry>
 	    <entry><literal>appender_setLevel myAppender DEBUG</literal></entry>
-	  </row><row>
+	  </row>
+	  <row>
 	    <entry>appender_setPattern</entry>
 	    <entry>set the output pattern for named appender (appender must be set to a PatternLayout)</entry>
 	    <entry><literal>appender_setPattern myAppender '%d %p - %m%n'</literal></entry>
 	  </row>
 	  <row>
-	  </row>
 	    <entry>appender_setAppenderRecipient (since 1.3.0)</entry>
 	    <entry>set the email recipient for a SMTPAppender</entry>
 	    <entry><literal>appender_setAppenderRecipient myAppender user@host</literal></entry>
@@ -669,6 +670,7 @@ Function Reference
 	    <entry>set the email subject for a SMTPAppender</entry>
 	    <entry><literal>appender_setAppenderSubject myAppender "Message from log4sh"</literal></entry>
 	  </row>
+	  <row>
 	    <!-- TODO -->
 	    <entry>appender_getSyslogHost (since 1.3.X)</entry>
 	    <entry>(future)</entry>
