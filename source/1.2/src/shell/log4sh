@@ -1,6 +1,6 @@
 # $Id$
 #
-# log4sh 1.2.6
+# log4sh 1.2.8
 # 
 # written by Kate Ward <kate.ward@forestent.com>
 # released under the LGPL
@@ -12,28 +12,6 @@
 #    of ERROR and SimpleLayout
 # *) the appender levels are as follows (decreasing order of output):
 #    DEBUG, INFO, WARN, ERROR, FATAL, OFF
-# *) the pattern separator is the ~ char, so inherantly, that character cannot
-#    be used in patterns...
-#
-# sample usage:
-# *) source the log4sh functions:
-#    . log4sh
-# *) set the global logging level (default is ERROR):
-#    logger_setLevel INFO
-# *) add an appender (STDOUT, STDERR, filename):
-#    logger_addAppender myFile
-# *) set the appender's type:
-#    logger_setAppenderType myFile FileAppender
-# *) set the appender's filename:
-#    logger_setAppenderFile myFile /tmp/log4sh.log
-# *) set an appender's logging level:
-#    appender_setLevel myFile DEBUG
-# *) set an appender to use a pattern layout:
-#    appender_setLayout myFile PatternLayout
-# *) disable default appender
-#    appender_setAppend stdout false
-# *) log something
-#    logger_info "Hello there :-)"
 #
 
 # (possibly) declare variables that might come in from outside
@@ -45,6 +23,8 @@ set -u
 #
 # constants
 #
+__LOG4SH_VERSION=1.2.8
+
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
 
@@ -69,7 +49,6 @@ __LOG4SH_LEVEL_OFF=6
 __LOG4SH_LEVEL_CLOSED=255
 
 __LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
-
 __LOG4SH_THREAD_DEFAULT='main'
 
 # set the constants to readonly
@@ -82,6 +61,7 @@ unset _const
 # variables
 #
 __log4sh_filename="`basename $0`"
+__log4sh_tmpDir=''
 
 __log4shAppenders=''
 __log4shAppenderCount=0
@@ -91,6 +71,7 @@ __log4shAppenderLevels=''
 __log4shAppenderPatterns=''
 __log4shAppenderTypes=''
 
+__log4shThreadArray=$__LOG4SH_THREAD_DEFAULT
 __log4shThreadName=$__LOG4SH_THREAD_DEFAULT
 
 #
@@ -98,11 +79,28 @@ __log4shThreadName=$__LOG4SH_THREAD_DEFAULT
 #
 
 #
+# Creates a secure temporary directory within which temporary files can be
+# created.  Honors the TMPDIR variable if it is set.
+#
+# @return  string  path to temporary location
+#
+_log4sh_mktempDir()
+{
+  _tmpDir="${TMPDIR-/tmp}/log4sh.$RANDOM$RANDOM$RANDOM$$"
+  (umask 077 && mkdir "$_tmpDir") || {
+    echo "log4sh:FATAL could not create temporary directory!  exiting" >&2
+    exit 1
+  }
+  echo $_tmpDir
+  unset _tmpDir
+}
+
+#
 # Converts an internally used level constant into its external tag equivalent
 #
-# @param  _level   internal level (eg. 3)
-# @echo   string   external tag equivalent (eg. WARN)
-# @return boolean  was the supplied _level valid?
+# @param   _level   internal level (eg. 3)
+# @echo    string   external tag equivalent (eg. WARN)
+# @return  boolean  was the supplied _level valid?
 #
 _log4sh_level2tag()
 {
@@ -188,7 +186,7 @@ _log4sh_arrayReplace()
     _i=`expr $_i + 1`
   done
 
-  echo "$_new"
+  echo "$_new" |sed 's/^ //'
   _return=$_found
   unset _i _found _max _new
   unset _pos _value _array
@@ -354,16 +352,15 @@ _log4sh_propRootLogger()
 #
 # reads a properties file, and configures appropriate configuration functions
 #
-# @param  _file   filename of the properties file
+# @param  _file  filename of the properties file
 #
 log4sh_readProperties()
 {
   _file=$1
 
-  _tmpFile="/tmp/log4sh.$$"
-  touch $_tmpFile
-  chmod 600 $_tmpFile
-  grep "^log4sh\." $_file >$_tmpFile
+  _tmpDir=`_log4sh_mktempDir`
+  _tmpFile="$_tmpDir/properties"
+  grep "^log4sh\." $_file >"$_tmpFile"
   _rp_count=`wc -l $_tmpFile |awk '{print $1}'`
   _rp_i=1
   while [ $_rp_i -le $_rp_count ]; do
@@ -383,9 +380,9 @@ log4sh_readProperties()
 
     _rp_i=`expr $_rp_i + 1`
   done
-  rm $_tmpFile
+  rm -fr $_tmpDir
 
-  unset _tmpFile _rp_i _rp_count _line _key _value _keyword
+  unset _tmpDir _tmpFile _rp_i _rp_count _line _key _value _keyword
   unset _file
 }
 
@@ -451,7 +448,13 @@ logger_getThreadName()
 #
 logger_setThreadName()
 {
-  __log4shThreadName=$1
+  _thread=$1
+
+  __log4shThreadName=$_thread
+  _index=`echo $__log4shThreadArray |wc -w`
+  __log4shThreadArray=`_log4sh_arrayReplace $_index $_thread "$__log4shThreadArray"`
+
+  unset _index _thread
 }
 
 #
@@ -467,7 +470,7 @@ logger_pushThreadName()
 {
   _thread=$1
 
-  __log4shThreadArray="$__log4shThreadArray $__log4shThreadName"
+  __log4shThreadArray="$__log4shThreadArray $_thread"
   __log4shThreadName=$_thread
 
   unset _thread
@@ -481,21 +484,15 @@ logger_pushThreadName()
 logger_popThreadName()
 {
   _count=`echo $__log4shThreadArray |wc -w`
-  if [ $_count -gt 0 ]; then
-    _count=`expr $_count - 1`
-    _i=1
-    while [ $_i -lt $_count ]; do
-      _newArray="$_newArray `echo $__log4shThreadArray |awk '{print \$$_i}'`"
-      _i=`expr $_i + 1`
-    done
-    __log4shThreadName="`echo $__log4shThreadArray |awk '{print \$$_i}'`"
-    __log4shThreadArray="$_newArray"
+  if [ $_count -gt 1 ]; then
+    __log4shThreadArray="`echo $__log4shThreadArray |sed 's/ [^ ]*$//'`"
+    __log4shThreadName="`echo $__log4shThreadArray |awk '{print \$NF}'`"
   else
-    __log4shThreadName=$__LOG4SH_THREAD_DEFAULT
-    __log4shThreadArray=''
+    __log4shThreadName=$__log4shThreadArray
+    echo "log4sh:WARN no more thread names on stack." >&2
   fi
 
-  unset _count _i _newArray
+  unset _count
 } 
 
 #
