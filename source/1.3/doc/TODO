@@ -11,12 +11,4 @@ SyslogAppender
   FacilityPrinting
   SyslogHost
 
-- implement a more secure tmpfile solution based on
-http://www.linuxsecurity.com/content/view/115462/151/
-
-	tmp=${TMPDIR-/tmp}
-	tmp=$tmp/somedir.$RANDOM.$RANDOM.$RANDOM.$$
-	(umask 077 && mkdir $tmp) || {
-		echo "Could not create temporary directory! Exiting." 1>&2 
-		exit 1
-	}
+- add more error checking on the appender_*set* functions.  see smtp_setSubject
