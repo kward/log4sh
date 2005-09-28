@@ -1,3 +1,12 @@
+Changes with 1.2.8
+
+*) [kwd] added a __LOG4SH_VERSION variable
+
+*) [kwd] implemented a more secure method for using temporary files.  if the
+TMPDIR variable is set, it is honored.  the method is based on info from
+http://www.linuxsecurity.com/content/view/115462/151/.
+
+
 Changes with 1.2.7
 
 *) [kwd] implemented logger_getThreadName, logger_pushThreadName, and
