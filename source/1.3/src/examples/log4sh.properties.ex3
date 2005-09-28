@@ -1,3 +1,9 @@
+# configure the external commands that log4sh uses
+log4sh.external.awk=/usr/bin/awk
+log4sh.external.logger=/usr/bin/logger
+log4sh.external.mail=/home/kward/usr/bin/mail
+log4sh.external.sed=/usr/bin/sed
+
 # set root logger to ERROR, and give it two appenders; stderr and R
 log4sh.rootLogger=ERROR, stderr, R
 
