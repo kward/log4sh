@@ -5,6 +5,13 @@
 #
 # The spiffy comments were shamelessly pulled from the lf5 examples from log4j.
 #
+# * Thu Sep 01 2005
+# - ported the {get|push|pull}ThreadName functions from 1.2.7
+#
+# * Mon Jun 20 2005
+# - added testing for syslog.  need to tail /var/log/messages or wherever these
+# will pop out at!
+#
 
 # load log4sh
 if [ -r log4sh ]; then
@@ -107,11 +114,11 @@ logger_info "setting a pattern for a patterned layout file logger, using an inva
 appender_setPattern myPattern '%d %p - %m%n'
 logger_info "setting the pattern for the patterned layout file logger back to a reasonable value."
 
+# test the *ThreadName functions
 appender_setPattern mySTDERR '%p [%F:%t]: %m%n'
 logger_info "setting a pattern layout for STDERR that uses the thread name conversion character.  the thread name isn't set yet, so it should be the default value ('main' as of this writing)..."
 logger_setThreadName myThread
 logger_info "the thread name is now set to the name of this script, so it should show up in output now"
-
 logger_info "will now 'push' a new thread 'myNewThread' on the thread name stack..."
 logger_pushThreadName "myNewThread"
 logger_info "checking to see if the thread name changed.  did it?"
@@ -120,4 +127,4 @@ logger_info "just 'got' the thread name of '$thread'.  does it match what is sho
 logger_popThreadName
 logger_info "I just popped the topmost thread name.  the previous thread name should be shown again.  is it?"
 logger_popThreadName
-logger_info "I just popped again.  the default thread name should be shown now.  is it?"
+logger_info "I just popped again.  the thread name should not have changed as we were already at the topmost thread name.  there should have been a log4sh warning too."
