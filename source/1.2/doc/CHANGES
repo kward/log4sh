@@ -1,3 +1,9 @@
+Changes with 1.2.9
+
+[kwd] removed extraneous call to logger_getLevel from logger_addAppender
+(reported by Omner Calhoun)
+
+
 Changes with 1.2.8
 
 *) [kwd] added a __LOG4SH_VERSION variable
@@ -75,3 +81,6 @@ to milliseconds
 Changes with 1.2.0
 
 *) [kwd] none; this release is identical to release 1.1.5
+
+
+$Revision$
