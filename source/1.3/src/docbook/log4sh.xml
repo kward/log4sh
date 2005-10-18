@@ -3,7 +3,7 @@
 <!-- vim:softtabstop=2 shiftwidth=2 -->
 
 <!DOCTYPE article
-  PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+  PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
   <!ENTITY myEmail "kate.ward@forestent.com">
 
   <!ENTITY all "<constant>ALL</constant>">
@@ -15,7 +15,7 @@
   <!ENTITY off "<constant>OFF</constant>">
 ]>
 
-<article id="index">
+<article id="index" lang="en-US">
 <articleinfo><title>log4sh</title>
   <author>
     <firstname>Kate</firstname>
@@ -612,6 +612,29 @@ Function Reference
 	</tbody>
       </tgroup>
     </table>
+
+    <table>
+      <tgroup cols="2">
+      	<tbody>
+	  <row>
+	    <entry>
+              <funcsynopsis>
+              <funcprototype>
+                <funcdef>boolean <function>_log4sh_tag2level</function></funcdef>
+                <paramdef>string <parameter>_tag</parameter></paramdef>
+              </funcprototype>
+              </funcsynopsis>
+            </entry>
+	    <entry>
+    <para>Converts an externally used tag into its internal constant equivalent</para>
+    <funcsynopsis>
+      <funcsynopsisinfo>_log4sh_tag2level WARN</funcsynopsisinfo>
+    </funcsynopsis>
+            </entry>
+	  </row>
+	</tbody>
+      </tgroup>
+    </table>
   </section>
 
   <section id="functions-appenders"><title>Appenders</title>
@@ -661,44 +684,74 @@ Function Reference
 	    <entry><literal>appender_setPattern myAppender '%d %p - %m%n'</literal></entry>
 	  </row>
 	  <row>
-	    <entry>appender_setAppenderRecipient (since 1.3.0)</entry>
+	    <entry>appender_smtp_setTo (since 1.3.1)</entry>
+	    <entry>set the email recipient for a SMTPAppender</entry>
+	    <entry><literal>appender_smtp_setTo myAppender user@host</literal></entry>
+	  </row>
+	  <row>
+	    <entry>appender_setAppenderRecipient (since 1.3.0; deprecated since 1.3.1)</entry>
 	    <entry>set the email recipient for a SMTPAppender</entry>
 	    <entry><literal>appender_setAppenderRecipient myAppender user@host</literal></entry>
 	  </row>
 	  <row>
-	    <entry>appender_setAppenderSubject (since 1.3.0)</entry>
+	    <entry>appender_smtp_setSubject (since 1.3.1)</entry>
+	    <entry>set the email subject for a SMTPAppender</entry>
+	    <entry><literal>appender_smtp_setSubject myAppender "Message from log4sh"</literal></entry>
+	  </row>
+	  <row>
+	    <entry>appender_setAppenderSubject (since 1.3.0; deprecated since 1.3.1)</entry>
 	    <entry>set the email subject for a SMTPAppender</entry>
 	    <entry><literal>appender_setAppenderSubject myAppender "Message from log4sh"</literal></entry>
 	  </row>
 	  <row>
 	    <!-- TODO -->
-	    <entry>appender_getSyslogHost (since 1.3.X)</entry>
+	    <entry>appender_syslog_getHost (since 1.3.1)</entry>
+	    <entry>(future)</entry>
+	    <entry><literal></literal></entry>
+	  </row>
+	  <row>
+	    <entry>appender_getSyslogHost (since 1.3.0; deprecated since 1.3.1)</entry>
 	    <entry>(future)</entry>
 	    <entry><literal></literal></entry>
 	  </row>
 	  <row>
 	    <!-- TODO -->
-	    <entry>appender_setSyslogHost (since 1.3.X)</entry>
+	    <entry>appender_syslog_setHost (since 1.3.1)</entry>
 	    <entry>(future)</entry>
 	    <entry><literal></literal></entry>
 	  </row>
 	  <row>
-	    <entry>appender_getSyslogFacility (since 1.3.0)</entry>
+	    <entry>appender_setSyslogHost (since 1.3.0; deprecated since 1.3.1)</entry>
+	    <entry>(future)</entry>
+	    <entry><literal></literal></entry>
+	  </row>
+	  <row>
+	    <entry>appender_syslog_getFacility (since 1.3.1)</entry>
 	    <entry>get the current Syslog facility of a SyslogAppender</entry>
 	    <entry><literal>facility=`appender_getSyslogFacility mySyslog`</literal></entry>
 	  </row>
 	  <row>
-	    <entry>appender_setSyslogFacility (since 1.3.0)</entry>
+	    <entry>appender_getSyslogFacility (since 1.3.0; deprecated since 1.3.1)</entry>
+	    <entry>get the current Syslog facility of a SyslogAppender</entry>
+	    <entry><literal>facility=`appender_getSyslogFacility mySyslog`</literal></entry>
+	  </row>
+	  <row>
+	    <entry>appender_syslog_setFacility (since 1.3.0)</entry>
 	    <entry>set the Syslog facility for a SyslogAppender</entry>
 	    <entry><literal>appender_setSyslogFacility mySyslog local4</literal></entry>
 	  </row>
 	  <row>
-	    <entry>appender_getSyslogFacilityPrinting (since 1.3.0)</entry>
+	    <entry>appender_setSyslogFacility (since 1.3.0; deprecated since 1.3.1)</entry>
+	    <entry>set the Syslog facility for a SyslogAppender</entry>
+	    <entry><literal>appender_setSyslogFacility mySyslog local4</literal></entry>
+	  </row>
+	  <row>
+	    <entry>appender_syslog_getFacilityPrinting (future)</entry>
 	    <entry>Default: FALSE.</entry>
 	    <entry><literal>.</literal></entry>
 	  </row>
 	  <row>
-	    <entry>appender_setSyslogFacilityPrinting (since 1.3.0)</entry>
+	    <entry>appender_syslog_setFacilityPrinting (future)</entry>
 	    <entry>.</entry>
 	    <entry><literal>.</literal></entry>
 	  </row>
