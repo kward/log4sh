@@ -1,0 +1,9 @@
+The following people have contributed to log4sh.
+
+Aaron Walker
+Dan Johansson
+Kate Ward
+Mickael Canevet
+Omner Calhoun
+
+$Revision$

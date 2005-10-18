@@ -12,3 +12,7 @@ SyslogAppender
   SyslogHost
 
 - add more error checking on the appender_*set* functions.  see smtp_setSubject
+
+- add get*ByName functions
+
+- try a `wc -l` in the _log4sh_getArrayLength function

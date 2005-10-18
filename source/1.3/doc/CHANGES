@@ -1,47 +1,69 @@
 Changes with 1.3.1
 
-*) [kwd] added a __LOG4SH_VERSION variable
+[kwd] added a __LOG4SH_VERSION variable
 
-*) [kwd] implemented a more secure method for using temporary files.  if the
+[kwd] implemented a more secure method for using temporary files.  if the
 TMPDIR variable is set, it is honored.  the method is based on info from
 http://www.linuxsecurity.com/content/view/115462/151/.
 
-*) [kwd] prefixed all the new array functions with _log4sh.  didn't think about
-it for the last release.  oops.
+[kwd] prefixed all the new array functions with _log4sh.  didn't think about it
+for the last release.  oops.
 
-*) [kwd] replaced many 'awk' statements with 'cut' statements.  resulted in
-about 10% faster performance while testing with the test-log4sh unit test
-script.
+[kwd] replaced many 'awk' statements with 'cut' statements.  resulted in about
+10% faster performance while testing with the test-log4sh unit test script.
 
-*) [kwd] added a TRACE debug level.  log4j-1.2.12 added this, so I did too.
+[kwd] added a TRACE debug level.  log4j-1.2.12 added this, so I did too.
 actually, just renamed my ALL debug level to TRACE, so nothing *really*
 changed.
 
-*) [kwd] renamed the file, smtp, and syslog functions to make future fuction
+[kwd] renamed the file, smtp, and syslog functions to make future fuction
 additions easier
 
-*) [kwd] reordered and regrouped the functions according to what they are for
+[kwd] reordered and regrouped the functions according to what they are for
 
-*) [kwd] stripped the setting and unsetting of temporary variables from many
+[kwd] stripped the setting and unsetting of temporary variables from many
 functions where they are simple enough to be understand without them
 
-*) [kwd] abstracted several array gets into functions to allow for future
+[kwd] abstracted several array gets into functions to allow for future
 underlying array implementation changes
 
-*) [kwd] replaced nearly all usages of the old array system with the new system
+[kwd] replaced nearly all usages of the old array system with the new system
+
+[kwd] fixed *many* reported bugs (credits to Omner Calhoun)
+
+[kwd] the various logging commands now support multiple arguments (very much
+like the echo command).  as a result, the input no longer needs to be
+surrounded by quotes.  (credits to Omner Calhoun)
+
+[kwd] realized that while internally, practically all of the get* functions use
+index numbers, there is the need to use the appender name as well.  added a
+appender_syslog_getFacilityByName function (as an example) and renamed the old
+function to appender_syslog_getFacilityByIndex.  must continue this work in the
+future.
+
+[kwd] begin implementing a type of documentation in the code...  will extract
+the documentation at build time from the code which will be used to build API
+documentation.  wrote a extractDocs.pl script to do the documentation
+extraction.  it's written in perl, I know, but log4sh is still in shell!
+
+[kwd] changed the functionality of the code in several places so that internal
+shell commands are used instead of forking off an external command.  (credits
+to Omner Calhoun)
+
+[kwd] I'm sure there are others that were forgotten
 
 
 Changes with 1.3.0
 
-*) [kwd] implemented a Syslog appender for logging via syslog by using the
-logger command.  currently limited to the localhost
+[kwd] implemented a Syslog appender for logging via syslog by using the logger
+command.  currently limited to the localhost
 
-*) [kwd] ported the new {get|push|pop}ThreadName functions from 1.2.7
+[kwd] ported the new {get|push|pop}ThreadName functions from 1.2.7
 
-*) [kwd] implemented a SMTP appender based on code supplied by Mickael Canevet.
-the appender is still in development.
+[kwd] implemented a SMTP appender.  the appender is still in development.
+(credits to Mickael Canevet)
 
-*) [kwd] implemented a new way to handle the string arrays.  the old method
-worked just fine, except for when the data contained space characters.  this
-new method handles spaces as well (which are needed for the SMTP appender
+[kwd] implemented a new way to handle the string arrays.  the old method worked
+just fine, except for when the data contained space characters.  this new
+method handles spaces as well (which are needed for the SMTP appender
 subjects).
