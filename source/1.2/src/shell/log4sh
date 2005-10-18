@@ -1,6 +1,6 @@
 # $Id$
 #
-# log4sh 1.2.8
+# log4sh 1.2.9
 # 
 # written by Kate Ward <kate.ward@forestent.com>
 # released under the LGPL
@@ -23,7 +23,7 @@ set -u
 #
 # constants
 #
-__LOG4SH_VERSION=1.2.8
+__LOG4SH_VERSION=1.2.9
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
@@ -531,7 +531,6 @@ logger_addAppender()
 {
   _appender=$1
 
-  _level=`logger_getLevel`
   __log4shAppenders="$__log4shAppenders $_appender"
   __log4shAppenderFiles="$__log4shAppenderFiles -"
   __log4shAppenderLevels="$__log4shAppenderLevels -"
@@ -540,7 +539,7 @@ logger_addAppender()
   __log4shAppenderTypes="$__log4shAppenderTypes -"
   __log4shAppenderCount=`expr $__log4shAppenderCount + 1`
 
-  unset _appender _layout _level
+  unset _appender _layout
 }
 
 #
