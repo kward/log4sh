@@ -3,7 +3,7 @@
 # <!-- $Id$ -->
 # <shelldoc xmlns:s="shelldoc">
 # <s:header>
-# log4sh 1.3.1
+# log4sh 1.3.2
 #
 # http://log4sh.sourceforge.net/
 # 
@@ -29,7 +29,7 @@ set -u
 #
 # constants
 #
-__LOG4SH_VERSION=1.3.1
+__LOG4SH_VERSION=1.3.2
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
@@ -62,6 +62,10 @@ __LOG4SH_LEVEL_CLOSED=255
 __LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
 __LOG4SH_THREAD_DEFAULT='main'
 
+# the following string is *supposed* to be on two lines!!
+__LOG4SH_IFS="
+"
+
 # set the constants to readonly
 for _const in `set |grep "^__LOG4SH_" |cut -d= -f1`; do
   readonly $_const
@@ -75,6 +79,7 @@ __log4sh_filename="`basename $0`"
 
 __log4shAppenders=''
 __log4shAppenderCount=0
+__log4shAppenderCounts=''
 __log4shAppenderLayouts=''
 __log4shAppenderLevels=''
 __log4shAppenderPatterns=''
@@ -244,14 +249,13 @@ _log4sh_getArrayElement()
   #echo "$1" |awk 'NR==r{print $0}' r=$2
 
   # new
-  _index=${2}
-  _oldIFS="${IFS}"; IFS="
-"
+  _index=$2
+  _oldIFS="${IFS}"; IFS="$__LOG4SH_IFS"
   set -- junk ${1}
   IFS="${_oldIFS}"; unset _oldIFS
 
-  shift ${_index}
-  echo ${1}
+  shift $_index
+  echo $1
 
   unset _index
 }
@@ -268,8 +272,7 @@ _log4sh_getArrayLength()
   #echo "$@" |awk 'END{print NR}'
 
   # new
-  _oldIFS="${IFS}"; IFS="
-"
+  _oldIFS="${IFS}"; IFS="$__LOG4SH_IFS"
   set -- ${1}
   IFS="${_oldIFS}"; unset _oldIFS
   echo $#
@@ -332,6 +335,31 @@ _log4sh_arrayReplace()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
+#       <funcdef>string <function>_log4sh_peekStack</function></funcdef>
+#       <paramdef>string[] <parameter>_array</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+# </entry>
+# <entry>
+#   <para>
+#     Return the topmost element on a stack without removing the element.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>element=`_log4sh_peekStack "$array"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_peekStack()
+{
+  echo "$@" |awk '{line=$0}END{print line}'
+}
+
+#/**
+# <s:function group="log4sh">
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
 #       <funcdef>string[] <function>_log4sh_popStack</function></funcdef>
 #       <paramdef>string[] <parameter>_array</parameter></paramdef>
 #     </funcprototype>
@@ -380,12 +408,7 @@ _log4sh_popStack()
 #*/
 _log4sh_pushStack()
 {
-  if [ -n "$1" ]; then
-    echo "$1
-$2"
-  else
-    echo "$2"
-  fi
+  echo "${1:+${1}${__LOG4SH_IFS}}${2}"
 }
 
 #-----------------------------------------------------------------------------
@@ -533,7 +556,7 @@ log4sh_readProperties()
   _tmpDir=`_log4sh_mktempDir`
   _tmpFile="$_tmpDir/properties"
   grep "^log4sh\." $_file >$_tmpFile
-  _rp_count=`wc -l $_tmpFile |cut -d' ' -f1`
+  _rp_count=`wc -l $_tmpFile |awk '{print $1}'`
   _rp_i=1
   while [ $_rp_i -le $_rp_count ]; do
     _line=`awk "$_rp_i==NR {print}" $_tmpFile`
@@ -570,10 +593,9 @@ log4sh_readProperties()
 #
 logger_addAppender()
 {
-  _appender=$1
-
-  __log4shAppenders="$__log4shAppenders $_appender"
+  __log4shAppenders=`_log4sh_pushStack "$__log4shAppenders" $1`
   __log4shAppenderCount=`expr $__log4shAppenderCount + 1`
+  __log4shAppenderCounts="${__log4shAppenderCounts} ${__log4shAppenderCount}"
   __log4shAppenderLayouts=`_log4sh_pushStack "$__log4shAppenderLayouts" "$__LOG4SH_LAYOUT_SIMPLE"`
   __log4shAppenderLevels=`_log4sh_pushStack "$__log4shAppenderLevels" -`
   __log4shAppenderPatterns=`_log4sh_pushStack "$__log4shAppenderPatterns" "$__LOG4SH_PATTERN_DEFAULT"`
@@ -584,8 +606,6 @@ logger_addAppender()
   __log4shAppender_smtp_tos=`_log4sh_pushStack "$__log4shAppender_smtp_tos" -`
   __log4shAppender_smtp_subjects=`_log4sh_pushStack "$__log4shAppender_smtp_subjects" -`
   __log4shAppender_syslog_facilities=`_log4sh_pushStack "$__log4shAppender_syslog_facilities" -`
-
-  unset _appender
 }
 
 #
@@ -615,7 +635,7 @@ logger_addAppenderWithPattern()
 #
 logger_setFilename()
 {
-  __log4sh_filename=$1
+  __log4sh_filename="$1"
 }
 
 # 
@@ -667,8 +687,8 @@ logger_setThreadName()
 {
   _thread=$1
 
-  _index=`_log4sh_getArrayLength "$__log4shThreadStack"`
-  __log4shThreadStack=`_log4sh_setArrayElement "$__log4shThreadStack" $_index $_thread`
+  _length=`_log4sh_getArrayLength "$__log4shThreadStack"`
+  __log4shThreadStack=`_log4sh_setArrayElement "$__log4shThreadStack" $_length $_thread`
   __log4shThreadName=$_thread
 
   unset _index _thread
@@ -715,8 +735,8 @@ logger_popThreadName()
 {
   _length=`_log4sh_getArrayLength "$__log4shThreadStack"`
   if [ $_length -gt 1 ]; then
-    __log4shThreadName=`echo "$__log4shThreadStack" |awk 'BEGIN{r--}NR==r{print $0}' r=$_length`
     __log4shThreadStack=`_log4sh_popStack "$__log4shThreadStack"`
+    __log4shThreadName=`_log4sh_peekStack "$__log4shThreadStack"`
   else
     echo "log4sh:WARN no more thread names available on thread name stack." >&2
   fi
@@ -725,29 +745,6 @@ logger_popThreadName()
 #=============================================================================
 # Appenders
 #
-
-#
-# determines the index position of an appender in the appender array.
-#
-# @param  _appender  the name of the appender
-# @echo   integer    the position of the appender in the appender array; 0 if
-#                    not found
-#
-_appender_getIndex()
-{
-  _appender=$1
-
-  _index=1
-  while [ $_index -le $__log4shAppenderCount ]; do
-    _a=`echo $__log4shAppenders |cut -d' ' -f$_index`
-    [ "$_a" '=' "$_appender" ] && break
-    _index=`expr $_index + 1`
-  done
-  [ $_index -gt $__log4shAppenderCount ] && _index=0
-
-  echo $_index
-  unset _a _appender _index
-}
 
 #
 # get the name of the appender
@@ -835,7 +832,7 @@ appender_getPattern()
 #
 appender_setPattern()
 {
-  _index=`_appender_getIndex $1`
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   __log4shAppenderPatterns=`_log4sh_setArrayElement "$__log4shAppenderPatterns" $_index "$2"`
   unset _index
 }
@@ -865,7 +862,7 @@ appender_getAppenderType()
 #
 appender_setType()
 {
-  _index=`_appender_getIndex $1`
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   __log4shAppenderTypes=`_log4sh_setArrayElement "$__log4shAppenderTypes" $_index "$2"`
   unset _index
 }
@@ -896,7 +893,6 @@ appender_getLayout()
 #
 appender_setLayout()
 {
-  _appender=$1
   _layout=$2
    
   case $_layout in
@@ -908,10 +904,10 @@ appender_setLayout()
     ;;
   esac
 
-  _index=`_appender_getIndex $_appender`
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   __log4shAppenderLayouts=`_log4sh_setArrayElement "$__log4shAppenderLayouts" $_index "$_layout"`
 
-  unset _appender _layout _index
+  unset _index _layout
   return $__LOG4SH_TRUE
 }
 
@@ -934,7 +930,7 @@ appender_getLevel()
 #
 appender_setLevel()
 {
-  _index=`_appender_getIndex $1`
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   __log4shAppenderLevels=`_log4sh_setArrayElement "$__log4shAppenderLevels" $_index "$2"`
   unset _index
 }
@@ -987,7 +983,7 @@ appender_file_setFile()
 
   if [ -n "$_appender" -a -n "$_file" ]; then
     # set the file
-    _index=`_appender_getIndex $_appender`
+    _index=`_log4sh_findArrayElement "$__log4shAppenders" $_appender`
     __log4shAppender_file_files=`_log4sh_setArrayElement "$__log4shAppender_file_files" $_index "$_file"`
     _return=$?
 
@@ -1015,6 +1011,12 @@ appender_file_setFile()
   return $_return
 }
 
+# (deprecated)
+appender_setAppenderFile()
+{
+  appender_file_setFile "$@"
+}
+
 #-----------------------------------------------------------------------------
 # SMTPAppender
 #
@@ -1038,7 +1040,7 @@ appender_smtp_getTo()
 #
 appender_smtp_setTo()
 {
-  _index=`_appender_getIndex $1`
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   __log4shAppender_smtp_tos=`_log4sh_setArrayElement "$__log4shAppender_smtp_tos" $_index "$2"`
   unset _index
 }
@@ -1073,7 +1075,7 @@ appender_smtp_setSubject()
   _subject=$2
 
   # set the Subject
-  _index=`_appender_getIndex $_appender`
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $_appender`
   if [ $_index -gt 0 ]; then
     __log4shAppender_smtp_subjects=`_log4sh_setArrayElement "$__log4shAppender_smtp_subjects" $_index "$_subject"`
     _return=$__LOG4SH_TRUE
@@ -1122,7 +1124,7 @@ appender_getSyslogFacility()
 #
 appender_syslog_getFacilityByName()
 {
-  _index=`_appender_getIndex $1`
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   _log4sh_getArrayElement "$__log4shAppender_syslog_facilities" $_index
   unset _index
 }
@@ -1171,13 +1173,19 @@ appender_syslog_setFacility()
 
   # set appender facility
   if [ $_found -eq $__LOG4SH_TRUE ]; then
-    _index=`_appender_getIndex $_appender`
+    _index=`_log4sh_findArrayElement "$__log4shAppenders" $_appender`
     __log4shAppender_syslog_facilities=`_log4sh_setArrayElement "$__log4shAppender_syslog_facilities" $_index "$_facility"`
     _return=$__LOG4SH_TRUE
   fi
 
   unset _appender _f _facility _found _index
   return $_return
+}
+
+# deprecated
+appender_setSyslogFacility()
+{
+  appender_syslog_setFacility $1 $2
 }
 
 #
@@ -1212,85 +1220,72 @@ appender_syslog_setHost()
 #
 log()
 {
-  _tag=$1
+  _tag=${1}
   shift
-  _msg="$@"
+  _msg="${@}"
 
-  _level=`_log4sh_tag2level $_tag`
-  _nextIndex=1
-  _l=0
+  _thisLevel=`_log4sh_tag2level ${_tag}`
 
-  while [ $_nextIndex -le $__log4shAppenderCount ]; do
-    _myIndex=$_nextIndex
-    _nextIndex=`expr $_nextIndex + 1`
-
-    # get the name of the appender
-    _tmpName=`appender_getName $_myIndex`
-
+  for _appenderIndex in ${__log4shAppenderCounts}; do
     # determine appender level
-    _tmpLevel=`appender_getLevel $_myIndex`
-    if [ "$_tmpLevel" = "-" ]; then
+    _appenderLevelTag=`appender_getLevel ${_appenderIndex}`
+    if [ "${_appenderLevelTag}" = "-" ]; then
       # continue if requested is level less than general level
-      [ ! $__log4shLevel -le $_level ] && continue
+      [ ! ${__log4shLevel} -le ${_thisLevel} ] && continue
     else
-      _l=`_log4sh_tag2level $_tmpLevel`
+      _appenderLevel=`_log4sh_tag2level ${_appenderLevelTag}`
       # continue if requested level is less than specific appender level
-      [ ! $_l -le $_level ] && continue
+      [ ! $_appenderLevel -le ${_thisLevel} ] && continue
     fi
 
     # determine appender layout
-    _tmpLayout=`appender_getLayout $_myIndex`
-    case $_tmpLayout in
-      $__LOG4SH_LAYOUT_SIMPLE|$__LOG4SH_LAYOUT_HTML)
+    _appenderLayout=`appender_getLayout ${_appenderIndex}`
+    case $_appenderLayout in
+      $__LOG4SH_LAYOUT_SIMPLE|\
+      $__LOG4SH_LAYOUT_HTML)
 	_thisLayout="$_tag - $_msg"
 	;;
       $__LOG4SH_LAYOUT_PATTERN) 
-	_tmpPattern=`appender_getPattern $_myIndex`
-	_thisLayout=`_appender_parsePattern "$_tmpPattern" $_tag "$_msg"`
+	_appenderPattern=`appender_getPattern $_appenderIndex`
+	_thisLayout=`_appender_parsePattern "$_appenderPattern" $_tag "$_msg"`
 	;;
     esac
 
     # log to appender
-    _appenderType=`appender_getType $_myIndex`
+    _appenderType=`appender_getType $_appenderIndex`
     case $_appenderType in
       $__LOG4SH_APPENDER_CONSOLE)
         echo "$_thisLayout"
 	;;
-      $__LOG4SH_APPENDER_SYSLOG)
-        _tmpFacility=`appender_syslog_getFacilityByIndex $_myIndex`
-	logger -p "$_tmpFacility.info" "$_thisLayout"
-	unset _tmpFacility
-	;;
-      $__LOG4SH_APPENDER_SMTP)
-        _smtpTo=`appender_smtp_getTo $_myIndex`
-        _smtpSubject=`appender_smtp_getSubject $_myIndex`
-        echo "$_thisLayout" |mail -s "$_smtpSubject" $_smtpTo
-	unset _smtpTo _smtpSubject
-        ;;
-      $__LOG4SH_APPENDER_FILE|$__LOG4SH_APPENDER_ROLLING_FILE|$__LOG4SH_APPENDER_DAILY_ROLLING_FILE)
-	_appenderFile=`appender_file_getFile $_myIndex`
-	if [ "$_appenderFile" = "STDERR" ]; then
-	  echo "$_thisLayout" >&2
-	elif [ "$_appenderFile" != "-" ]; then
+      $__LOG4SH_APPENDER_FILE|\
+      $__LOG4SH_APPENDER_ROLLING_FILE|\
+      $__LOG4SH_APPENDER_DAILY_ROLLING_FILE)
+	_appenderFile=`appender_file_getFile ${_appenderIndex}`
+	if [ "${_appenderFile}" = "STDERR" ]; then
+	  echo "${_thisLayout}" >&2
+	elif [ "${_appenderFile}" != "-" ]; then
 	  # do rotation
-	  case $_tmpName in
+	  _appenderName=`appender_getName ${_appenderIndex}`
+	  case $_appenderName in
 	    $__LOG4SH_APPENDER_ROLLING_FILE)
-	      _maxSize=$__LOG4SH_APPENDER_ROLLING_FILE_MAX_FILE_SIZE
 	      # check whether the max file size has been exceeded
+	      _rotSize=${__LOG4SH_APPENDER_ROLLING_FILE_MAX_FILE_SIZE}
 	      _size=`ls -s $_appenderFile |cut -d' ' -f1`
-	      if [ $_size -gt $_maxSize ]; then
+	      if [ $_size -gt ${_rotSize} ]; then
 	        # rotate the appender file(s)
-		_rotIndex=$__LOG4SH_APPENDER_ROLLING_FILE_MAX_BACKUP_INDEX
-		_rotFile="$_appenderFile.$_rotIndex"
-		[ -f "$_rotFile" ] && rm -f "$_rotFile"
-		while [ $_rotIndex -gt 0 ]; do
-		  _rotIndexLast=$_rotIndex
-		  _rotFileLast="$_rotFile"
-		  _rotIndex=`expr $_rotIndex - 1`
-		  _rotFile="$_appenderFile.$_rotIndex"
-		  [ -f "$_rotFile" ] && mv -f "$_rotFile" "$_rotFileLast"
+		_rotIndex=${__LOG4SH_APPENDER_ROLLING_FILE_MAX_BACKUP_INDEX}
+		_rotFile="${_appenderFile}.${_rotIndex}"
+		[ -f "${_rotFile}" ] && rm -f "${_rotFile}"
+		while [ ${_rotIndex} -gt 0 ]; do
+		  _rotIndexLast=${_rotIndex}
+		  _rotFileLast="${_rotFile}"
+		  _rotIndex=`expr ${_rotIndex} - 1`
+		  _rotFile="${_appenderFile}.${_rotIndex}"
+		  [ -f "${_rotFile}" ] && mv -f "${_rotFile}" "${_rotFileLast}"
 		done
+		unset _rotFile _rotFileLast _rotIndex _rotIndexLast
 	      fi
+	      unset _size
 	      ;;
 	    $__LOG4SH_APPENDER_DAILY_ROLLING_FILE)
 	      ;;
@@ -1300,12 +1295,23 @@ log()
 	  :
 	fi
 	;;
+      $__LOG4SH_APPENDER_SMTP)
+        _smtpTo=`appender_smtp_getTo $_appenderIndex`
+        _smtpSubject=`appender_smtp_getSubject $_appenderIndex`
+        echo "$_thisLayout" |mail -s "$_smtpSubject" $_smtpTo
+	unset _smtpTo _smtpSubject
+        ;;
+      $__LOG4SH_APPENDER_SYSLOG)
+        _tmpFacility=`appender_syslog_getFacilityByIndex $_appenderIndex`
+	logger -p "$_tmpFacility.info" "$_thisLayout"
+	unset _tmpFacility
+	;;
     esac
   done
 
-  unset _tag _msg
-  unset _appenderFile _appenderType _myIndex _nextIndex _l _level
-  unset _thisLayout _tmpLayout _tmpLevel _tmpName _tmpPattern
+  unset _msg _tag _thisLayout _thisLevel
+  unset _appenderFile _appenderIndex _appenderLayout _appenderLevel
+  unset _appenderLevelTag _appenderName _appenderPattern _appenderType
 }
 
 #
