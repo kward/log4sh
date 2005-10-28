@@ -1,3 +1,21 @@
+Changes with 1.3.2
+
+[kwd] removed the last reminants of the old array implementation that was used
+for the __log4shAppenders variable.  the new implementation is now used
+consistently throughout.
+
+[kwd] fixed bug in the popThreadName function.  the current thread name was
+being filled with the wrong value.
+
+[kwd] added the (deprecated) commands appender_setAppenderFile() and
+appender_setSyslogFacility() back to be backwards compatible with the 1.2 series
+
+[kwd] increased performance in the log() function (credits to Omner Calhoun)
+
+[kwd] fixed bug in the log4sh_readProperties() function that broke it under
+Solaris
+
+
 Changes with 1.3.1
 
 [kwd] added a __LOG4SH_VERSION variable
