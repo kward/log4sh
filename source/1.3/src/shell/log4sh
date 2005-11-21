@@ -21,7 +21,7 @@
 #*/
 
 # (possibly) declare variables that might come in from outside
-[ -z "$LOG4SH_CONFIGURATION" ] && LOG4SH_CONFIGURATION=''
+[ -z "${LOG4SH_CONFIGURATION}" ] && LOG4SH_CONFIGURATION=''
 
 # treat unset variables as an error when substituting
 set -u
@@ -123,11 +123,11 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 _log4sh_mktempDir()
 {
   _tmpDir="${TMPDIR-/tmp}/log4sh.$RANDOM$RANDOM$RANDOM$$"
-  (umask 077 && mkdir "$_tmpDir") || {
+  (umask 077 && mkdir "${_tmpDir}") || {
     echo "log4sh:FATAL could not create temporary directory!  exiting" >&2
     exit 1
   }
-  echo $_tmpDir
+  echo ${_tmpDir}
   unset _tmpDir
 }
 
@@ -154,7 +154,7 @@ _log4sh_level2tag()
 {
   _level=$1
 
-  _return=$__LOG4SH_TRUE
+  _return=${__LOG4SH_TRUE}
   _tag=''
 
   case $_level in
@@ -169,9 +169,9 @@ _log4sh_level2tag()
     *) _return=$__LOG4SH_FALSE ;;
   esac
 
-  echo $_tag
+  echo ${_tag}
   unset _level _tag
-  return $_return
+  return ${_return}
 }
 
 #/**
@@ -198,23 +198,23 @@ _log4sh_tag2level()
   _tag=$1
 
   _level=''
-  _return=$__LOG4SH_TRUE
+  _return=${__LOG4SH_TRUE}
 
   case $_tag in
-    TRACE) _level=$__LOG4SH_LEVEL_TRACE ;;
-    DEBUG) _level=$__LOG4SH_LEVEL_DEBUG ;;
-    INFO) _level=$__LOG4SH_LEVEL_INFO ;;
-    WARN) _level=$__LOG4SH_LEVEL_WARN ;;
-    ERROR) _level=$__LOG4SH_LEVEL_ERROR ;;
-    FATAL) _level=$__LOG4SH_LEVEL_FATAL ;;
-    OFF) _level=$__LOG4SH_LEVEL_OFF ;;
-    CLOSED) _level=$__LOG4SH_LEVEL_CLOSED ;;
-    *) _return=$__LOG4SH_FALSE ;;
+    TRACE) _level=${__LOG4SH_LEVEL_TRACE} ;;
+    DEBUG) _level=${__LOG4SH_LEVEL_DEBUG} ;;
+    INFO) _level=${__LOG4SH_LEVEL_INFO} ;;
+    WARN) _level=${__LOG4SH_LEVEL_WARN} ;;
+    ERROR) _level=${__LOG4SH_LEVEL_ERROR} ;;
+    FATAL) _level=${__LOG4SH_LEVEL_FATAL} ;;
+    OFF) _level=${__LOG4SH_LEVEL_OFF} ;;
+    CLOSED) _level=${__LOG4SH_LEVEL_CLOSED} ;;
+    *) _return=${__LOG4SH_FALSE} ;;
   esac
 
-  echo $_level
+  echo ${_level}
   unset _level _tag
-  return $_return
+  return ${_return}
 }
 
 #-----------------------------------------------------------------------------
@@ -1240,38 +1240,38 @@ log()
 
     # determine appender layout
     _appenderLayout=`appender_getLayout ${_appenderIndex}`
-    case $_appenderLayout in
-      $__LOG4SH_LAYOUT_SIMPLE|\
-      $__LOG4SH_LAYOUT_HTML)
-	_thisLayout="$_tag - $_msg"
+    case ${_appenderLayout} in
+      ${__LOG4SH_LAYOUT_SIMPLE}|\
+      ${__LOG4SH_LAYOUT_HTML})
+	_thisLayout="${_tag} - ${_msg}"
 	;;
-      $__LOG4SH_LAYOUT_PATTERN) 
-	_appenderPattern=`appender_getPattern $_appenderIndex`
-	_thisLayout=`_appender_parsePattern "$_appenderPattern" $_tag "$_msg"`
+      ${__LOG4SH_LAYOUT_PATTERN}) 
+	_appenderPattern=`appender_getPattern ${_appenderIndex}`
+	_thisLayout=`_appender_parsePattern "${_appenderPattern}" ${_tag} "${_msg}"`
 	;;
     esac
 
     # log to appender
-    _appenderType=`appender_getType $_appenderIndex`
-    case $_appenderType in
-      $__LOG4SH_APPENDER_CONSOLE)
-        echo "$_thisLayout"
+    _appenderType=`appender_getType ${_appenderIndex}`
+    case ${_appenderType} in
+      ${__LOG4SH_APPENDER_CONSOLE})
+        echo "${_thisLayout}"
 	;;
-      $__LOG4SH_APPENDER_FILE|\
-      $__LOG4SH_APPENDER_ROLLING_FILE|\
-      $__LOG4SH_APPENDER_DAILY_ROLLING_FILE)
+      ${__LOG4SH_APPENDER_FILE}|\
+      ${__LOG4SH_APPENDER_ROLLING_FILE}|\
+      ${__LOG4SH_APPENDER_DAILY_ROLLING_FILE})
 	_appenderFile=`appender_file_getFile ${_appenderIndex}`
 	if [ "${_appenderFile}" = "STDERR" ]; then
 	  echo "${_thisLayout}" >&2
 	elif [ "${_appenderFile}" != "-" ]; then
 	  # do rotation
 	  _appenderName=`appender_getName ${_appenderIndex}`
-	  case $_appenderName in
-	    $__LOG4SH_APPENDER_ROLLING_FILE)
+	  case ${_appenderName} in
+	    ${__LOG4SH_APPENDER_ROLLING_FILE})
 	      # check whether the max file size has been exceeded
 	      _rotSize=${__LOG4SH_APPENDER_ROLLING_FILE_MAX_FILE_SIZE}
-	      _size=`ls -s $_appenderFile |cut -d' ' -f1`
-	      if [ $_size -gt ${_rotSize} ]; then
+	      _size=`ls -s ${_appenderFile} |cut -d' ' -f1`
+	      if [ ${_size} -gt ${_rotSize} ]; then
 	        # rotate the appender file(s)
 		_rotIndex=${__LOG4SH_APPENDER_ROLLING_FILE_MAX_BACKUP_INDEX}
 		_rotFile="${_appenderFile}.${_rotIndex}"
@@ -1287,23 +1287,23 @@ log()
 	      fi
 	      unset _size
 	      ;;
-	    $__LOG4SH_APPENDER_DAILY_ROLLING_FILE)
+	    ${__LOG4SH_APPENDER_DAILY_ROLLING_FILE})
 	      ;;
 	  esac
-	  echo "$_thisLayout" >>$_appenderFile
+	  echo "${_thisLayout}" >>${_appenderFile}
 	else
 	  :
 	fi
 	;;
-      $__LOG4SH_APPENDER_SMTP)
-        _smtpTo=`appender_smtp_getTo $_appenderIndex`
-        _smtpSubject=`appender_smtp_getSubject $_appenderIndex`
-        echo "$_thisLayout" |mail -s "$_smtpSubject" $_smtpTo
+      ${__LOG4SH_APPENDER_SMTP})
+        _smtpTo=`appender_smtp_getTo ${_appenderIndex}`
+        _smtpSubject=`appender_smtp_getSubject ${_appenderIndex}`
+        echo "${_thisLayout}" |mail -s "${_smtpSubject}" ${_smtpTo}
 	unset _smtpTo _smtpSubject
         ;;
       $__LOG4SH_APPENDER_SYSLOG)
-        _tmpFacility=`appender_syslog_getFacilityByIndex $_appenderIndex`
-	logger -p "$_tmpFacility.info" "$_thisLayout"
+        _tmpFacility=`appender_syslog_getFacilityByIndex ${_appenderIndex}`
+	logger -p "${_tmpFacility}.info" "${_thisLayout}"
 	unset _tmpFacility
 	;;
     esac
