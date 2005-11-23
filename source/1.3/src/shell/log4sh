@@ -11,14 +11,15 @@
 # released under the LGPL
 #
 # this module implements something like the log4j module from the Apache group
+# </s:header>
+#*/
 #
 # notes:
 # *) the default appender is a ConsoleAppender called stdout with a level
 #    of ERROR and SimpleLayout
 # *) the appender levels are as follows (decreasing order of output):
 #    TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF
-# </s:header>
-#*/
+#
 
 # (possibly) declare variables that might come in from outside
 [ -z "${LOG4SH_CONFIGURATION}" ] && LOG4SH_CONFIGURATION=''
@@ -113,7 +114,7 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 # </entry>
 # <entry>
 #   <para>Creates a secure temporary directory within which temporary files can
-#   be created.  HOnors the TMPDIR environment variable if it is set.</para>
+#   be created.  Honors the TMPDIR environment variable if it is set.</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>tmpDir=`_log4sh_mktempDir`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -223,32 +224,52 @@ _log4sh_tag2level()
 # note: arrays are '1' based
 #
 
-#
-# Find an element in an array
-#
-# @param  _array    array of values
-# @param  _element  element to be appended
-# @echo   integer   position of element; 0 if not found
-#
+#/**
+# <s:function group="log4sh">
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef>integer <function>_log4sh_findArrayElement</function></funcdef>
+#       <paramdef>string[] <parameter>array</parameter></paramdef>
+#       <paramdef>string <parameter>element</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+# </entry>
+# <entry>
+#   <para>Find the position of element in an array</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>pos=`_log4sh_findArrayElement "$array" $element`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 _log4sh_findArrayElement()
 {
   pos=`echo "$1" |awk '$0==e{print NR}' e="$2"`
   [ -n "$pos" ] && echo "$pos" || echo 0
 }
 
-#
-# Retrieve an element at a given position from an array
-#
-# @param  _array  array of values
-# @param  _pos    position of element
-# @echo   string  array with element appended
-#
+#/**
+# <s:function group="log4sh">
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef>string <function>_log4sh_getArrayElement</function></funcdef>
+#       <paramdef>string[] <parameter>array</parameter></paramdef>
+#       <paramdef>integer <parameter>position</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+# </entry>
+# <entry>
+#   <para>Retrieve the element at the given position from an array</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>element=`_log4sh_getArrayElement "$array" $position`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 _log4sh_getArrayElement()
 {
-  # old (using external awk)
-  #echo "$1" |awk 'NR==r{print $0}' r=$2
-
-  # new
   _index=$2
   _oldIFS="${IFS}"; IFS="$__LOG4SH_IFS"
   set -- junk ${1}
@@ -260,74 +281,55 @@ _log4sh_getArrayElement()
   unset _index
 }
 
-#
-# Get the length of an array
-#
-# @param  _array   array of values
-# @echo   integer  length of the given array
-#
+#/**
+# <s:function group="log4sh">
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef>integer <function>_log4sh_getArrayLength</function></funcdef>
+#       <paramdef>string[] <parameter>array</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+# </entry>
+# <entry>
+#   <para>Get the length of an array</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>length=`_log4sh_getArrayLength "$array"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 _log4sh_getArrayLength()
 {
-  # old (using external awk)
-  #echo "$@" |awk 'END{print NR}'
-
-  # new
   _oldIFS="${IFS}"; IFS="$__LOG4SH_IFS"
   set -- ${1}
   IFS="${_oldIFS}"; unset _oldIFS
   echo $#
 }
 
-#
-# Set the array element value at the given position
-#
-# @param   string[]  array of values
-# @param   integer   array position to set
-# @param   string    element to place at the position
-# @echo    string    updated array
-# @return  boolean   always returns true
-#
+#/**
+# <s:function group="log4sh">
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef>string <function>_log4sh_setArrayElement</function></funcdef>
+#       <paramdef>string[] <parameter>array</parameter></paramdef>
+#       <paramdef>integer <parameter>position</parameter></paramdef>
+#       <paramdef>string <parameter>element</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+# </entry>
+# <entry>
+#   <para>Get the length of an array</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>length=`_log4sh_getArrayLength "$array"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 _log4sh_setArrayElement()
 {
   echo "$1" |awk '{if(NR==r){print e}else{print $0}}' r=$2 e="$3"
-
-  return $__LOG4SH_TRUE
-}
-
-#
-# (deprecated) Replaces a value at a given position in an array
-#
-# @param   _pos     position of value
-# @param   _value   value to place into array
-# @param   _array   space separated string of values (poor man's array)
-# @echo    string   new version of array
-# @return  boolean  boolean result of whether or not array position was found
-#
-_log4sh_arrayReplace()
-{
-  _pos=$1
-  _value=$2
-  _array=$3
-
-  _i=1
-  _found=$__LOG4SH_FALSE
-  _max=`echo $_array |wc -w`
-  _new=''
-  while [ $_i -le $_max ]; do
-    if [ $_i -ne $_pos ]; then
-      _new="$_new "`echo $_array |cut -d' ' -f$_i`
-    else
-      _new="$_new $_value"
-      _found=$__LOG4SH_TRUE
-    fi
-    _i=`expr $_i + 1`
-  done
-
-  echo "$_new" |sed 's/^ //'
-  _return=$_found
-  unset _i _found _max _new
-  unset _pos _value _array
-  return $_return
 }
 
 #/**
@@ -336,7 +338,7 @@ _log4sh_arrayReplace()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef>string <function>_log4sh_peekStack</function></funcdef>
-#       <paramdef>string[] <parameter>_array</parameter></paramdef>
+#       <paramdef>string[] <parameter>array</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 # </entry>
@@ -361,7 +363,7 @@ _log4sh_peekStack()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef>string[] <function>_log4sh_popStack</function></funcdef>
-#       <paramdef>string[] <parameter>_array</parameter></paramdef>
+#       <paramdef>string[] <parameter>array</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 # </entry>
@@ -710,7 +712,7 @@ logger_pushThreadName()
 }
 
 #/**
-# <s:function group="log4sh">
+# <s:function group="threads">
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
