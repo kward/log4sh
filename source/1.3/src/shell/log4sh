@@ -1,7 +1,7 @@
 #/**
 # <?xml version="1.0" encoding="UTF-8"?>
 # <!-- $Id$ -->
-# <shelldoc xmlns:s="http://www.forestent.com/2005/XSL/ShellDoc">
+# <s:shelldoc xmlns:s="http://www.forestent.com/2005/XSL/ShellDoc">
 # <s:header>
 # log4sh 1.3.2
 #
@@ -108,6 +108,7 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef>string <function>_log4sh_mktempDir</function></funcdef>
+#       <void />
 #     </funcprototype>
 #   </funcsynopsis>
 # </entry>
@@ -250,16 +251,17 @@ _log4sh_findArrayElement()
 
 #/**
 # <s:function group="log4sh">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef>string <function>_log4sh_getArrayElement</function></funcdef>
+#       <funcdef><function>_log4sh_getArrayElement</function></funcdef>
 #       <paramdef>string[] <parameter>array</parameter></paramdef>
 #       <paramdef>integer <parameter>position</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-# </entry>
-# <entry>
 #   <para>Retrieve the element at the given position from an array</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>element=`_log4sh_getArrayElement "$array" $position`</funcsynopsisinfo>
@@ -282,15 +284,16 @@ _log4sh_getArrayElement()
 
 #/**
 # <s:function group="log4sh">
-# <entry>
+# <entry align="right">
+#   <code>integer</code>
+# </entry>
+# <entry align="left">
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef>integer <function>_log4sh_getArrayLength</function></funcdef>
+#       <funcdef><function>_log4sh_getArrayLength</function></funcdef>
 #       <paramdef>string[] <parameter>array</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-# </entry>
-# <entry>
 #   <para>Get the length of an array</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>length=`_log4sh_getArrayLength "$array"`</funcsynopsisinfo>
@@ -712,14 +715,16 @@ logger_pushThreadName()
 
 #/**
 # <s:function group="threads">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef><function>logger_popThreadName</function></funcdef>
+#       <void />
 #     </funcprototype>
 #   </funcsynopsis>
-# </entry>
-# <entry>
 #   <para>
 # Removes the topmost thread name from the stack.  The next thread name on
 # the stack is then placed in the __log4shThreadName variable.  If the
@@ -1400,5 +1405,5 @@ fi
 set +u
 
 #/**
-# </shelldoc>
+# </s:shelldoc>
 #*/
