@@ -13,8 +13,6 @@ $ xsltproc shelldoc.xslt log4sh.xml |xmllint -noblanks -
       method="xml"
       version="1.0"
       encoding="UTF-8"
-      doctype-public="-//OASIS//DTD DocBook XML V4.4//EN"
-      doctype-system="http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
       indent="yes"/>
   <xsl:strip-space elements="*" />
 
@@ -31,15 +29,24 @@ $ xsltproc shelldoc.xslt log4sh.xml |xmllint -noblanks -
       <xsl:sort select="@group" />
 
       <table><title><xsl:value-of select="@group" /></title>
-        <tgroup><tbody>
+        <tgroup cols="2"><tbody>
         <xsl:for-each select="key('groups', @group)">
           <xsl:sort select="entry/funcsynopsis/funcprototype/funcdef/function" />
-          <row><xsl:copy-of select="entry" /></row>
+          <row valign="top">
+	    <xsl:copy-of select="entry" />
+	    <!--<xsl:apply-templates select="entry" />-->
+	  </row>
         </xsl:for-each>
         </tbody></tgroup>
       </table>
     </xsl:for-each>
     </article>
+  </xsl:template>
+
+  <xsl:template match="entry">
+    <entry>
+    <xsl:copy-of select="*" />
+    </entry>
   </xsl:template>
 
 </xsl:stylesheet>
