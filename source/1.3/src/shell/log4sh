@@ -1,7 +1,7 @@
 #/**
 # <?xml version="1.0" encoding="UTF-8"?>
 # <!-- $Id$ -->
-# <shelldoc xmlns:s="shelldoc">
+# <shelldoc xmlns:s="http://www.forestent.com/2005/XSL/ShellDoc">
 # <s:header>
 # log4sh 1.3.2
 #
@@ -11,15 +11,14 @@
 # released under the LGPL
 #
 # this module implements something like the log4j module from the Apache group
-# </s:header>
-#*/
 #
 # notes:
 # *) the default appender is a ConsoleAppender called stdout with a level
 #    of ERROR and SimpleLayout
 # *) the appender levels are as follows (decreasing order of output):
 #    TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF
-#
+# </s:header>
+#*/
 
 # (possibly) declare variables that might come in from outside
 [ -z "${LOG4SH_CONFIGURATION}" ] && LOG4SH_CONFIGURATION=''
@@ -114,7 +113,7 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 # </entry>
 # <entry>
 #   <para>Creates a secure temporary directory within which temporary files can
-#   be created.  Honors the TMPDIR environment variable if it is set.</para>
+# be created.  Honors the TMPDIR environment variable if it is set.</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>tmpDir=`_log4sh_mktempDir`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -722,14 +721,14 @@ logger_pushThreadName()
 # </entry>
 # <entry>
 #   <para>
-#     Removes the topmost thread name from the stack.  The next thread name on
-#     the stack is then placed in the __log4shThreadName variable.  If the
-#     stack is empty, or has only one element left, then a warning is given
-#     that no more thread names can be popped from the stack.
+# Removes the topmost thread name from the stack.  The next thread name on
+# the stack is then placed in the __log4shThreadName variable.  If the
+# stack is empty, or has only one element left, then a warning is given
+# that no more thread names can be popped from the stack.
 #   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>logger_popThreadName</funcsynopsisinfo>
-#   </funcsynopsis>
+# <funcsynopsis>
+#   <funcsynopsisinfo>logger_popThreadName</funcsynopsisinfo>
+# </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
