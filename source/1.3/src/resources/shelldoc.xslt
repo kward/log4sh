@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-example usage:
-$ java -cp xalan-2.6.0.jar org.apache.xalan.xslt.Process \
--xml -in mktg_emails.xml -xsl emails_by_client_id.xslt
+example ways to process this xslt:
+$ java -cp xalan-2.6.0.jar \
+  org.apache.xalan.xslt.Process -xml -in log4sh.xml -xsl shelldoc.xslt
+
+$ xsltproc shelldoc.xslt log4sh.xml |xmllint -noblanks -
 -->
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -29,17 +31,12 @@ $ java -cp xalan-2.6.0.jar org.apache.xalan.xslt.Process \
       <xsl:sort select="@group" />
 
       <table><title><xsl:value-of select="@group" /></title>
-        <tgroup>
-	  <tbody>
-            <xsl:for-each select="key('groups', @group)">
-              <xsl:sort select="entry/funcsynopsis/funcprototype/funcdef/function" />
-
-            <row>
-	      <xsl:copy-of select="entry" />
-	    </row>
-            </xsl:for-each>
-          </tbody>
-	</tgroup>
+        <tgroup><tbody>
+        <xsl:for-each select="key('groups', @group)">
+          <xsl:sort select="entry/funcsynopsis/funcprototype/funcdef/function" />
+          <row><xsl:copy-of select="entry" /></row>
+        </xsl:for-each>
+        </tbody></tgroup>
       </table>
     </xsl:for-each>
     </article>
