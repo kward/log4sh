@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id$ -->
+<!-- vim:softtabstop=2 shiftwidth=2 -->
+<!-- =========================================================================
+Usage Guide
+-->
+<chapter id="usage"><title>Usage Guide</title>
+  <para>The usage of log4sh is simple.  There are only a few simple steps required to setup and use log4sh in your application.</para>
+
+  <para>
+    <orderedlist spacing="compact">
+      <listitem><para>preconfigure log4sh (properties file)</para></listitem>
+      <listitem><para>source the log4sh script code</para></listitem>
+      <listitem><para>configure log4sh in code (optional)</para></listitem>
+      <listitem><para>call logging statements</para></listitem>
+    </orderedlist>
+  </para>
+
+  <section id="usage-preconfigure"><title>Preconfigure log4sh (optional)</title>
+    <para>To preconfigure log4sh, create a properties file (see the <link linkend="properties_file" endterm="properties_file.title" /> later in this document).  Set the <varname>LOG4SH_CONFIGURATION</varname> environment variable to point log4sh to the properties file if the properties file is not located in the current directory.</para>
+
+    <para>If log4sh is not preconfigured, the default configuration will be equivalent to the following:</para>
+
+    <programlisting><![CDATA[
+log4sh.rootLogger=ERROR, stdout
+log4sh.appender.stdout=ConsoleAppender
+log4sh.appender.stdout.layout=PatternLayout
+log4sh.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
+]]></programlisting>
+  </section>
+
+  <section id="usage-source"><title>Source log4sh</title>
+    <para>To source the code into your script (also known as including), one uses the sourcing ability of shell to source one script into another.  See the following quick example for how easy this is done.</para>
+
+    <example><title>Sourcing external shell code into current program</title>
+      <programlisting><![CDATA[
+#! /bin/sh
+
+# source log4sh from current directory
+. ./log4sh
+]]></programlisting>
+    </example>
+
+    <para>Here is some sample code that looks for log4sh in the same directory as the script is located, as well as the current directory.  If log4sh could not be found, it exits with an error.  If log4sh is found, it is loaded, along with the <filename>log4sh.properties</filename> file in the current directory (see the following example).  It then logs a message at the &info; level to STDOUT.</para>
+
+    <example><title>Hello, world (using properties file)</title>
+      <programlisting><![CDATA[
+#! /bin/sh
+#
+# log4sh example: Hello, world
+#
+myDir=`dirname $0`
+
+# find and source log4sh
+if [ -r "$myDir/log4sh" ]; then
+  log4shDir=$myDir
+elif [ -r "./log4sh" ]; then
+  log4shDir=.
+else
+  echo "fatal: could not find log4sh" >&2
+  exit 1
+fi
+. $log4shDir/log4sh
+
+# say Hello to the world
+logger_info "Hello, world"
+]]></programlisting>
+    </example>
+
+    <para>Here is the <filename>log4sh.properties</filename> file for the previous example.  Save it in the same directory you are running the above script from.</para>
+
+    <example><title>Hello, world; properties file</title>
+      <programlisting><![CDATA[
+#
+# log4sh example: Hello, world properties file
+#
+
+# Set root logger level to DEBUG and its only appender to A1
+log4sh.rootLogger=INFO, A1
+
+# A1 is set to be a ConsoleAppender.
+log4sh.appender.A1=ConsoleAppender
+
+# A1 uses a PatternLayout.
+log4sh.appender.A1.layout=PatternLayout
+log4sh.appender.A1.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
+]]></programlisting>
+    </example>
+  </section>
+
+  <section id="usage-code"><title id="usage-code.title">Configure log4sh in code</title>
+    <para>To configure log4sh in code, simply call the appropriate functions in your code.  The following code sample loads log4sh from the current directory, configures it for STDERR output, and the logs a message at the &info; level.</para>
+
+    <example><title>Hello, world (configured in code)</title>
+      <programlisting><![CDATA[
+#! /bin/sh
+#
+# log4sh example: Hello, world
+#
+
+# source log4sh (disabling properties file warning)
+LOG4SH_CONFIGURATION="none" . ./log4sh
+
+# configure log4sh defaults
+logger_setLevel INFO
+
+# configure appenders
+appender_setAppend stdout false
+logger_addAppender stderr
+appender_setAppenderType stderr FileAppender
+appender_setAppenderFile stderr STDERR
+
+# say Hello to the world
+logger_info "Hello, world"
+]]></programlisting>
+    </example>
+  </section>
+
+  <section id="usage-logging"><title>Logging with log4sh</title>
+    <para>Once log4sh is loaded, logging is as simple as calling the appropriate logging function with a message to be logged.  Take a look at the above examples to see just how easy it was to log the statement <literal>"Hello, world"</literal> at an &info; level.</para>
+  </section>
+</chapter>
