@@ -18,7 +18,7 @@ all: build docs
 build:
 	mkdir $(BUILD_DIR)
 
-docs: docs-extract-shelldoc docs-transform-docbook
+docs: docs-transform-shelldoc docs-transform-docbook
 
 docs-prep:
 	mkdir -p $(DOCBOOK_BUILD_DIR)
