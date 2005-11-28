@@ -227,15 +227,16 @@ _log4sh_tag2level()
 #/**
 # <s:function group="log4sh">
 # <entry>
+#   <code>integer</code>
+# </entry>
+# <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef>integer <function>_log4sh_findArrayElement</function></funcdef>
+#       <funcdef><function>_log4sh_findArrayElement</function></funcdef>
 #       <paramdef>string[] <parameter>array</parameter></paramdef>
 #       <paramdef>string <parameter>element</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-# </entry>
-# <entry>
 #   <para>Find the position of element in an array</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>pos=`_log4sh_findArrayElement "$array" $element`</funcsynopsisinfo>
