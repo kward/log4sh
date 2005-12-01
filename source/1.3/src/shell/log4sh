@@ -309,7 +309,8 @@ _log4sh_getArrayLength()
   _oldIFS="${IFS}"; IFS="$__LOG4SH_IFS"
   set -- ${1}
   IFS="${_oldIFS}"; unset _oldIFS
-  echo $# }
+  echo $#
+}
 
 #/**
 # <s:function group="arrays">
