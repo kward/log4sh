@@ -24,11 +24,12 @@ $ xsltproc shelldoc.xslt log4sh.xml |xmllint -noblanks -
   <xsl:key name="groups" match="s:function" use="@group" />
 
   <xsl:template match="/">
-    <article id="shelldoc" lang="en-US">
+    <chapter id="shelldoc" lang="en-US"><title>Function Reference</title>
     <xsl:for-each select="//s:function[generate-id(.)=generate-id(key('groups', @group)[1])]">
       <xsl:sort select="@group" />
 
-      <table><title><xsl:value-of select="@group" /></title>
+      <section><title><xsl:value-of select="@group"/></title>
+      <table><title><xsl:value-of select="@group"/></title>
         <tgroup cols="2"><tbody>
         <xsl:for-each select="key('groups', @group)">
           <xsl:sort select="entry/funcsynopsis/funcprototype/funcdef/function" />
@@ -39,8 +40,9 @@ $ xsltproc shelldoc.xslt log4sh.xml |xmllint -noblanks -
         </xsl:for-each>
         </tbody></tgroup>
       </table>
+      </section>
     </xsl:for-each>
-    </article>
+    </chapter>
   </xsl:template>
 
   <xsl:template match="entry">
