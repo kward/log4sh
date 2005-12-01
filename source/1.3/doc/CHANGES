@@ -8,12 +8,21 @@ consistently throughout.
 being filled with the wrong value.
 
 [kwd] added the (deprecated) commands appender_setAppenderFile() and
-appender_setSyslogFacility() back to be backwards compatible with the 1.2 series
+appender_setSyslogFacility() back to be backwards compatible with the 1.2
+series
 
 [kwd] increased performance in the log() function (credits to Omner Calhoun)
 
 [kwd] fixed bug in the log4sh_readProperties() function that broke it under
-Solaris
+Solaris (credits to Steve Etchelecu)
+
+[kwd] begin putting function documentation in the log4sh code as pseudo-XML
+like data.  next, I wrote an extractor to parse out the XML into a separate
+file.  that file gets run through an XSLT, and is now inserted as function
+documentation into the docbook documentation during build time.
+
+[kwd] docbook source now split into individual chapter files to support the
+dynamic inclusion of the function reference chapter
 
 
 Changes with 1.3.1
