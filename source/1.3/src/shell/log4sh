@@ -26,7 +26,8 @@
 # treat unset variables as an error when substituting
 set -u
 
-# # constants
+#
+# constants
 #
 __LOG4SH_VERSION=1.3.2
 
@@ -682,7 +683,7 @@ log4sh_readProperties()
 #
 
 #/**
-# <s:function group="appenders">
+# <s:function group="Appenders">
 # <entry align="right">
 #   <emphasis>void</emphasis>
 # </entry>
@@ -718,7 +719,7 @@ logger_addAppender()
 }
 
 #/**
-# <s:function group="appenders">
+# <s:function group="Appenders">
 # <entry align="right">
 #   <emphasis>void</emphasis>
 # </entry>
@@ -749,32 +750,74 @@ logger_addAppenderWithPattern()
   unset _myAppender _myPattern
 }
 
-#
-# sets the filename to be shown when the %F conversion character is used in a
-# pattern layout.
-#
-# @param  string  string to use as filename
-#
+#/**
+# <s:function group="PatternLayout">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_setFilename</function></funcdef>
+#       <paramdef>string <parameter>filename</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Set the filename to be shown when the '%F' conversion character is
+#   used in a PatternLayout.</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_setFilename "myScript.sh"</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_setFilename()
 {
   __log4sh_filename="$1"
 }
 
-# 
-# gets the default logging level
-#
-# @echo  string  current logging level (eg. DEBUG)
-#
+#/**
+# <s:function group="Levels">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_getLevel</function></funcdef>
+#       <void />
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the global default logging level (e.g. DEBUG).</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>level=`logger_getLevel`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_getLevel()
 {
   _log4sh_level2tag $__log4shLevel
 }
 
-#
-# sets the default logging level
-#
-# @param  _tag  new default logging level (eg. DEBUG)
-#
+#/**
+# <s:function group="Levels">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_setLevel</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the global default logging level (e.g. DEBUG).</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_setLevel INFO</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_setLevel()
 {
   _tag=$1
@@ -789,22 +832,51 @@ logger_setLevel()
   unset _level _tag
 }
 
-#
-# gets the thread name
-#
-# @echo  string  the current thread name
-#
+#/**
+# <s:function group="Threads">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_getThreadName</function></funcdef>
+#       <void />
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the current thread name.</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>threadName=`logger_getThreadName`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_getThreadName()
 {
   echo $__log4shThreadName
 }
 
-#
-# sets the thread name (eg. the name of the script).  this thread name can be
-# used with the %t conversion character within a pattern layout.
-#
-# @param  string  string to use as thread name
-#
+#/**
+# <s:function group="Threads">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_setThreadName</function></funcdef>
+#       <paramdef>string <parameter>threadName</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the thread name (e.g. the name of the script).  This thread name
+#   can be used with the '%t' conversion character within a
+#   PatternLayout.</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_setThreadName "myThread"</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_setThreadName()
 {
   _thread=$1
@@ -816,15 +888,27 @@ logger_setThreadName()
   unset _index _thread
 }
 
-#
-# sets the thread name (eg. the name of the script) and pushes the old on to a
-# stack for later use.  This thread name can be used with the %t conversion
-# character within a pattern layout.
-#
-# @param  string  string to use as thread name
-#
-# push thread name
-#
+#/**
+# <s:function group="Threads">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_pushThreadName</function></funcdef>
+#       <paramdef>string <parameter>threadName</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the thread name (eg. the name of the script) and pushes the old
+#   on to a stack for later use.  This thread name can be used with the '%t'
+#   conversion character within a PatternLayout.</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_pushThreadName "myThread"</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_pushThreadName()
 {
   __log4shThreadStack=`_log4sh_pushStack "$__log4shThreadStack" $1`
@@ -832,9 +916,9 @@ logger_pushThreadName()
 }
 
 #/**
-# <s:function group="threads">
+# <s:function group="Threads">
 # <entry align="right">
-#   <code>void</code>
+#   <emphasis>void</emphasis>
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -843,15 +927,13 @@ logger_pushThreadName()
 #       <void />
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>
-# Removes the topmost thread name from the stack.  The next thread name on
-# the stack is then placed in the __log4shThreadName variable.  If the
-# stack is empty, or has only one element left, then a warning is given
-# that no more thread names can be popped from the stack.
-#   </para>
-# <funcsynopsis>
-#   <funcsynopsisinfo>logger_popThreadName</funcsynopsisinfo>
-# </funcsynopsis>
+#   <para>Removes the topmost thread name from the stack.  The next thread name
+#   on the stack is then placed in the __log4shThreadName variable.  If the
+#   stack is empty, or has only one element left, then a warning is given that
+#   no more thread names can be popped from the stack.</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_popThreadName</funcsynopsisinfo>
+#   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
@@ -870,40 +952,88 @@ logger_popThreadName()
 # Appenders
 #
 
-#
-# get the name of the appender
-#
-# @param  integer  array index of the appender name
-# @echo   string   name of the appender
-#
-appender_getName()
+#/**
+# <!-- XXX should this function even exist ?? -->
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_getNameByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the name of the appender at the given position in the appender
+#   array.</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appenderName=`_appender_getNameByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_getNameByIndex()
 {
-  echo "$__log4shAppenders" |cut -d' ' -f$1
+  _log4sh_getArrayElement "$__log4shAppenderPatterns" $1
 }
 
-#
-# TODO: set the name of the appender
-#
-# @param  integer  array index of the appender name
-# @param  string   name of the appender
-#
-appender_setName()
+#/**
+# <!-- TODO write this function ?? -->
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_setNameByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#       <paramdef>string <parameter>appenderName</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>(future) Sets the name of the appender at the given position in the
+#   appender array.</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_appender_setNameByIndex 3 "myAppender"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_setNameByIndex()
 {
   return $__LOG4SH_TRUE
 }
 
-#
-# this function generates message given a pattern template and a message
-# to use
-#
-# notes:
-# * The %r character modifier does not work in the Solaris /bin/sh shell
-#
-# @param  _pattern   the pattern template
-# @param  _priority  the priority of this logging message
-# @param  _msg       the message to be 
-# @echo   string     parsed according to the pattern template
-#
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_parsePattern</function></funcdef>
+#       <paramdef>string <parameter>pattern</parameter></paramdef>
+#       <paramdef>string <parameter>priority</parameter></paramdef>
+#       <paramdef>string <parameter>message</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Generate a logging message given a Pattern, priority, and message.
+#   All dates will be represented as ISO 8601 dates (YYYY-MM-DD
+#   HH:MM:SS).</para>
+#   <para>Note: the '<code>%r</code>' character modifier does not work in the
+#   Solaris <code>/bin/sh</code> shell</para>
+#   <para>Example:
+#     <blockquote>
+#       <funcsynopsis>
+#         <funcsynopsisinfo>_appender_parsePattern '%d %p - %m%n' INFO "message to log"</funcsynopsisinfo>
+#       </funcsynopsis>
+#     </blockquote>
+#   </para>
+# </entry>
+# </s:function>
+#*/
 _appender_parsePattern()
 {
   _pattern=$1
@@ -911,11 +1041,6 @@ _appender_parsePattern()
   _msg=$3
 
   # set date to ISO 8601 format
-
-  # old (always set the date)
-  #_date=`date '+%Y-%m-%d %H:%M:%S'`
-
-  # new (determine if we must run the date command)
   _oldIFS="${IFS}"; IFS="%"; set -- x${_pattern}; IFS="${_oldIFS}"
   if [ ${#} -gt 1 ]; then
     IFS="d"; set -- ${_pattern}; IFS="${_oldIFS}"
@@ -937,23 +1062,76 @@ _appender_parsePattern()
   unset _date _pattern _tag _msg
 }
 
-#
-# gets the pattern of appender at the specified array index
-#
-# @param  _index  array index of the pattern
-# @echo   string  appender pattern
-#
-appender_getPattern()
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_getPatternByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Pattern of an Appender at the specified array index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>pattern=`_appender_getPatternByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_getPatternByIndex()
 {
   _log4sh_getArrayElement "$__log4shAppenderPatterns" $1
 }
 
-#
-# sets the pattern of the specified appender
-#
-# @param   _appender  name of appender
-# @param   _pattern   pattern to set for appender
-#
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getPattern</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Pattern of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>pattern=`appender_getPattern myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_getPattern()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppenderPatterns" $_index
+  unset _index
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setPattern</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>pattern</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the Pattern of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setPattern myAppender '%d %p - %m%n'</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setPattern()
 {
   _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
@@ -961,60 +1139,205 @@ appender_setPattern()
   unset _index
 }
 
-#
-# gets the appender type for an appender
-#
-# @param  _index  index of appender type
-# @echo   string  appender type
-#
-appender_getType()
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_getTypeByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Type of an Appender at the given array index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`_appender_getTypeByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_getTypeByIndex()
 {
   _log4sh_getArrayElement "$__log4shAppenderTypes" $1
 }
 
-# (deprecated)
-appender_getAppenderType()
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getType</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Type of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`appender_getType myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_getType()
 {
-  appender_getType "$@"
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppenderTypes" $_index
+  unset $_index
 }
 
-#
-# sets the appender type for an appender
-#
-# @param  _appender  name of appender
-# @param  _type      type to set appender to
-#
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getAppenderType</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis> Gets the Type of an Appender at the
+#   given array index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`appender_getAppenderType 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_getAppenderType()
+{
+  _appender_getTypeByIndex "$@"
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setType</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>type</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the Type of an Appender (e.g. FileAppender)</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setType myAppender FileAppender</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setType()
 {
+  # XXX need to do any cleanup when changing a previously defined appender??
   _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   __log4shAppenderTypes=`_log4sh_setArrayElement "$__log4shAppenderTypes" $_index "$2"`
   unset _index
 }
 
-# (deprecated)
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setAppenderType</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>type</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis>Sets the Type of an Appender (e.g.
+#   FileAppender)</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setAppenderType myAppender FileAppender</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setAppenderType()
 {
   appender_setType "$@"
 }
 
-#
-# gets the layout of the specified appender
-#
-# @param  _index  array index of appender
-# @echo   string  layout of specified appender
-#
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_getLayoutByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Layout of an Appender at the given array index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`_appender_getLayoutByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_getLayoutByIndex()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppenderLayouts" $_index
+  unset _index
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getLayout</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Layout of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`appender_getLayout myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_getLayout()
 {
   _log4sh_getArrayElement "$__log4shAppenderLayouts" $1
 }
 
-#
-# sets the layout of the specified appender
-#
-# @param   _appender  name of appender
-# @param   _layout    layout for the appender
-# @return  boolean    was the operation successful?
-#
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setLayout</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>layout</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the Layout of an Appender (e.g. PatternLayout)</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setLayout myAppender PatternLayout</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setLayout()
 {
   _layout=$2
@@ -1035,23 +1358,77 @@ appender_setLayout()
   return $__LOG4SH_TRUE
 }
 
-#
-# gets the current logging level of the specified appender
-#
-# @param  _index  array index of appender
-# @echo   string  level of appender, or "" if not found
-#
-appender_getLevel()
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_getLevelByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the current logging Level of an Appender at the given array
+#   index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`_appender_getLevelByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_getLevelByIndex()
 {
   _log4sh_getArrayElement "$__log4shAppenderLevels" $1
 }
 
-#
-# set the logging level of the specified appender
-#
-# @param   _appender  name of appender
-# @param   _level     level to set appender to
-#
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getLevel</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the current logging Level of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`appender_getLevel myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_getLevel()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppenderLevels" $_index
+  unset _index
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setLevel</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the Level of an Appender (e.g. INFO)</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setLevel myAppender INFO</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setLevel()
 {
   _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
@@ -1059,47 +1436,107 @@ appender_setLevel()
   unset _index
 }
 
-#
-# release any resources allocated for the appender
-#
-# @param   _myAppender  name of appender
-# @return  boolean      was the operation successful?
-#
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_close</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Disable any further logging via an appender.  Once closed, the
+#   appender can be reopened by setting it to any logging Level (e.g.
+#   INFO).</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_close myAppender</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_close()
 {
-  _appender=$1
-
-  # set the appender level to CLOSED
-  appender_setLevel $_appender CLOSED
-  _return=$?
-
-  unset _appender
-  return $_return
+  appender_setLevel $1 CLOSED
 }
 
 #-----------------------------------------------------------------------------
 # FileAppender
 #
 
-#
-# gets the filename for an appender
-#
-# @param   integer  appender array index
-# @echo    string   filename associated with the appender
-# @return  boolean  always returns true
-#
-appender_file_getFile()
+#/**
+# <s:function group="FileAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_file_getFileByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the filename of a FileAppender at the given array index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_appender_file_getFileByIndex 3</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_file_getFileByIndex()
 {
   _log4sh_getArrayElement "$__log4shAppender_file_files" $1
 }
 
-#
-# sets the filename for an appender
-#
-# @param   _appender  name of appender
-# @param   _file      filename to associate with the appender
-# @return  boolean    was the operation successful?
-#
+#/**
+# <s:function group="FileAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_file_getFile</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the filename of a FileAppender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_file_getFile myAppender</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_file_getFile()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppender_file_files" $_index
+  unset _index
+}
+
+#/**
+# <s:function group="FileAppender">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_file_setFile</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>filename</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Set the filename for a FileAppender (e.g. "STDERR" or
+#   "/var/log/log4sh.log")</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_file_setFile myAppender STDERR</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_file_setFile()
 {
   _appender=$1
@@ -1135,7 +1572,27 @@ appender_file_setFile()
   return $_return
 }
 
-# (deprecated)
+#/**
+# <s:function group="FileAppender">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setAppenderFile</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>filename</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis> Set the filename for a FileAppender
+#   (e.g. "STDERR" or "/var/log/log4sh.log")</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setAppenderFile myAppender STDERR</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setAppenderFile()
 {
   appender_file_setFile "$@"
@@ -1352,7 +1809,7 @@ log()
 
   for _appenderIndex in ${__log4shAppenderCounts}; do
     # determine appender level
-    _appenderLevelTag=`appender_getLevel ${_appenderIndex}`
+    _appenderLevelTag=`_appender_getLevelByIndex ${_appenderIndex}`
     if [ "${_appenderLevelTag}" = "-" ]; then
       # continue if requested is level less than general level
       [ ! ${__log4shLevel} -le ${_thisLevel} ] && continue
@@ -1363,20 +1820,20 @@ log()
     fi
 
     # determine appender layout
-    _appenderLayout=`appender_getLayout ${_appenderIndex}`
+    _appenderLayout=`_appender_getLayoutByIndex ${_appenderIndex}`
     case ${_appenderLayout} in
       ${__LOG4SH_LAYOUT_SIMPLE}|\
       ${__LOG4SH_LAYOUT_HTML})
 	_thisLayout="${_tag} - ${_msg}"
 	;;
       ${__LOG4SH_LAYOUT_PATTERN}) 
-	_appenderPattern=`appender_getPattern ${_appenderIndex}`
+	_appenderPattern=`_appender_getPatternByIndex ${_appenderIndex}`
 	_thisLayout=`_appender_parsePattern "${_appenderPattern}" ${_tag} "${_msg}"`
 	;;
     esac
 
     # log to appender
-    _appenderType=`appender_getType ${_appenderIndex}`
+    _appenderType=`_appender_getTypeByIndex ${_appenderIndex}`
     case ${_appenderType} in
       ${__LOG4SH_APPENDER_CONSOLE})
         echo "${_thisLayout}"
@@ -1384,12 +1841,12 @@ log()
       ${__LOG4SH_APPENDER_FILE}|\
       ${__LOG4SH_APPENDER_ROLLING_FILE}|\
       ${__LOG4SH_APPENDER_DAILY_ROLLING_FILE})
-	_appenderFile=`appender_file_getFile ${_appenderIndex}`
+	_appenderFile=`_appender_file_getFileByIndex ${_appenderIndex}`
 	if [ "${_appenderFile}" = "STDERR" ]; then
 	  echo "${_thisLayout}" >&2
 	elif [ "${_appenderFile}" != "-" ]; then
 	  # do rotation
-	  _appenderName=`appender_getName ${_appenderIndex}`
+	  _appenderName=`_appender_getNameByIndex ${_appenderIndex}`
 	  case ${_appenderName} in
 	    ${__LOG4SH_APPENDER_ROLLING_FILE})
 	      # check whether the max file size has been exceeded
