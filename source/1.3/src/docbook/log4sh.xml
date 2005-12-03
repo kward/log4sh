@@ -21,6 +21,7 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
   <!ENTITY usage SYSTEM "usage.xml">
 
   <!ENTITY myEmail "kate.ward@forestent.com">
+  <!ENTITY isoDate "@@ISO_DATE@@">
 
   <!ENTITY all "<constant>ALL</constant>">
   <!ENTITY debug "<constant>DEBUG</constant>">
@@ -46,7 +47,7 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
     </authorgroup>
   
     <!-- All dates specified in ISO "YYYY-MM-DD" format -->
-    <pubdate>2005-08-15</pubdate>
+    <pubdate>&isoDate;</pubdate>
   
     <!-- TODO flush out like bookinfo in docbook-tdg -->
   
