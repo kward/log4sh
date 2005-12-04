@@ -1602,12 +1602,49 @@ appender_setAppenderFile()
 # SMTPAppender
 #
 
-#
-# gets the SMTP To address of appender at the specified array index
-#
-# @param  _index  array index of the address
-# @echo   string  the To address for the appender
-#
+#/**
+# <s:function group="SMTPAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_smtp_getToByIndex</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the to address for the given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>email=`_appender_smtp_getToByIndex myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_smtp_getToByIndex()
+{
+  _log4sh_getArrayElement "$__log4shAppender_smtp_tos" $1
+}
+
+#/**
+# <s:function group="SMTPAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_smtp_getTo</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the to address for the given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>email=`appender_smtp_getTo myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_smtp_getTo()
 {
   _log4sh_getArrayElement "$__log4shAppender_smtp_tos" $1
@@ -1619,6 +1656,26 @@ appender_smtp_getTo()
 # @param  _appender  name of the appender
 # @param  _to        the To address for the appender
 #
+#/**
+# <s:function group="SMTPAppender">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_smtp_setTo</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>email</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the to address for the given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>email=`appender_smtp_setTo myAppender user@example.com`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_smtp_setTo()
 {
   _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
@@ -1877,7 +1934,7 @@ log()
 	fi
 	;;
       ${__LOG4SH_APPENDER_SMTP})
-        _smtpTo=`appender_smtp_getTo ${_appenderIndex}`
+        _smtpTo=`_appender_smtp_getToByIndex ${_appenderIndex}`
         _smtpSubject=`appender_smtp_getSubject ${_appenderIndex}`
         echo "${_thisLayout}" |mail -s "${_smtpSubject}" ${_smtpTo}
 	unset _smtpTo _smtpSubject
