@@ -51,6 +51,10 @@ UPDATE VERSION
 Edit the log4sh source code, and change the version number in the comment, as
 well as in the __LOG4SH_VERSION variable
 
+FINISH THE CHANGELOG
+
+Make sure that any remaning changes get put into the CHANGES file.
+
 CHECK IN ALL THE CODE
 
 This step is pretty self-explainatory

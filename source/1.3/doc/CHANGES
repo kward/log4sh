@@ -24,6 +24,13 @@ documentation into the docbook documentation during build time.
 [kwd] docbook source now split into individual chapter files to support the
 dynamic inclusion of the function reference chapter
 
+[kwd] finished the shelldoc documentation
+
+[kwd] read through the documentation and made some updates
+
+[kwd] replaced depraced function calls in the test programs with the current
+versions
+
 
 Changes with 1.3.1
 
