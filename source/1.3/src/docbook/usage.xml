@@ -10,23 +10,14 @@ Usage Guide
   <para>
     <orderedlist spacing="compact">
       <listitem><para>preconfigure log4sh (properties file)</para></listitem>
-      <listitem><para>source the log4sh script code</para></listitem>
+      <listitem><para>source the log4sh script code into the shell script</para></listitem>
       <listitem><para>configure log4sh in code (optional)</para></listitem>
       <listitem><para>call logging statements</para></listitem>
     </orderedlist>
   </para>
 
   <section id="usage-preconfigure"><title>Preconfigure log4sh (optional)</title>
-    <para>To preconfigure log4sh, create a properties file (see the <link linkend="properties_file" endterm="properties_file.title" /> later in this document).  Set the <varname>LOG4SH_CONFIGURATION</varname> environment variable to point log4sh to the properties file if the properties file is not located in the current directory.</para>
-
-    <para>If log4sh is not preconfigured, the default configuration will be equivalent to the following:</para>
-
-    <programlisting><![CDATA[
-log4sh.rootLogger=ERROR, stdout
-log4sh.appender.stdout=ConsoleAppender
-log4sh.appender.stdout.layout=PatternLayout
-log4sh.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
-]]></programlisting>
+    <para>To preconfigure log4sh, create a properties file (see the <link linkend="properties_file" endterm="properties_file.title" /> later in this document).  If the properties file is not located in the same directory as log4sh, set the <varname>LOG4SH_CONFIGURATION</varname> environment variable to the full path to the properties file.  If you do not wish to preconfigure log4sh, please read the <link linkend="usage-code" endterm="usage-code.title" /> section later in this chapter.</para>
   </section>
 
   <section id="usage-source"><title>Source log4sh</title>
@@ -89,6 +80,14 @@ log4sh.appender.A1.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
   </section>
 
   <section id="usage-code"><title id="usage-code.title">Configure log4sh in code</title>
+    <para>If log4sh was not preconfigured, the default configuration will be equivalent the config shown below.  Please note: log4sh will complain if no configuration file was found.  If you meant for the default configuration to be used, or you want to configure log4sh via code, make sure to define the <varname>LOG4SH_CONFIGURATION</varname> with the value of "none".</para>
+
+    <programlisting><![CDATA[
+log4sh.rootLogger=ERROR, stdout
+log4sh.appender.stdout=ConsoleAppender
+log4sh.appender.stdout.layout=PatternLayout
+log4sh.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
+]]></programlisting>
     <para>To configure log4sh in code, simply call the appropriate functions in your code.  The following code sample loads log4sh from the current directory, configures it for STDERR output, and the logs a message at the &info; level.</para>
 
     <example><title>Hello, world (configured in code)</title>
@@ -101,14 +100,14 @@ log4sh.appender.A1.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
 # source log4sh (disabling properties file warning)
 LOG4SH_CONFIGURATION="none" . ./log4sh
 
-# configure log4sh defaults
+# set the global logging level
 logger_setLevel INFO
 
-# configure appenders
-appender_setAppend stdout false
+# close the STDOUT appender, and add a new STDERR appender
+appender_close stdout
 logger_addAppender stderr
-appender_setAppenderType stderr FileAppender
-appender_setAppenderFile stderr STDERR
+appender_setType stderr FileAppender
+appender_file_setFile stderr STDERR
 
 # say Hello to the world
 logger_info "Hello, world"
