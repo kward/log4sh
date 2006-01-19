@@ -5,47 +5,75 @@
 Quickstart
 -->
 <chapter id="quickstart"><title>Quickstart</title>
-  <para>To get started quickly with log4sh, take a look at the <filename>test-log4sh</filename> sample script in the <filename class="directory">src/test</filename> directory of the distribution.  You will need to copy the <filename>log4sh</filename> script itself from the <filename class="directory">src/shell</filename> directory into the <filename class="directory">test</filename> directory before running the test.  This test script is designed to configure log4sh via code.  Later on, we will configure log4sh with a properties file, very similar to how log4j is configured.</para>
+  <example><title>Simple Test #1</title>
+    <para>To get started quickly with log4sh, take a look at the <filename>test-log4sh</filename> sample script in the <filename class="directory">src/test</filename> directory of the distribution.  You will need to copy the <filename>log4sh</filename> script itself from the <filename class="directory">src/shell</filename> directory into the <filename class="directory">test</filename> directory before running the test.  This test script is designed to configure log4sh via code.  Later on, we will configure log4sh with a properties file, very similar to how log4j is configured.</para>
 
-  <para>By default, log4sh is configured with a <constant>ConsoleAppender</constant> which logs to STDOUT using a <constant>SimpleLayout</constant> and a logging level of &error;.  If no configuration file is found, a warning message will be given letting the user know that no configuration file was found.  This warning can be supressed by setting the <varname>LOG4SH_CONFIGURATION</varname> environment variable to <literal>none</literal>.</para>
+    <para>By default, log4sh is configured with a <constant>ConsoleAppender</constant> which logs to STDOUT using a <constant>SimpleLayout</constant> and a logging level of &error;.  If no configuration file is found, a warning message will be given letting the user know that no configuration file was found.  This warning can be supressed by setting the <varname>LOG4SH_CONFIGURATION</varname> environment variable to <literal>none</literal>.</para>
 
-  <para>Run the first test.</para>
+    <para>Run the first test.</para>
 
-  <example><title>Test #1</title>
     <screen><![CDATA[
+$ make test-prep
+$ cd test
 $ ./test-log4sh
 ]]></screen>
+
+    <para>After a first run you will see quite a bit of output to the display, two log files will be created (<filename>log4sh-pattern.log</filename> and <filename>log4sh-simple.log</filename>), and there will be several lines added to the <command>syslog</command> logfile at the INFO loging level.  The display contains a mix of output to STDOUT and STDERR, and the files contain various versions of the same data, but with output that changes as various layouts and patterns are tested.  To clean up the display a bit, you could send all of the output of the STDERR appender off to <filename>/dev/null</filename>.</para>
   </example>
 
-  <para>After a first run you will see quite a bit of output to the display, and as well two log files will be created (<filename>log4sh-pattern.log</filename> and <filename>log4sh-simple.log</filename>).  The display contains a mix of output to STDOUT and STDERR, and the files contain various versions of the same data, but with output that changes as various layouts and patterns are tested.  To clean up the display a bit, you could send all of the output of the STDERR appender off to <filename>/dev/null</filename>.</para>
+  <example><title>Simple Test #2</title>
+    <para>Run the test again, but redirecting STDERR to <filename>/dev/null</filename>.</para>
 
-  <para>Run the test again, but redirecting STDERR to <filename>/dev/null</filename>.</para>
-
-  <example><title>Test #2</title>
     <screen><![CDATA[
 $ ./test-log4sh 2>/dev/null
 ]]></screen>
+
+    <para>Go ahead a take a look at the test script to get a feel of what the script is trying to accomplish.  Hopefully, you can see just how simple log4sh is to use and control.</para>
   </example>
 
-  <para>Go ahead a take a look at the test script to get a feel of what the script is trying to accomplish.  Hopefully, you can see just how simple log4sh is to use and control.</para>
+  <example><title>Properties Test #1</title>
+    <para>For our next test, we will configure log4sh with a properties file.  This test is incredibly simple as it is designed to show the power of the properties file.   Copy first example properties file <filename path="src/examples">log4sh.properties.ex1</filename> from the <filename class="directory">src/examples</filename> directory into the <filename class="directory">test</filename> directory, and give it the name <filename>log4sh.properties</filename>.</para>
 
-  <para>For our next test, we will configure log4sh with a properties file.  This test is incredibly simple as it is designed to show the power of the properties file.   Copy first example properties file <filename path="src/examples">log4sh.properties.ex1</filename> from the <filename class="directory">src/examples</filename> directory into the <filename class="directory">test</filename> directory, and give it the name <filename>log4sh.properties</filename>.</para>
+    <para>Run the properties test.</para>
 
-  <para>Run the second test.</para>
-
-  <example><title>Test #3</title>
     <screen><![CDATA[
 $ ./test-properties
+4 [main] INFO shell  - (my info message) log4sh now loaded
+4 [main] ERROR shell  - (my error message) log4sh now loaded
+5 [main] WARN shell  - (my warn message) log4sh now loaded
+5 [main] FATAL shell  - (my fatal message) log4sh now loaded
+]]></screen>
+
+    <para>This very simple test is designed to work very much like one of the log4j examples.  The properties file is taken almost verbatum from the log4j short manual, with only small changes required to make it work for log4sh.  Log4sh is configured with a <constant>ConsoleAppender</constant> that has a <constant>PatternLayout</constant>.  One limitation of log4sh is that it does not have access to a timer with millisecond accuracy, so it logs only with an accuracy of one second.  For most situations, this should be sufficient.</para>
+  </example>
+
+  <example><title>Properties Test #2</title>
+    <para>Copy the second example properties file (<filename path="src/examples">log4sh.properties.ex2</filename>) as <filename>log4sh.properties</filename>, and rerun the test.  This second properties file is only slightly different from the first in that it adds the filename to the output, and removes the <option>%x</option> pattern directive as that directive is not supported by log4sh.</para>
+
+    <para>Run the test.</para>
+
+    <screen><![CDATA[
+$ ./test-properties
+2006-01-18 12:03:25 [test-properties:main] INFO shell - (my info message) log4sh now loaded
+2006-01-18 12:03:26 [test-properties:main] ERROR shell - (my error message) log4sh now loaded
+2006-01-18 12:03:26 [test-properties:main] WARN shell - (my warn message) log4sh now loaded
+2006-01-18 12:03:26 [test-properties:main] FATAL shell - (my fatal message) log4sh now loaded
 ]]></screen>
   </example>
 
-  <para>This test is designed to look very much like one of the log4j examples.  The properties file is taken almost verbatum from the log4j short manual, with only small changes required to make it work for log4sh.  Log4sh is configured with a <constant>ConsoleAppender</constant> that has a <constant>PatternLayout</constant>.  One limitation of log4sh is that it does not have access to a timer with millisecond accuracy, so it logs only with an accuracy of one second.  For most situations, this should be sufficient.</para>
+  <example><title>Properties Test #3</title>
+    <para>This last example shows a typical situation where an administrator wants to run a script via a cron job, wants a log of the scripts actions, but only wants an email if the job failed.</para>
 
-  <para>Copy the second example properties file (<filename path="src/examples">log4sh.properties.ex2</filename>) as <filename>log4sh.properties</filename>, and rerun the test.  This second properties file is only slightly different from the first in that it adds the filename to the output, and removes the <option>%x</option> pattern directive as that directive is not supported by log4sh.</para>
+    <para>Copy the third example properies file (<filename path="src/examples">log4sh.properties.ex3</filename>) over, and rerun the test.  This time, the output will be sent to two separate locations; STDERR and a file called <filename>example.log</filename>.  The output to STDERR is set to the &error; level, and output sent to the file is at the &info; level.  More output is written to the logfile (as expected) when the test is run.</para>
 
-  <para>The next example shows a typical situation where an administrator wants to run a script via a cron job, wants a log of the scripts actions, but only wants an email if the job failed.</para>
+    <para>Run the test.</para>
 
-  <para>Copy the third example properies file (<filename path="src/examples">log4sh.properties.ex3</filename>) over, and rerun the test.  This time, the output will be sent to two separate locations; STDERR and a file called <filename>example.log</filename>.  The output to STDERR is set to the &error; level, and output sent to the file is at the &info; level.  More output is written to the logfile (as expected) when the test is run.</para>
+    <screen><![CDATA[
+$ ./test-properties
+2006-01-18 12:03:58 ERROR - (my error message) log4sh now loaded
+2006-01-18 12:03:59 FATAL - (my fatal message) log4sh now loaded
+]]></screen>
 
-  <para>In the situation of being run from a cron job, the logfile will always be written, but an email comes only when output from the script came at the &error; or &fatal; level.  An administrator can even configure the <filename>log4sh.properties</filename> file to a &debug; level so that more output is logged for testing or debugging purposes, and this change can happen without making any code changes to the script.  Something very useful in a production environment!</para>
+    <para>In the situation of being run from a cron job, the logfile will always be written, but an email comes only when output from the script came at the &error; or &fatal; level.  An administrator can even configure the <filename>log4sh.properties</filename> file to the &debug; or even &trace; level so that more output is logged for testing or debugging purposes.  What's more, this change can happen without making any code changes to the script.  Something very useful in a production environment!</para>
+  </example>
 </chapter>
