@@ -115,7 +115,7 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Creates a secure temporary directory within which temporary files can
-#   be created.  Honors the TMPDIR environment variable if it is set.</para>
+#     be created.  Honors the TMPDIR environment variable if it is set.</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>tmpDir=`_log4sh_mktempDir`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1202,7 +1202,7 @@ appender_getType()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para><emphasis>(deprecated)</emphasis> Gets the Type of an Appender at the
-#   given array index</para>
+#     given array index</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>type=`appender_getAppenderType 3`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1255,8 +1255,8 @@ appender_setType()
 #       <paramdef>string <parameter>type</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis>Sets the Type of an Appender (e.g.
-#   FileAppender)</para>
+#   <para><emphasis>(deprecated)</emphasis> Sets the Type of an Appender (e.g.
+#     FileAppender)</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_setAppenderType myAppender FileAppender</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1289,9 +1289,7 @@ appender_setAppenderType()
 #*/
 _appender_getLayoutByIndex()
 {
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppenderLayouts" $_index
-  unset _index
+  _log4sh_getArrayElement "$__log4shAppenderLayouts" $1
 }
 
 #/**
@@ -1315,7 +1313,9 @@ _appender_getLayoutByIndex()
 #*/
 appender_getLayout()
 {
-  _log4sh_getArrayElement "$__log4shAppenderLayouts" $1
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppenderLayouts" $_index
+  unset _index
 }
 
 #/**
@@ -1586,7 +1586,7 @@ appender_file_setFile()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para><emphasis>(deprecated)</emphasis> Set the filename for a FileAppender
-#   (e.g. "STDERR" or "/var/log/log4sh.log")</para>
+#     (e.g. "STDERR" or "/var/log/log4sh.log")</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_setAppenderFile myAppender STDERR</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1611,12 +1611,12 @@ appender_setAppenderFile()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef><function>_appender_smtp_getToByIndex</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Get the to address for the given appender</para>
+#   <para>Get the email to address for the given appender</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>email=`_appender_smtp_getToByIndex myAppender`</funcsynopsisinfo>
+#     <funcsynopsisinfo>email=`_appender_smtp_getToByIndex 3`</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -1647,15 +1647,11 @@ _appender_smtp_getToByIndex()
 #*/
 appender_smtp_getTo()
 {
-  _log4sh_getArrayElement "$__log4shAppender_smtp_tos" $1
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppender_smtp_tos" $_index
+  unset _index
 }
 
-#
-# sets the To address for an appender
-#
-# @param  _appender  name of the appender
-# @param  _to        the To address for the appender
-#
 #/**
 # <s:function group="SMTPAppender">
 # <entry align="right">
@@ -1669,9 +1665,9 @@ appender_smtp_getTo()
 #       <paramdef>string <parameter>email</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Get the to address for the given appender</para>
+#   <para>Set the to address for the given appender</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>email=`appender_smtp_setTo myAppender user@example.com`</funcsynopsisinfo>
+#     <funcsynopsisinfo>appender_smtp_setTo myAppender user@example.com</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -1683,30 +1679,101 @@ appender_smtp_setTo()
   unset _index
 }
 
-# (deprecated)
+#/**
+# <s:function group="SMTPAppender">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setAppenderRecipient</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>email</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis>Set the to address for the given
+#     appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_smtp_setTo myAppender user@example.com</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setAppenderRecipient()
 {
   appender_smtp_setTo "$@"
 }
 
-#
-# gets the SMTP subject of appender at the specified array index
-#
-# @param  _index  array index of the subject
-# @echo   string  the Subject for the appender
-#
-appender_smtp_getSubject()
+#/**
+# <s:function group="SMTPAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_smtp_getSubjectByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the email subject for the given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>subject=`_appender_smtp_getSubjectByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_smtp_getSubjectByIndex()
 {
   _log4sh_getArrayElement "$__log4shAppender_smtp_subjects" $1
 }
 
-#
-# sets the subjects for an appender
-#
-# @param   _appender  name of appender
-# @param   _subject   the Subject for the appender
-# @return  boolean    was the operation successful ?
-#
+#/**
+# <s:function group="SMTPAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_smtp_getSubject</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the email subject for the given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>subject=`appender_smtp_getSubject myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_smtp_getSubject()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppender_smtp_subjects" $_index
+  unset _index
+}
+
+#/**
+# <s:function group="FileAppender">
+# <entry align="right">
+#   <emphasis>void/boolean</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_smtp_setSubject</function></funcdef> #       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>subject</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the email subject for an SMTP appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_smtp_setSubject myAppender "This is a test"</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_smtp_setSubject()
 {
   _appender=$1
@@ -1727,7 +1794,27 @@ appender_smtp_setSubject()
   return $_return
 }
 
-# deprecated
+#/**
+# <s:function group="FileAppender">
+# <entry align="right">
+#   <emphasis>void/boolean</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setAppenderSubject</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>subject</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis> Sets the email subject for an SMTP
+#     appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setAppenderSubject myAppender "This is a test"</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setAppenderSubject()
 {
   appender_smtp_getSubject "$@"
@@ -1737,43 +1824,151 @@ appender_setAppenderSubject()
 # SyslogAppender
 #
 
-#
-# gets the syslog facility of the specified appender by index
-#
-# @param  _index  array index of facility
-# @echo   string  syslog facility of specified appender
-#
-appender_syslog_getFacilityByIndex()
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_syslog_getFacilityByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the syslog facility of the specified appender by index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>facility=`_appender_syslog_getFacilityByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_syslog_getFacilityByIndex()
 {
   _log4sh_getArrayElement "$__log4shAppender_syslog_facilities" $1
 }
 
-# deprecated
-appender_getSyslogFacility()
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_syslog_getFacilityByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis> Get the syslog facility of the
+#     specified appender by index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>facility=`appender_syslog_getFacilityByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_syslog_getFacilityByIndex()
 {
-  appender_syslog_getFacilityByIndex "$@"
+  _appender_syslog_getFacilityByIndex "$@"
 }
 
-#
-# gets the syslog facility of the specified appender by name
-#
-# @param  string  appender name
-# @echo   string  syslog facility of specified appender
-#
-appender_syslog_getFacilityByName()
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getSyslogFacility</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis> Get the syslog facility of the
+#     specified appender by index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>facility=`appender_getSyslogFacility 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_getSyslogFacility()
+{
+  _appender_syslog_getFacilityByIndex "$@"
+}
+
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_syslog_getFacility</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Get the syslog facility for the given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>facility=`appender_syslog_getFacility myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_syslog_getFacility()
 {
   _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   _log4sh_getArrayElement "$__log4shAppender_syslog_facilities" $_index
   unset _index
 }
 
-#
-# sets the syslog facility of the specified appender
-#
-# @param   _appender  name of appender
-# @param   _facility  syslog facility for the appender
-# @return  boolean    was the operation successful?
-#
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_syslog_getFacility</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis> Get the syslog facility for the
+#     given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>facility=`appender_syslog_getFacilityByName myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_syslog_getFacilityByName()
+{
+  appender_syslog_getFacility "$@"
+}
+
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_syslog_setFacility</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>facility</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Set the syslog facility for the given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_syslog_setFacility myAppender local4`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_syslog_setFacility()
 {
   _appender=$1
@@ -1786,61 +1981,97 @@ appender_syslog_setFacility()
 
   _found=$__LOG4SH_FALSE
 
-  # verify facility
-
-  # old - a while loop?  what was I thinking
-  #_index=1
-  #_count=`echo $__LOG4SH_APPENDER_SYSLOG_FACILITIES |wc -w`
-  #while [ $_index -le $_count -a $_found -ne $__LOG4SH_TRUE ]
-  #do
-  #  _f=`echo $__LOG4SH_APPENDER_SYSLOG_FACILITIES |cut -d' ' -f$_index`
-  #  [ "$_f" '=' "$_facility" ] && _found=$__LOG4SH_TRUE
-  #  _index=`expr $_index + 1`
-  #done
-  #unset _count
-
-  # new - a simple grep
+  # look for facility
   echo $__LOG4SH_APPENDER_SYSLOG_FACILITIES |grep " ${_facility} " >/dev/null
   [ $? -eq 0 ] && _found=$__LOG4SH_TRUE
 
-  # was the facility found?
-  if [ $_found -ne $__LOG4SH_TRUE ]; then
-    echo "log4sh:ERROR syslog facility ($_facility) unrecognized" >&2
-    _return=$__LOG4SH_FALSE
-  fi
-
   # set appender facility
   if [ $_found -eq $__LOG4SH_TRUE ]; then
+    # the facility is valid
     _index=`_log4sh_findArrayElement "$__log4shAppenders" $_appender`
+    # TODO: put check for valid _index here
     __log4shAppender_syslog_facilities=`_log4sh_setArrayElement "$__log4shAppender_syslog_facilities" $_index "$_facility"`
     _return=$__LOG4SH_TRUE
+  else
+    # the facility is not valid
+    echo "log4sh:ERROR syslog facility ($_facility) unrecognized" >&2
+    _return=$__LOG4SH_FALSE
   fi
 
   unset _appender _f _facility _found _index
   return $_return
 }
 
-# deprecated
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setSyslogFacility</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>facility</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para><emphasis>(deprecated)</emphasis> Set the syslog facility for the
+#     given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setSyslogFacility myAppender local4`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_setSyslogFacility()
 {
-  appender_syslog_setFacility $1 $2
+  appender_syslog_setFacility "$@"
 }
 
-#
-# TODO: getHost()
-#
-# @param _appender
-#
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_syslog_getHost</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>TODO: Get the syslog host of the specified appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>host=`appender_syslog_getHost myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_syslog_getHost()
 {
   return $__LOG4SH_TRUE
 }
 
-#
-# TODO: setHost()
-#
-# @param _appender
-#
+#/**
+# <s:function group="SyslogAppender">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_syslog_setHost</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>host</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>TODO: Set the syslog host for the given appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_syslog_setHost myAppender localhost`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 appender_syslog_setHost()
 {
   return $__LOG4SH_TRUE
@@ -1850,12 +2081,27 @@ appender_syslog_setHost()
 # Log
 #
 
-#
-# base logging command that logs a message to all defined appenders
-#
-# @param  _tag  logging level to log the message at
-# @param  _msg  message to be logged
-#
+#/**
+# <s:function group="Logger">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>log</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#       <paramdef>string[] <parameter>message(s)</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>The base logging command that logs a message to all defined
+#     appenders</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>log DEBUG "This is a test message"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 log()
 {
   _tag=${1}
@@ -1935,12 +2181,12 @@ log()
 	;;
       ${__LOG4SH_APPENDER_SMTP})
         _smtpTo=`_appender_smtp_getToByIndex ${_appenderIndex}`
-        _smtpSubject=`appender_smtp_getSubject ${_appenderIndex}`
+        _smtpSubject=`_appender_smtp_getSubjectByIndex ${_appenderIndex}`
         echo "${_thisLayout}" |mail -s "${_smtpSubject}" ${_smtpTo}
 	unset _smtpTo _smtpSubject
         ;;
       $__LOG4SH_APPENDER_SYSLOG)
-        _tmpFacility=`appender_syslog_getFacilityByIndex ${_appenderIndex}`
+        _tmpFacility=`_appender_syslog_getFacilityByIndex ${_appenderIndex}`
 	logger -p "${_tmpFacility}.info" "${_thisLayout}"
 	unset _tmpFacility
 	;;
@@ -1952,61 +2198,151 @@ log()
   unset _appenderLevelTag _appenderName _appenderPattern _appenderType
 }
 
-#
-# This is a helper function for log function in the TRACE priority mode.
-#
-# @param  string  message to be logged
-#
+#/**
+# <s:function group="Logger">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_trace</function></funcdef>
+#       <paramdef>string[] <parameter>message</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>This is a helper function for logging a message at the TRACE
+#     priority</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_trace "This is a trace message"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_trace()
 {
   log TRACE "$@"
 }
 
-#
-# This is a helper function for log function in the DEBUG priority mode.
-#
-# @param  string  message to be logged
-#
+#/**
+# <s:function group="Logger">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_debug</function></funcdef>
+#       <paramdef>string[] <parameter>message</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>This is a helper function for logging a message at the DEBUG
+#     priority</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_debug "This is a debug message"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_debug()
 {
   log DEBUG "$@"
 }
 
-#
-# This is a helper function for log function in the INFO priority mode.
-#
-# @param  string  message to be logged
-#
+#/**
+# <s:function group="Logger">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_info</function></funcdef>
+#       <paramdef>string[] <parameter>message</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>This is a helper function for logging a message at the INFO
+#     priority</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_info "This is a info message"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_info()
 {
   log INFO "$@"
 }
 
-#
-# This is a helper function for log function in the WARN priority mode.
-#
-# @param  string  message to be logged
-#
+#/**
+# <s:function group="Logger">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_warn</function></funcdef>
+#       <paramdef>string[] <parameter>message</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>This is a helper function for logging a message at the WARN
+#     priority</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_warn "This is a warn message"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_warn()
 {
   log WARN "$@"
 }
 
-#
-# This is a helper function for log function in the ERROR priority mode.
-#
-# @param  string  message to be logged
-#
+#/**
+# <s:function group="Logger">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_error</function></funcdef>
+#       <paramdef>string[] <parameter>message</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>This is a helper function for logging a message at the ERROR
+#     priority</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_error "This is a error message"`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_error()
 {
   log ERROR "$@"
 }
 
-#
-# This is a helper function for log function in the FATAL priority mode.
-#
-# @param  string  message to be logged
-#
+#/**
+# <s:function group="Logger">
+# <entry align="right">
+#   <code>void</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>logger_fatal</function></funcdef>
+#       <paramdef>string[] <parameter>message</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>This is a helper function for logging a message at the FATAL
+#     priority</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>logger_fatal This is a fatal message`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 logger_fatal()
 {
   log FATAL "$@"
