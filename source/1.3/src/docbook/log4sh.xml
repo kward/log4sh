@@ -23,7 +23,7 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
   <!ENTITY myEmail "kate.ward@forestent.com">
   <!ENTITY isoDate "@@ISO_DATE@@">
 
-  <!ENTITY all "<constant>ALL</constant>">
+  <!ENTITY trace "<constant>TRACE</constant>">
   <!ENTITY debug "<constant>DEBUG</constant>">
   <!ENTITY info "<constant>INFO</constant>">
   <!ENTITY warn "<constant>WARN</constant>">
@@ -55,7 +55,7 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
     <revhistory>
       <revision>
         <revnumber>1.3.2</revnumber>
-        <date>2005-XX-XX</date>
+        <date>2006-01-18</date>
         <authorinitials>kwd</authorinitials>
         <revremark>converted DocBook XML from single document into individual chapter XML files so that the funciton reference chapter could be dynamically generated</revremark>
       </revision>
