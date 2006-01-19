@@ -1,22 +1,25 @@
 # $Id$
 
-BIN_DIR=$(PWD)/bin
 
 DOCBOOK_SRC_DIR=$(PWD)/src/docbook
 SHELL_SRC_DIR=$(PWD)/src/shell
 TEST_SRC_DIR=$(PWD)/src/test
 
+BIN_DIR=$(PWD)/bin
 BUILD_DIR=$(PWD)/build
-DOCBOOK_BUILD_DIR=$(BUILD_DIR)/docbook
-
 DIST_DIR=$(PWD)/dist
+DOCBOOK_BUILD_DIR=$(BUILD_DIR)/docbook
+TEST_DIR=$(PWD)/test
 
 HTML_XSL=$(PWD)/share/docbook/tldp-xsl/21MAR2004/html/tldp-one-page.xsl
 
 all: build docs
 
-build:
-	mkdir $(BUILD_DIR)
+build: build-prep
+	cp -p $(SHELL_SRC_DIR)/log4sh $(BUILD_DIR)
+
+build-prep:
+	@mkdir -p $(BUILD_DIR)
 
 docs: docs-transform-shelldoc docs-transform-docbook
 
@@ -42,12 +45,17 @@ docs-transform-docbook: docs-prep
 	@echo "Parsing the documentation with DocBook"
 	@xsltproc $(HTML_XSL) $(DOCBOOK_BUILD_DIR)/log4sh.xml >$(BUILD_DIR)/log4sh.html
 
-test: build
-	( cd $(BUILD_DIR); $(TEST_SRC_DIR)/test-log4sh )
+test: test-prep
+	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-log4sh )
+
+test-prep: build
+	@mkdir -p $(TEST_DIR)
+	cp -p $(TEST_SRC_DIR)/* $(TEST_DIR)
+	cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
 
 dist: build docs
-	mkdir $(DIST_DIR)
-	cp -p src/shell/log4sh $(DIST_DIR)
+	@mkdir $(DIST_DIR)
+	cp -p $(BUILD_DIR)/log4sh $(DIST_DIR)
 	cp -p $(BUILD_DIR)/log4sh.html $(DIST_DIR)
 
 clean:
