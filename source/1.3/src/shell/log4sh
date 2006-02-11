@@ -145,7 +145,7 @@ _log4sh_cleanup()
         sed 's/^[0-9]*: //'`
     else
       # unrecognized trap output
-      echo "log4sh:FATAL unable to restore old traps!  unrecognized trap command output"
+      echo "log4sh:FATAL unable to restore old traps!  unrecognized trap command output" >&2
     fi
   fi
    
