@@ -50,7 +50,7 @@ test: test-prep
 
 test-prep: build
 	@mkdir -p $(TEST_DIR)
-	cp -p $(TEST_SRC_DIR)/* $(TEST_DIR)
+	cp -p $(TEST_SRC_DIR)/test-* $(TEST_DIR)
 	cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
 
 dist: build docs
