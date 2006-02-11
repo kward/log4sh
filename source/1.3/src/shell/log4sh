@@ -3,7 +3,7 @@
 # <!-- $Id$ -->
 # <s:shelldoc xmlns:s="http://www.forestent.com/2005/XSL/ShellDoc">
 # <s:header>
-# log4sh 1.3.2
+# log4sh 1.3.3
 #
 # http://log4sh.sourceforge.net/
 # 
@@ -29,7 +29,7 @@ set -u
 #
 # constants
 #
-__LOG4SH_VERSION=1.3.2
+__LOG4SH_VERSION=1.3.3pre
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
@@ -62,8 +62,9 @@ __LOG4SH_LEVEL_CLOSED=255
 __LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
 __LOG4SH_THREAD_DEFAULT='main'
 
-# the following string is *supposed* to be on two lines!!
-__LOG4SH_IFS="
+__LOG4SH_DEFAULT_IFS=" "
+# the following IFS is *supposed* to be on two lines!!
+__LOG4SH_ARRAY_IFS="
 "
 
 # set the constants to readonly
@@ -76,6 +77,8 @@ unset _const
 # variables
 #
 __log4sh_filename="`basename $0`"
+__log4sh_tmpDir=''
+__log4sh_trapsFile=''
 
 __log4shAppenders=''
 __log4shAppenderCount=0
@@ -102,6 +105,55 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 # miscellaneous
 #
 
+_log4sh_cleanup()
+{
+  _restoreTrap=${__LOG4SH_FALSE}
+  _oldTrap=''
+
+  # do we possibly need to restore a previous trap?
+  if [ -f "${__log4sh_trapsFile}" -a -s "${__log4sh_trapsFile}" ]; then
+    # yes.  figure out what we need to do
+    if [ `grep "^trap -- " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
+    then
+      # newer trap command
+      _restoreTrap=${__LOG4SH_TRUE}
+      _oldTrap=`grep " ${1}$" "${__log4sh_trapsFile}" |\
+        sed "s/^trap -- '\(.*\)' [A-Z]*$/\1/"`
+    elif [ `grep "[0-9]*: " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
+    then
+      # older trap command
+      _restoreTrap=${__LOG4SH_TRUE}
+
+      # these are the only signals that log4sh traps.  no need to list them all
+      case "${1}" in
+        EXIT) _signal=0 ;;
+	*) _signal=-1 ;;
+      esac
+
+      if [ ${_signal} -ge 0 ]; then
+        _oldTrap=`grep "^${_signal}: " "${__log4sh_trapsFile}" |\
+          sed 's/^[0-9]*: //'`
+        echo "oldTrap=$_oldTrap"
+      fi
+
+      unset _signal
+    else
+      # unrecognized trap output
+      echo "log4sh:FATAL unable to restore old traps!  unrecognized trap command output"
+    fi
+  fi
+   
+  # do our work
+  rm -fr "${__log4sh_tmpDir}"
+
+  # execute the old trap
+  if [ ${_restoreTrap} -eq ${__LOG4SH_TRUE} -a -n "${_oldTrap}" ]; then
+    eval "${_oldTrap}"
+  fi
+
+  unset _restoreTrap _oldTrap
+}
+
 #/**
 # <s:function group="miscellaneous">
 # <entry align="right">
@@ -124,13 +176,27 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 #*/
 _log4sh_mktempDir()
 {
-  _tmpDir="${TMPDIR-/tmp}/log4sh.$RANDOM$RANDOM$RANDOM$$"
-  (umask 077 && mkdir "${_tmpDir}") || {
+  # try the standard mktemp function
+  ( exec mktemp -dqt log4sh.XXXXXX 2>/dev/null ) && return
+
+  # the standard mktemp didn't work.  doing our own.
+  RANDOM="${RANDOM:-}"
+  if [ -n "${RANDOM}" ]; then
+    # $RANDOM works
+    _random=${RANDOM}${RANDOM}${RANDOM}${$}
+  else
+    # $RANDOM doesn't work
+    _date=`date '+%Y%m%d%H%M%S'`
+    _random=`expr ${_date} / ${$}`
+  fi
+
+  _tmpDir="${TMPDIR-/tmp}/log4sh.${_random}"
+  ( umask 077 && mkdir "${_tmpDir}" ) || {
     echo "log4sh:FATAL could not create temporary directory!  exiting" >&2
     exit 1
   }
   echo ${_tmpDir}
-  unset _tmpDir
+  unset _date _random _tmpDir
 }
 
 #/**
@@ -275,8 +341,8 @@ _log4sh_findArrayElement()
 #*/
 _log4sh_getArrayElement()
 {
-  _index=$2
-  _oldIFS="${IFS}"; IFS="$__LOG4SH_IFS"
+  _index=${2}
+  _oldIFS="${IFS}"; IFS="$__LOG4SH_ARRAY_IFS"
   set -- junk ${1}
   IFS="${_oldIFS}"; unset _oldIFS
 
@@ -307,7 +373,7 @@ _log4sh_getArrayElement()
 #*/
 _log4sh_getArrayLength()
 {
-  _oldIFS="${IFS}"; IFS="$__LOG4SH_IFS"
+  _oldIFS="${IFS}"; IFS="$__LOG4SH_ARRAY_IFS"
   set -- ${1}
   IFS="${_oldIFS}"; unset _oldIFS
   echo $#
@@ -417,7 +483,7 @@ _log4sh_popStack()
 #*/
 _log4sh_pushStack()
 {
-  echo "${1:+${1}${__LOG4SH_IFS}}${2}"
+  echo "${1:+${1}${__LOG4SH_ARRAY_IFS}}${2}"
 }
 
 #-----------------------------------------------------------------------------
@@ -508,7 +574,7 @@ _log4sh_propAppender()
   _key=`_log4sh_stripPropPrefix $_key`
 
   # handle appender definitions
-  if [ "$_key" '=' "`echo $_key |sed 's/\.//g'`" ]; then
+  if [ "$_key" '=' "`expr \"${_key}\" : '\([^.]*\)'`" ]; then
     case $_value in
       $__LOG4SH_APPENDER_CONSOLE) appender_setType $_key $_value ;;
       $__LOG4SH_APPENDER_FILE) appender_setType $_key $_value ;;
@@ -524,7 +590,7 @@ _log4sh_propAppender()
   # handle appender values and methods
   _appender=`_log4sh_getPropPrefix $_key`
   _key=`_log4sh_stripPropPrefix $_key`
-  if [ "$_key" '=' "`echo $_key |sed 's/\.//g'`" ]; then
+  if [ "$_key" '=' "`expr \"${_key}\" : '\([^.]*\)'`" ]; then
     case $_key in
       DatePattern) ;;  # unsupported
       File) appender_file_setFile $_appender "$_value" ;;
@@ -649,8 +715,7 @@ log4sh_readProperties()
 {
   _file=$1
 
-  _tmpDir=`_log4sh_mktempDir`
-  _tmpFile="$_tmpDir/properties"
+  _tmpFile="${__log4sh_tmpDir}/properties"
   grep "^log4sh\." $_file >$_tmpFile
   _rp_count=`cat $_tmpFile |wc -l`
   _rp_i=1
@@ -672,9 +737,9 @@ log4sh_readProperties()
 
     _rp_i=`expr $_rp_i + 1`
   done
-  rm -fr $_tmpDir
+  rm -f "${_tmpFile}"
 
-  unset _tmpDir _tmpFile _rp_i _rp_count _line _key _value _keyword
+  unset _tmpFile _rp_i _rp_count _line _key _value _keyword
   unset _file
 }
 
@@ -1040,26 +1105,27 @@ _appender_parsePattern()
   _priority=$2
   _msg=$3
 
-  # set date to ISO 8601 format
+  # try to determine if it is necessary to run the date command
   _oldIFS="${IFS}"; IFS="%"; set -- x${_pattern}; IFS="${_oldIFS}"
   if [ ${#} -gt 1 ]; then
     IFS="d"; set -- ${_pattern}; IFS="${_oldIFS}"
+    # set date to ISO 8601 format
     [ ${#} -gt 1 ] && _date=`date '+%Y-%m-%d %H:%M:%S'`
   fi
   unset _oldIFS
 
   echo "${_pattern}" |sed \
--e 's/%c/shell/' \
--e "s/%d/${_date}/" \
--e "s/%F/${__log4sh_filename}/" \
--e 's/%L//' \
--e 's/%n//' \
--e "s/%-*[0-9]*p/${_priority}/" \
--e "s/%-*[0-9]*r/${SECONDS}/" \
--e "s/%t/${__log4shThreadName}/" \
--e 's/%x//' \
--e "s%m${_msg}"
-  unset _date _pattern _tag _msg
+    -e 's/%c/shell/' \
+    -e "s/%d/${_date}/" \
+    -e "s/%F/${__log4sh_filename}/" \
+    -e 's/%L//' \
+    -e 's/%n//' \
+    -e "s/%-*[0-9]*p/${_priority}/" \
+    -e "s/%-*[0-9]*r/${SECONDS}/" \
+    -e "s/%t/${__log4shThreadName}/" \
+    -e 's/%x//' \
+    -e "s%m${_msg}"
+  unset _date _msg _pattern _tag
 }
 
 #/**
@@ -2110,6 +2176,7 @@ log()
 
   _thisLevel=`_log4sh_tag2level ${_tag}`
 
+  IFS="${__LOG4SH_DEFAULT_IFS}" && \
   for _appenderIndex in ${__log4shAppenderCounts}; do
     # determine appender level
     _appenderLevelTag=`_appender_getLevelByIndex ${_appenderIndex}`
@@ -2351,6 +2418,16 @@ logger_fatal()
 #
 # main
 #
+
+# create a temporary directory
+__log4sh_tmpDir=`_log4sh_mktempDir`
+
+# preserve old trap(s)
+__log4sh_trapsFile="${__log4sh_tmpDir}/traps"
+trap >"${__log4sh_trapsFile}"
+
+# configure traps
+trap '_log4sh_cleanup EXIT' EXIT
 
 # load the properties file
 if [ -n "$LOG4SH_CONFIGURATION" -a -r "$LOG4SH_CONFIGURATION" ]; then
