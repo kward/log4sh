@@ -1,3 +1,27 @@
+Changes with 1.3.3
+
+[kwd] improved the _log4sh_mktempDir function some more.  the random temporary
+directories generated under the standard Solaris shell were not all that random
+(as pointed out by Gordon Pedersen).  the function now supports the system
+mktemp function (if it exists), but falls back to the shell $RANDOM value (if
+it works), and finally it will do a mix of the date divided by the current
+process id.  this should make the semi-random value suffiently difficult enough
+to easily guess.  
+
+[kwd] replacing some more sed commands with expr equivalents
+
+[kwd] fixed a situation where changing the default value of the IFS variable
+once log4sh was loaded would cause log4sh to have problems with for loops
+
+[kwd] added trap code to automatically remove the temporary directory upon exit
+of the script.  did this so that if the outside script is killled, the
+temporary directory is still cleaned up.
+
+[kwd] with the addition of a trap handler, the log4sh handler overwrites any
+previously defined handler.  added code to execute the previous handler as well
+so that log4sh plays nicely with scripts that trap the EXIT signal as well.
+
+
 Changes with 1.3.2
 
 [kwd] removed the last reminants of the old array implementation that was used
