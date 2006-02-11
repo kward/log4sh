@@ -22,6 +22,9 @@ previously defined handler.  added code to execute the previous handler as well
 so that log4sh plays nicely with scripts that trap the EXIT or TERM signals as
 well.
 
+[kwd] added the ability to debug log4sh itself by declaring a LOG4SH_DEBUG
+variable
+
 
 Changes with 1.3.2
 
