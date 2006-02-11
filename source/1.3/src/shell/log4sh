@@ -23,6 +23,12 @@
 # (possibly) declare variables that might come in from outside
 [ -z "${LOG4SH_CONFIGURATION}" ] && LOG4SH_CONFIGURATION=''
 
+# configure log4sh debugging.  set the LOG4SH_DEBUG environment variable to any
+# non-empty value to enable debugging.
+LOG4SH_DEBUG=${LOG4SH_DEBUG:+' '}
+LOG4SH_DEBUG=${LOG4SH_DEBUG:-':'}
+${LOG4SH_DEBUG} echo "log4sh:DEBUG debug output enabled" >&2
+
 # treat unset variables as an error when substituting
 set -u
 
@@ -107,8 +113,18 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 
 _log4sh_cleanup()
 {
+  _trap="${1}"
+
+  ${LOG4SH_DEBUG} echo "log4sh:DEBUG _log4sh_cleanup(): the ${_trap} signal was caught" >&2
+
   _restoreTrap=${__LOG4SH_FALSE}
   _oldTrap=''
+
+  # these are the only signals that log4sh traps.  no need to list them all
+  case "${_trap}" in
+    EXIT) _signal=0 ;;
+    TERM) _signal=15 ;;
+  esac
 
   # do we possibly need to restore a previous trap?
   if [ -f "${__log4sh_trapsFile}" -a -s "${__log4sh_trapsFile}" ]; then
@@ -116,27 +132,17 @@ _log4sh_cleanup()
     if [ `grep "^trap -- " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # newer trap command
+      $LOG4SH_DEBUG echo "log4sh:DEBUG newer POSIX trap command"
       _restoreTrap=${__LOG4SH_TRUE}
-      _oldTrap=`grep " ${1}$" "${__log4sh_trapsFile}" |\
+      _oldTrap=`grep "${_trap}$" "${__log4sh_trapsFile}" |\
         sed "s/^trap -- \(.*\) [A-Z]*$/\1/"`
-      echo "oldTrap=$_oldTrap"
     elif [ `grep "[0-9]*: " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # older trap command
+      $LOG4SH_DEBUG echo "log4sh:DEBUG older style trap command"
       _restoreTrap=${__LOG4SH_TRUE}
-
-      # these are the only signals that log4sh traps.  no need to list them all
-      case "${1}" in
-        EXIT) _signal=0 ;;
-	*) _signal=-1 ;;
-      esac
-
-      if [ ${_signal} -ge 0 ]; then
-        _oldTrap=`grep "^${_signal}: " "${__log4sh_trapsFile}" |\
-          sed 's/^[0-9]*: //'`
-      fi
-
-      unset _signal
+      _oldTrap=`grep "^${_signal}: " "${__log4sh_trapsFile}" |\
+        sed 's/^[0-9]*: //'`
     else
       # unrecognized trap output
       echo "log4sh:FATAL unable to restore old traps!  unrecognized trap command output"
@@ -151,7 +157,15 @@ _log4sh_cleanup()
     eval "${_oldTrap}"
   fi
 
-  unset _restoreTrap _oldTrap
+  # exit cleanly
+  if [ "${_trap}" = "EXIT" ]; then
+    _return=${_signal}
+  else
+    _return=`expr 128 + ${_signal}`
+    # disable the EXIT trap
+    trap EXIT
+  fi
+  exit ${_return}
 }
 
 #/**
@@ -2428,6 +2442,7 @@ trap >"${__log4sh_trapsFile}"
 
 # configure traps
 trap '_log4sh_cleanup EXIT' EXIT
+trap '_log4sh_cleanup TERM' TERM
 
 # load the properties file
 if [ -n "$LOG4SH_CONFIGURATION" -a -r "$LOG4SH_CONFIGURATION" ]; then
