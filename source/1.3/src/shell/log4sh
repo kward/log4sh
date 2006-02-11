@@ -133,7 +133,6 @@ _log4sh_cleanup()
       if [ ${_signal} -ge 0 ]; then
         _oldTrap=`grep "^${_signal}: " "${__log4sh_trapsFile}" |\
           sed 's/^[0-9]*: //'`
-        echo "oldTrap=$_oldTrap"
       fi
 
       unset _signal
