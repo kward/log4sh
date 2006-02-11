@@ -111,6 +111,30 @@ __log4shThreadStack=$__LOG4SH_THREAD_DEFAULT
 # miscellaneous
 #
 
+#/**
+# <s:function group="miscellaneous">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_cleanup</function></funcdef>
+#       <paramdef>string <parameter>signal</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>This is a cleanup function to remove the temporary directory used by
+#   log4sh.  It should only be called by log4sh itself when it is taking
+#   control of traps.</para>
+#   <para>If there was a previously defined trap for the given signal, log4sh
+#   will attempt to call the original trap handler as well so as not to break
+#   the parent script.</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_cleanup EXIT</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
 _log4sh_cleanup()
 {
   _trap="${1}"
@@ -222,7 +246,7 @@ _log4sh_mktempDir()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef><function>_log4sh_level2tag</function></funcdef>
-#       <paramdef>integer <parameter>_level</parameter></paramdef>
+#       <paramdef>integer <parameter>level</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Converts an internally used level constant into its external tag
@@ -266,7 +290,7 @@ _log4sh_level2tag()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef><function>_log4sh_tag2level</function></funcdef>
-#       <paramdef>string <parameter>_tag</parameter></paramdef>
+#       <paramdef>string <parameter>tag</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Converts an externally used level tag into its internal constant
