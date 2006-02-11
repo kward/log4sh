@@ -118,7 +118,8 @@ _log4sh_cleanup()
       # newer trap command
       _restoreTrap=${__LOG4SH_TRUE}
       _oldTrap=`grep " ${1}$" "${__log4sh_trapsFile}" |\
-        sed "s/^trap -- '\(.*\)' [A-Z]*$/\1/"`
+        sed "s/^trap -- \(.*\) [A-Z]*$/\1/"`
+      echo "oldTrap=$_oldTrap"
     elif [ `grep "[0-9]*: " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # older trap command
