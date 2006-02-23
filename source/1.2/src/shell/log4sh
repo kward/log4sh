@@ -326,27 +326,24 @@ _log4sh_propLogger()
 #
 # configure log4sh with a rootLogger configuration statement
 #
-# @param  _key    configuration command
-# @param  _value  configuration value
+# @param  rootLogger  configuration value
 #
 _log4sh_propRootLogger()
 {
-  _value=$1
-
-  _count=`echo $_value |sed 's/,/ /' |wc -w`
-  _i=1
-  while [ $_i -le $_count ]; do
-    _a=`echo $_value |awk -F, "{print \\$$_i}"`
-    if [ $_i -eq 1 ]; then
-      logger_setLevel $_a
+  __rootLogger=`echo "$@" |sed 's/ *, */,/g'`
+  __count=`echo "${__rootLogger}" |sed 's/,/ /g' |wc -w`
+  __index=1
+  while [ ${__index} -le ${__count} ]; do
+    __operand=`echo "${__rootLogger}" |cut -d, -f${__index}`
+    if [ ${__index} -eq 1 ]; then
+      logger_setLevel "${__operand}"
     else
-      logger_addAppender $_a
+      logger_addAppender "${__operand}"
     fi
-    _i=`expr $_i + 1`
+    __index=`expr ${__index} + 1`
   done
 
-  unset _a _count _i
-  unset _value
+  unset __count __index __operand __rootLogger
 }
 
 #
