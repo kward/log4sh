@@ -3,6 +3,11 @@ Changes with 1.2.9
 [kwd] removed extraneous call to logger_getLevel from logger_addAppender
 (reported by Omner Calhoun)
 
+[kwd] backported a serious bugfix from 1.3.3pre.  when log4sh is configured
+from a properties file, there are problems when declaring more than one
+appender when there are no spaces after the commas in the rootLogger
+declaration.  (thanks to Gordon Pedersen for indirectly finding this)
+
 
 Changes with 1.2.8
 

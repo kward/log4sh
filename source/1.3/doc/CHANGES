@@ -29,7 +29,7 @@ variable
 If there were more than two appenders declared with the log4sh.rootLogger
 option, or if they were not separated with exactily ', ' (comma space), they
 were [mostly] ignored.  basically, it didn't work right.  brown bag here!
-thanks to Gordon Pedersen for indirectly finding this one.
+(thanks to Gordon Pedersen for indirectly finding this one)
 
 [kwd] added appender_exists function to check for the existance of an appender.
 some things were being done with the assumption that the appender existed, but

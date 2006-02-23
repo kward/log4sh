@@ -38,6 +38,7 @@ For these steps, it is assumed we are working with release 1.3.0.
 
 Steps:
 * update version
+* finish changelog
 * check all the code in
 * tag the release
 * export the release
