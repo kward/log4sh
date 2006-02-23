@@ -39,6 +39,7 @@ __LOG4SH_VERSION=1.3.3pre
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
+__LOG4SH_ERROR=2
 
 __LOG4SH_CONFIGURATION='log4sh.properties'
 
@@ -380,7 +381,7 @@ _log4sh_findArrayElement()
 _log4sh_getArrayElement()
 {
   _index=${2}
-  _oldIFS="${IFS}"; IFS="$__LOG4SH_ARRAY_IFS"
+  _oldIFS="${IFS}"; IFS="${__LOG4SH_ARRAY_IFS}"
   set -- junk ${1}
   IFS="${_oldIFS}"; unset _oldIFS
 
@@ -608,25 +609,41 @@ _log4sh_propAppender()
   _key=$1
   _value=$2
 
-  # strip the leading appender name
+  _appender=''
+
+  # strip the leading 'appender' keyword prefix
   _key=`_log4sh_stripPropPrefix $_key`
 
   # handle appender definitions
-  if [ "$_key" '=' "`expr \"${_key}\" : '\([^.]*\)'`" ]; then
+  if [ "${_key}" '=' "`expr \"${_key}\" : '\([^.]*\)'`" ]; then
+    _appender="${_key}"
+  else
+    _appender=`_log4sh_getPropPrefix $_key`
+  fi
+  
+  # does the appender exist?
+  appender_exists ${_appender}
+  if [ $? -eq ${__LOG4SH_FALSE} ]; then
+    echo "log4sh:ERROR attempt to configure the non-existant appender (${_appender})" >&2
+    unset _appender _key _value
+    return ${__LOG4SH_ERROR}
+  fi
+
+  # handle the appender type
+  if [ "${_appender}" = "${_key}" ]; then
     case $_value in
-      $__LOG4SH_APPENDER_CONSOLE) appender_setType $_key $_value ;;
-      $__LOG4SH_APPENDER_FILE) appender_setType $_key $_value ;;
-      $__LOG4SH_APPENDER_DAILY_ROLLING_FILE) appender_setType $_key $_value ;;
-      $__LOG4SH_APPENDER_ROLLING_FILE) appender_setType $_key $_value ;;
-      $__LOG4SH_APPENDER_SMTP) appender_setType $_key $_value ;;
+      $__LOG4SH_APPENDER_CONSOLE) appender_setType $_appender $_value ;;
+      $__LOG4SH_APPENDER_FILE) appender_setType $_appender $_value ;;
+      $__LOG4SH_APPENDER_DAILY_ROLLING_FILE) appender_setType $_appender $_value ;;
+      $__LOG4SH_APPENDER_ROLLING_FILE) appender_setType $_appender $_value ;;
+      $__LOG4SH_APPENDER_SMTP) appender_setType $_appender $_value ;;
       *) echo "log4sh:ERROR appender type ($_value) unrecognized" >&2 ;;
     esac
-    unset _key _value
-    return
+    unset _appender _key _value
+    return ${__LOG4SH_TRUE}
   fi
 
   # handle appender values and methods
-  _appender=`_log4sh_getPropPrefix $_key`
   _key=`_log4sh_stripPropPrefix $_key`
   if [ "$_key" '=' "`expr \"${_key}\" : '\([^.]*\)'`" ]; then
     case $_key in
@@ -640,8 +657,8 @@ _log4sh_propAppender()
       layout) appender_setLayout $_appender "$_value" ;;
       *) echo "log4sh:ERROR appender value/method ($_key) unrecognized" >&2 ;;
     esac
-    unset _key _value _appender
-    return
+    unset _appender _key _value
+    return ${__LOG4SH_TRUE}
   fi
 
   # handle appender layout values and methods
@@ -650,12 +667,12 @@ _log4sh_propAppender()
     ConversionPattern) appender_setPattern $_appender "$_value" ;;
     *) echo "log4sh:ERROR layout value/method ($_key) unrecognized" >&2 ;;
   esac
-  unset _key _value _appender
+  unset _appender _key _value
+  return ${__LOG4SH_TRUE}
 }
 
 #/**
 # <s:function group="properties" isPrivate="true">
-# <!-- XXX what the f*** is this function for?? -->
 # <entry align="right">
 #   <code>string</code>
 # </entry>
@@ -690,7 +707,6 @@ _log4sh_propLogger()
 #
 #/**
 # <s:function group="properties" isPrivate="true">
-# <!-- XXX what the f*** is this function for?? -->
 # <entry align="right">
 #   <emphasis>void</emphasis>
 # </entry>
@@ -698,11 +714,16 @@ _log4sh_propLogger()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef><function>_log4sh_propRootLogger</function></funcdef>
-#       <paramdef>string <parameter>value</parameter></paramdef>
+#       <paramdef>string <parameter>rootLogger</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Configures log4sh with a <code>rootLogger</code> configuration
-#   statement.</para>
+#   statement.  It expects a comma separated string similar to the following:</para>
+#   <para><code>log4sh.rootLogger=ERROR, stderr, R</code></para>
+#   <para>The first option is the default logging level to set for all
+#   of the following appenders that will be created, and all following options
+#   are the names of appenders to create.  The appender names must be
+#   unique.</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>_log4sh_propRootLogger $value</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -711,22 +732,25 @@ _log4sh_propLogger()
 #*/
 _log4sh_propRootLogger()
 {
-  _value=$1
-
-  _count=`echo $_value |sed 's/,/ /' |wc -w`
-  _i=1
-  while [ $_i -le $_count ]; do
-    _a=`echo $_value |cut -d, -f$_i`
-    if [ $_i -eq 1 ]; then
-      logger_setLevel $_a
+  __rootLogger=`echo "$@" |sed 's/ *, */,/g'`
+  __count=`echo "${__rootLogger}" |sed 's/,/ /g' |wc -w`
+  __index=1
+  while [ ${__index} -le ${__count} ]; do
+    __operand=`echo "${__rootLogger}" |cut -d, -f${__index}`
+    if [ ${__index} -eq 1 ]; then
+      logger_setLevel "${__operand}"
     else
-      logger_addAppender $_a
+      appender_exists "${__operand}"
+      if [ $? -eq ${__LOG4SH_FALSE} ]; then
+        logger_addAppender "${__operand}"
+      else
+        echo "log4sh:ERROR attempt to add already existing appender of name (${__operand})" >&2
+      fi
     fi
-    _i=`expr $_i + 1`
+    __index=`expr ${__index} + 1`
   done
 
-  unset _a _count _i
-  unset _value
+  unset __count __index __operand __rootLogger
 }
 
 #/**
@@ -1485,6 +1509,33 @@ appender_setLayout()
 _appender_getLevelByIndex()
 {
   _log4sh_getArrayElement "$__log4shAppenderLevels" $1
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>boolean</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_exists</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Checks for the existance of a named appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>exists=`appender_exists myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_exists()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  [ "${_index}" -gt 0 ] && _return=${__LOG4SH_TRUE} || _return=${__LOG4SH_FALSE}
+  unset _index
+  return ${_return}
 }
 
 #/**
