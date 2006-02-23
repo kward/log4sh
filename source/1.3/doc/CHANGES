@@ -28,7 +28,12 @@ variable
 [kwd] found a major oops bug when configuring log4sh using a properties file.
 If there were more than two appenders declared with the log4sh.rootLogger
 option, or if they were not separated with exactily ', ' (comma space), they
-were [mostly] ignored.  Basically, it didn't work right.  Brown bag here!
+were [mostly] ignored.  basically, it didn't work right.  brown bag here!
+thanks to Gordon Pedersen for indirectly finding this one.
+
+[kwd] added appender_exists function to check for the existance of an appender.
+some things were being done with the assumption that the appender existed, but
+it was never checked.  starting to check now.
 
 
 Changes with 1.3.2
