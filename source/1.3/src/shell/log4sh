@@ -637,6 +637,7 @@ _log4sh_propAppender()
       $__LOG4SH_APPENDER_DAILY_ROLLING_FILE) appender_setType $_appender $_value ;;
       $__LOG4SH_APPENDER_ROLLING_FILE) appender_setType $_appender $_value ;;
       $__LOG4SH_APPENDER_SMTP) appender_setType $_appender $_value ;;
+      $__LOG4SH_APPENDER_SYSLOG) appender_setType $_appender $_value ;;
       *) echo "log4sh:ERROR appender type ($_value) unrecognized" >&2 ;;
     esac
     unset _appender _key _value
@@ -647,14 +648,25 @@ _log4sh_propAppender()
   _key=`_log4sh_stripPropPrefix $_key`
   if [ "$_key" '=' "`expr \"${_key}\" : '\([^.]*\)'`" ]; then
     case $_key in
+      # General
+      Threshold) appender_setLevel $_appender "$_value" ;;
+      layout) appender_setLayout $_appender "$_value" ;;
+
+      # FileAppender
       DatePattern) ;;  # unsupported
       File) appender_file_setFile $_appender "$_value" ;;
       MaxBackupIndex) ;;  # unsupported
       MaxFileSize) ;;  # unsupported
-      Threshold) appender_setLevel $_appender "$_value" ;;
+
+      # SMTPAppender
       To) appender_smtp_setTo $_appender "$_value" ;;
       Subject) appender_smtp_setSubject $_appender "$_value" ;;
-      layout) appender_setLayout $_appender "$_value" ;;
+
+      # SyslogAppender
+      SyslogHost) appender_syslog_setHost ${_appender} "${_value}" ;;
+      Facility) appender_syslog_setFacility ${_appender} "${_value}" ;;
+
+      # catch unrecognized
       *) echo "log4sh:ERROR appender value/method ($_key) unrecognized" >&2 ;;
     esac
     unset _appender _key _value
@@ -783,8 +795,8 @@ log4sh_readProperties()
   _rp_i=1
   while [ $_rp_i -le $_rp_count ]; do
     _line=`awk "$_rp_i==NR {print}" $_tmpFile`
-    _key=`echo "$_line" |sed 's^\([^=]*\)=.*\1'`
-    _value=`echo "$_line" |sed 's^[^=]*=\(.*\)\1'`
+    _key=`echo "$_line" |sed 's^\([^= ]*\) *=.*\1'`
+    _value=`echo "$_line" |sed 's^[^= ]* *= *\(.*\)\1'`
 
     # strip the leading 'log4sh.'
     _key=`_log4sh_stripPropPrefix $_key`
@@ -842,7 +854,7 @@ logger_addAppender()
   __log4shAppender_rollingFile_maxFileSizes=`_log4sh_pushStack "$__log4shAppender_rollingFile_maxFileSizes" $__LOG4SH_APPENDER_ROLLING_FILE_MAX_FILE_SIZE`
   __log4shAppender_smtp_tos=`_log4sh_pushStack "$__log4shAppender_smtp_tos" -`
   __log4shAppender_smtp_subjects=`_log4sh_pushStack "$__log4shAppender_smtp_subjects" -`
-  __log4shAppender_syslog_facilities=`_log4sh_pushStack "$__log4shAppender_syslog_facilities" -`
+  __log4shAppender_syslog_facilities=`_log4sh_pushStack "$__log4shAppender_syslog_facilities" user`
 }
 
 #/**
@@ -1167,12 +1179,13 @@ _appender_parsePattern()
   _priority=$2
   _msg=$3
 
-  # try to determine if it is necessary to run the date command
+  # determine if various commands must be run
   _oldIFS="${IFS}"; IFS="%"; set -- x${_pattern}; IFS="${_oldIFS}"
-  if [ ${#} -gt 1 ]; then
+  if [ $# -gt 1 ]; then
+    # run date command??
     IFS="d"; set -- ${_pattern}; IFS="${_oldIFS}"
     # set date to ISO 8601 format
-    [ ${#} -gt 1 ] && _date=`date '+%Y-%m-%d %H:%M:%S'`
+    [ $# -gt 1 ] && _date=`date '+%Y-%m-%d %H:%M:%S'`
   fi
   unset _oldIFS
 
@@ -2134,27 +2147,20 @@ appender_syslog_setFacility()
     return $__LOG4SH_FALSE
   fi
 
-  _found=$__LOG4SH_FALSE
-
-  # look for facility
+  # check for valid facility
   echo $__LOG4SH_APPENDER_SYSLOG_FACILITIES |grep " ${_facility} " >/dev/null
-  [ $? -eq 0 ] && _found=$__LOG4SH_TRUE
-
-  # set appender facility
-  if [ $_found -eq $__LOG4SH_TRUE ]; then
-    # the facility is valid
-    _index=`_log4sh_findArrayElement "$__log4shAppenders" $_appender`
-    # TODO: put check for valid _index here
-    __log4shAppender_syslog_facilities=`_log4sh_setArrayElement "$__log4shAppender_syslog_facilities" $_index "$_facility"`
-    _return=$__LOG4SH_TRUE
-  else
+  if [ $? -ne 0 ]; then
     # the facility is not valid
-    echo "log4sh:ERROR syslog facility ($_facility) unrecognized" >&2
-    _return=$__LOG4SH_FALSE
+    echo "log4sh:ERROR [${_facility}] is an unknown syslog facility.  Defaulting to [USER]." >&2
+    _facility='user'
   fi
 
-  unset _appender _f _facility _found _index
-  return $_return
+  # set appender facility
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $_appender`
+  # TODO: put check for valid _index here
+  __log4shAppender_syslog_facilities=`_log4sh_setArrayElement "$__log4shAppender_syslog_facilities" $_index "$_facility"`
+
+  unset _appender _f _facility _index
 }
 
 #/**
@@ -2343,8 +2349,14 @@ log()
         ;;
       $__LOG4SH_APPENDER_SYSLOG)
         _tmpFacility=`_appender_syslog_getFacilityByIndex ${_appenderIndex}`
-	logger -p "${_tmpFacility}.info" "${_thisLayout}"
-	unset _tmpFacility
+	_tmpTag=${_tag}
+	case ${_tag} in
+	  FATAL) _tmpTag='emerg' ;;
+	  TRACE) _tmpTag='debug' ;;
+	  *) _tmpTag=${_tag} ;;
+	esac
+	logger -p "${_tmpFacility}.${_tmpTag}" -t "${__log4sh_filename}[$$]" "${_thisLayout}"
+	unset _tmpFacility _tmpTag
 	;;
     esac
   done
