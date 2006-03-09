@@ -3,7 +3,8 @@ Changes with 1.3.4
 [kwd] updated comments in the examples to match what the examples are actually
 showing.  (thanks to Stephan Hegel for pointing out the mismatch)
 
-[kwd] fixed bug that caused only the first conversion character in a PatternLayout to be replaced.  (credits to Aaron Rodden for the patch)
+[kwd] fixed bug that caused only the first conversion character in a
+PatternLayout to be replaced.  (credits to Aaron Rodden for the patch)
 
 [kwd] worked on the PatternLayout 'd' conversion character .  it now supports
 giving a date specifier (e.g. %d{ISODATE}), but whatever is specified is
@@ -14,7 +15,8 @@ converted.
 '%%' chars are given in a pattern, they are replaced with a single '%' char in
 the output.
 
-[kwd} added support for the %X PatternLayout conversion character.  (credits to Aaron Rodden for the patch)
+[kwd} added support for the %X PatternLayout conversion character.  (credits to
+Aaron Rodden for the patch)
 
 
 Changes with 1.3.3
