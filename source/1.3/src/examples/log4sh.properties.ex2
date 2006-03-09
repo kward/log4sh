@@ -1,4 +1,4 @@
-# Set root logger level to DEBUG and its only appender to A1
+# Set root logger level to INFO and its only appender to A1
 log4sh.rootLogger=INFO, A1
 
 # A1 is set to be a ConsoleAppender.
