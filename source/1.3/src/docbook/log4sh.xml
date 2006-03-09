@@ -54,40 +54,39 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
     <!-- Most recent revision goes at the top; list in descending order -->
     <revhistory>
       <revision>
+        <revnumber>1.3.4</revnumber>
+        <date>2006-03-09</date>
+        <authorinitials>kwd</authorinitials>
+      </revision>
+
+      <revision>
         <revnumber>1.3.3</revnumber>
         <date>2006-02-11</date>
         <authorinitials>kwd</authorinitials>
-        <revremark>
-	  Added documentation for the _log4sh_cleanup private command.
-	</revremark>
       </revision>
 
       <revision>
         <revnumber>1.3.2</revnumber>
         <date>2006-01-18</date>
         <authorinitials>kwd</authorinitials>
-        <revremark>converted DocBook XML from single document into individual chapter XML files so that the funciton reference chapter could be dynamically generated</revremark>
       </revision>
   
       <revision>
         <revnumber>1.3.0</revnumber>
         <date>2005-08-15</date>
         <authorinitials>kwd</authorinitials>
-        <revremark>added the new get/push/pop thread name commands from 1.2.7; added Syslog and SMTP appender support</revremark>
       </revision>
   
       <revision>
         <revnumber>1.2.6</revnumber>
         <date>2005-02-01</date>
         <authorinitials>kwd</authorinitials>
-        <revremark>improved examples where log4sh is searched for and sourced in</revremark>
       </revision>
   
       <revision>
         <revnumber>1.2.4</revnumber>
         <date>2004-12-28</date>
         <authorinitials>kwd</authorinitials>
-        <revremark>initial DocBook conversion</revremark>
       </revision>
     </revhistory>
   
