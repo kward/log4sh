@@ -1,3 +1,15 @@
+Changes with 1.2.10
+
+[kwd] backported the _log4sh_mktempDir() function from the 1.3 series.  it
+attempts to use the native mktemp function if it is available on the system. if
+the function is not available, it falls back to using the RANDOM variabl if it
+is available.  if not, it finally defaults to generating a semi-random number
+that is a combination of the date and PID.
+
+[kwd] fixed bug that caused '&' characters in the logging message to be
+replaced with '%m'.
+
+
 Changes with 1.2.9
 
 [kwd] removed extraneous call to logger_getLevel from logger_addAppender
