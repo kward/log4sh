@@ -1,6 +1,6 @@
 # $Id$
 #
-# log4sh 1.2.9
+# log4sh 1.2.10
 # 
 # written by Kate Ward <kate.ward@forestent.com>
 # released under the LGPL
@@ -23,7 +23,7 @@ set -u
 #
 # constants
 #
-__LOG4SH_VERSION=1.2.9
+__LOG4SH_VERSION=1.2.10
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
@@ -86,13 +86,27 @@ __log4shThreadName=$__LOG4SH_THREAD_DEFAULT
 #
 _log4sh_mktempDir()
 {
-  _tmpDir="${TMPDIR-/tmp}/log4sh.$RANDOM$RANDOM$RANDOM$$"
-  (umask 077 && mkdir "$_tmpDir") || {
+  # try the standard mktemp function
+  ( exec mktemp -dqt log4sh.XXXXXX 2>/dev/null ) && return
+
+  # the standard mktemp didn't work.  doing our own.
+  RANDOM="${RANDOM:-}"
+  if [ -n "${RANDOM}" ]; then
+    # $RANDOM works
+    _random=${RANDOM}${RANDOM}${RANDOM}${$}
+  else
+    # $RANDOM doesn't work
+    _date=`date '+%Y%m%d%H%M%S'`
+    _random=`expr ${_date} / ${$}`
+  fi
+
+  _tmpDir="${TMPDIR-/tmp}/log4sh.${_random}"
+  ( umask 077 && mkdir "${_tmpDir}" ) || {
     echo "log4sh:FATAL could not create temporary directory!  exiting" >&2
     exit 1
   }
-  echo $_tmpDir
-  unset _tmpDir
+  echo ${_tmpDir}
+  unset _date _random _tmpDir
 }
 
 #
@@ -213,6 +227,10 @@ _log4sh_parsePattern()
 
   _date=`date '+%Y-%m-%d %H:%M:%S'`
 
+  # escape any '&' chars in the message
+  _msg=`echo "${_msg}" |sed 's/&/\\\\&/g'`
+
+  # parse the pattern
   echo "$_pattern" |sed \
 -e 's/%c/shell/' \
 -e "s/%d/$_date/" \
