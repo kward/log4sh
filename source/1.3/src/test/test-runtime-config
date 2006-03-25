@@ -1,0 +1,71 @@
+#! /bin/sh
+# $Id$
+#
+# Author: Kate Ward <kate.ward@forestent.com>
+#
+
+# find myself
+whoAmI=`basename $0`
+whereAmI=`dirname $0`
+whereAmI=`cd "${whereAmI}" 2>/dev/null && pwd || echo "${whereAmI}"`
+
+#-----------------------------------------------------------------------------
+# load log4sh
+#
+
+if [ -r log4sh ]; then
+  LOG4SH_CONFIGURATION="none" . ./log4sh
+else
+  echo "ERROR: could not load (log4sh) >&2"
+  exit 1
+fi
+logger_trace "whoAmI=${whoAmI} whereAmI=${whereAmI}"
+
+#-----------------------------------------------------------------------------
+# preconfigure log4sh
+#
+# the functions called in this section are meant to exactly reproduce what the
+# log4sh.properties does so that the common tests that are run generate the
+# same output.
+#
+
+# close the default console appender
+appender_close stdout
+
+# setup the default logging level to INFO
+logger_setLevel INFO
+
+# add a file appender at the default level that logs to STDERR
+logger_addAppender mySTDERR
+appender_setType mySTDERR FileAppender
+appender_file_setFile mySTDERR STDERR
+
+# add a file appender at the DEBUG level with the default layout
+logger_addAppender mySimple
+appender_setLevel mySimple DEBUG
+appender_setType mySimple FileAppender
+appender_file_setFile mySimple log4sh-simple.log
+
+# add file appender at the default level with a Pattern layout
+logger_addAppender myPattern
+appender_setType myPattern FileAppender
+appender_file_setFile myPattern log4sh-pattern.log
+appender_setLayout myPattern PatternLayout
+appender_setPattern myPattern '%d [%p] (%F) - %m%n'
+
+# add a syslog appender at the default level with a facility of local4
+logger_addAppenderWithPattern mySyslog '[%p] (%F) - %m%n'
+appender_setType mySyslog SyslogAppender
+appender_syslog_setFacility mySyslog local4
+
+#-----------------------------------------------------------------------------
+# load and run the common tests
+#
+
+commonTests='test-common'
+if [ -r "${commonTests}" ]; then
+  . ${whereAmI}/${commonTests}
+else
+  logger_fatal "could not load the common tests"
+  exit 1
+fi

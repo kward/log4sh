@@ -1,0 +1,41 @@
+#! /bin/sh
+# $Id$
+#
+# Author: Kate Ward <kate.ward@forestent.com>
+#
+
+# find myself
+whoAmI=`basename $0`
+whereAmI=`dirname $0`
+whereAmI=`cd "${whereAmI}" 2>/dev/null && pwd || echo "${whereAmI}"`
+
+#-----------------------------------------------------------------------------
+# load log4sh
+#
+
+if [ -r log4sh ]; then
+  . ./log4sh
+else
+  echo "ERROR: could not load (log4sh) >&2"
+  exit 1
+fi
+logger_trace "whoAmI=${whoAmI} whereAmI=${whereAmI}"
+
+#-----------------------------------------------------------------------------
+# pre-configure log4sh
+#
+# the functions called in this section are meant to exactly reproduce what the
+# runtime configuration test script does so that the common tests that are run
+# generate the same output.
+
+#-----------------------------------------------------------------------------
+# load and run the common tests
+#
+
+commonTests='test-common'
+if [ -r "${commonTests}" ]; then
+  . ${whereAmI}/${commonTests}
+else
+  logger_fatal "could not load the common tests"
+  exit 1
+fi
