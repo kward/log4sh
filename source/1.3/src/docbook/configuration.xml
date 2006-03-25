@@ -336,6 +336,7 @@
 	    <entry>
 	      <para>This variable is used to tell log4sh what the name of (and possibly the full path to) the configuration (a.k.a properties) file that should be used to configure log4sh at the time log4sh is sourced.  If the value 'none' is passed, than log4sh will expect to be configured at a later time via run-time configuration.</para>
 	      <example>
+	        <title>LOG4SH_CONFIGURATION variable</title>
 	        <programlisting>LOG4SH_CONFIGURATION='/path/to/log4j.properties'</programlisting>
 	      </example>
 	    </entry>
@@ -345,6 +346,7 @@
 	    <entry>
 	      <para>This variable is used to tell log4sh what prefix it should use when parsing the configuration file.  Normally, the default value is 'log4sh' (e.g. 'log4sh.rootLogger'), but the value can be redefined so that a configuration file from another logging frame work such as log4j can be read.</para>
 	      <example>
+	        <title>LOG4SH_CONFIG_PREFIX variable</title>
 	        <programlisting>LOG4SH_CONFIG_PREFIX='log4j'</programlisting>
 	      </example>
 	    </entry>
