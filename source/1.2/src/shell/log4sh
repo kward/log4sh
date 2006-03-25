@@ -227,8 +227,8 @@ _log4sh_parsePattern()
 
   _date=`date '+%Y-%m-%d %H:%M:%S'`
 
-  # escape any '&' chars in the message
-  _msg=`echo "${_msg}" |sed 's/&/\\\\&/g'`
+  # escape any '\' and '&' chars in the message
+  _msg=`echo "${_msg}" |sed 's/\\\\/\\\\\\\\/g;s/&/\\\\&/g'`
 
   # parse the pattern
   echo "$_pattern" |sed \

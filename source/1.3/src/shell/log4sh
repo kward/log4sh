@@ -1229,8 +1229,8 @@ _appender_parsePattern()
   fi
   unset _oldIFS
 
-  # escape any '&' chars in the message
-  _msg=`echo "${_msg}" |sed 's/&/\\\\&/g'`
+  # escape any '\' and '&' chars in the message
+  _msg=`echo "${_msg}" |sed 's/\\\\/\\\\\\\\/g;s/&/\\\\&/g'`
 
   # parse the pattern
   _pattern=`echo "${_pattern}" |sed \
