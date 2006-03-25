@@ -5,75 +5,69 @@
 Quickstart
 -->
 <chapter id="quickstart"><title>Quickstart</title>
-  <example><title>Simple Test #1</title>
-    <para>To get started quickly with log4sh, take a look at the <filename>test-log4sh</filename> sample script in the <filename class="directory">src/test</filename> directory of the distribution.  You will need to copy the <filename>log4sh</filename> script itself from the <filename class="directory">src/shell</filename> directory into the <filename class="directory">test</filename> directory before running the test.  This test script is designed to configure log4sh via code.  Later on, we will configure log4sh with a properties file, very similar to how log4j is configured.</para>
+  <para>First things first.  Go to the directory from which you extracted the log4sh software.  In there, you should find a <filename>Makefile</filename>.  If you find one, you are in the right place.  We need to setup the environment for running tests, so from this directory, execute the <command>make test-prep</command> command as shown below.  Once this is done, a <filename class="directory">test</filename> directory will be created and prepared with everything needed to run the log4sh tests.</para>
 
-    <para>By default, log4sh is configured with a <constant>ConsoleAppender</constant> which logs to STDOUT using a <constant>SimpleLayout</constant> and a logging level of &error;.  If no configuration file is found, a warning message will be given letting the user know that no configuration file was found.  This warning can be supressed by setting the <varname>LOG4SH_CONFIGURATION</varname> environment variable to <literal>none</literal>.</para>
+  <para>Prepare your environment.</para>
 
-    <para>Run the first test.</para>
-
-    <screen><![CDATA[
+  <screen><![CDATA[
 $ make test-prep
 $ cd test
-$ ./test-log4sh
 ]]></screen>
 
-    <para>After a first run you will see quite a bit of output to the display, two log files will be created (<filename>log4sh-pattern.log</filename> and <filename>log4sh-simple.log</filename>), and there will be several lines added to the <command>syslog</command> logfile at the INFO loging level.  The display contains a mix of output to STDOUT and STDERR, and the files contain various versions of the same data, but with output that changes as various layouts and patterns are tested.  To clean up the display a bit, you could send all of the output of the STDERR appender off to <filename>/dev/null</filename>.</para>
-  </example>
+  <!-- =======================================================================
+   ! Hello, World! example
+   !-->
+  <example><title>Hello, World!</title>
+    <para>Ok.  What kind of a quickstart would this be if the first example wasn't a "Hello, World!" example?  Who knows, but this isn't one of those kind of quickstarts.</para>
 
-  <example><title>Simple Test #2</title>
-    <para>Run the test again, but redirecting STDERR to <filename>/dev/null</filename>.</para>
+    <para>Run the Hello World test.</para>
 
     <screen><![CDATA[
-$ ./test-log4sh 2>/dev/null
+$ ./test-hello_world
+0 [main] INFO shell  - Hello, world!
 ]]></screen>
 
-    <para>Go ahead a take a look at the test script to get a feel of what the script is trying to accomplish.  Hopefully, you can see just how simple log4sh is to use and control.</para>
+    <para>You should have seen output similar to that above.  If not, make sure you are in the right location and such.  If you really had problems, please send a letter to the log4sh maintainers.  Who knows, maybe you already found a bug.  Hopefully not!</para>
+
+    <para>The Hello, World! test is about as simple as it gets.  If you take a look at the test, all it does is load <filename>log4sh</filename>, reset the default logging level from <option>ERROR</option> to <option>INFO</option>, and the logs a message.  As you can see, it didn't take much to setup and use log4sh.</para>
   </example>
 
-  <example><title>Properties Test #1</title>
-    <para>For our next test, we will configure log4sh with a properties file.  This test is incredibly simple as it is designed to show the power of the properties file.   Copy first example properties file <filename path="src/examples">log4sh.properties.ex1</filename> from the <filename class="directory">src/examples</filename> directory into the <filename class="directory">test</filename> directory, and give it the name <filename>log4sh.properties</filename>.</para>
+  <!-- =======================================================================
+   ! Properties configuration example
+   !-->
+  <example><title>Properties Configuration Test</title>
+    <para>In this example, a <filename>log4sh.properties</filename> configuraiton file will be used to pre-configure log4sh before any logging messages are output.  It demonstrates that a configuration file can be used to alter the behavior of log4sh without having to change any shell code.</para>
 
-    <para>Run the properties test.</para>
+    <para>Run the properties configuration test.</para>
 
     <screen><![CDATA[
-$ ./test-properties
-4 [main] INFO shell  - (my info message) log4sh now loaded
-4 [main] ERROR shell  - (my error message) log4sh now loaded
-5 [main] WARN shell  - (my warn message) log4sh now loaded
-5 [main] FATAL shell  - (my fatal message) log4sh now loaded
+$ ./test-prop-config
+INFO - We are the Simpsons!
+INFO - Mmmmmm .... Chocolate.
+INFO - Homer likes chocolate
+...
 ]]></screen>
 
-    <para>This very simple test is designed to work very much like one of the log4j examples.  The properties file is taken almost verbatum from the log4j short manual, with only small changes required to make it work for log4sh.  Log4sh is configured with a <constant>ConsoleAppender</constant> that has a <constant>PatternLayout</constant>.  One limitation of log4sh is that it does not have access to a timer with millisecond accuracy, so it logs only with an accuracy of one second.  For most situations, this should be sufficient.</para>
+    <para>You should see much more output on your terminal that what was listed above.  What is actually happening is log4sh is outputting information to STDERR using logging statements that were stored in the <filename>test-common</filename> script.  In addition, there were multiple logfiles generated (take a look in the <filename class="directory">test</filename> directory), and output was written to Syslog.  Take a look at both the property configuration script (<filename>test-prop-config</filename>) and the common script (<filename>test-common</filename>) if you would like to see what is happening.  If you do, you will notice that nowhere was it configured to write to the any of those different locations.  The <filename>log4sh.properties</filename> configuration file did all of that work.  Go ahead and take a look at it too.  You might be amazed with how easy it was to write to so many locations with such a small amount of code.</para>
   </example>
 
-  <example><title>Properties Test #2</title>
-    <para>Copy the second example properties file (<filename path="src/examples">log4sh.properties.ex2</filename>) as <filename>log4sh.properties</filename>, and rerun the test.  This second properties file is only slightly different from the first in that it adds the filename to the output, and removes the <option>%x</option> pattern directive as that directive is not supported by log4sh.</para>
+  <!-- =======================================================================
+   ! Runtime configuration example
+   !-->
+  <example><title>Runtime Configuration Test</title>
+    <para>This example is exactly like the last example as far as output is concerned (they both execute the same <filename>test-common</filename> script), but this one is configured instead at runtime with function calls.  It demonstrates that log4sh is fully configurable at runtime.</para>
 
-    <para>Run the test.</para>
+    <para>Run the runtime configuration test.</para>
 
     <screen><![CDATA[
-$ ./test-properties
-2006-01-18 12:03:25 [test-properties:main] INFO shell - (my info message) log4sh now loaded
-2006-01-18 12:03:26 [test-properties:main] ERROR shell - (my error message) log4sh now loaded
-2006-01-18 12:03:26 [test-properties:main] WARN shell - (my warn message) log4sh now loaded
-2006-01-18 12:03:26 [test-properties:main] FATAL shell - (my fatal message) log4sh now loaded
-]]></screen>
-  </example>
-
-  <example><title>Properties Test #3</title>
-    <para>This last example shows a typical situation where an administrator wants to run a script via a cron job, wants a log of the scripts actions, but only wants an email if the job failed.</para>
-
-    <para>Copy the third example properies file (<filename path="src/examples">log4sh.properties.ex3</filename>) over, and rerun the test.  This time, the output will be sent to two separate locations; STDERR and a file called <filename>example.log</filename>.  The output to STDERR is set to the &error; level, and output sent to the file is at the &info; level.  More output is written to the logfile (as expected) when the test is run.</para>
-
-    <para>Run the test.</para>
-
-    <screen><![CDATA[
-$ ./test-properties
-2006-01-18 12:03:58 ERROR - (my error message) log4sh now loaded
-2006-01-18 12:03:59 FATAL - (my fatal message) log4sh now loaded
+$ ./test-runtime-config
+INFO - We are the Simpsons!
+INFO - Mmmmmm .... Chocolate.
+INFO - Homer likes chocolate
+...
 ]]></screen>
 
-    <para>In the situation of being run from a cron job, the logfile will always be written, but an email comes only when output from the script came at the &error; or &fatal; level.  An administrator can even configure the <filename>log4sh.properties</filename> file to the &debug; or even &trace; level so that more output is logged for testing or debugging purposes.  What's more, this change can happen without making any code changes to the script.  Something very useful in a production environment!</para>
+    <para>You should again see much more output on your terminal that what was listed above.  The output should also have been exactly the same (except that the times were different) as the above example.  This is because the same logging commands were used.  If you take a look a look in the <filename>test-runtime-config</filename> script though, you will see that log4sh was configured completly at runtime.  The <filename>log4sh.properties</filename> was not used.  It shows that log4sh can be fully configured without a pre-existing configuration file.  This isn't nearly as friendly as using the configuration file, but there are times when it is needed.</para>
   </example>
+
 </chapter>
