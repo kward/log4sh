@@ -1,5 +1,13 @@
 Changes with 1.3.4
 
+[kwd] reworked the test scripts so that there is a test-prop-config script that
+sets up a logging environment from a log4sh.properties file, and a
+test-runtime-config script that sets up the exact same environment, but at
+runtime.  they both call a test-common script so that they should give nearly
+exactly the same output.
+
+[kwd] fixed bug that caused '\' chars in the logging message to cause problems
+
 [kwd] added a log4sh_cleanup() function that scripts can call.  normally log4sh
 will be cleaned up using a trap handler, but if an external script overrides
 the trap handler, it won't work.  this gives scripts the ability to manually
