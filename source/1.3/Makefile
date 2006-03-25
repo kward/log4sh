@@ -16,7 +16,7 @@ HTML_XSL=$(PWD)/share/docbook/tldp-xsl/21MAR2004/html/tldp-one-page.xsl
 all: build docs
 
 build: build-prep
-	cp -p $(SHELL_SRC_DIR)/log4sh $(BUILD_DIR)
+	@cp -p $(SHELL_SRC_DIR)/log4sh $(BUILD_DIR)
 
 build-prep:
 	@mkdir -p $(BUILD_DIR)
@@ -46,12 +46,20 @@ docs-transform-docbook: docs-prep
 	@xsltproc $(HTML_XSL) $(DOCBOOK_BUILD_DIR)/log4sh.xml >$(BUILD_DIR)/log4sh.html
 
 test: test-prep
-	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-log4sh )
+	@echo -------------------------------------------------------------------------------
+	@echo "testing log4sh from an initial properties configuration"
+	@sleep 2
+	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-prop-config )
+	@echo -------------------------------------------------------------------------------
+	@echo "testing log4sh via runtime configuration"
+	@sleep 2
+	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-runtime-config )
 
 test-prep: build
 	@mkdir -p $(TEST_DIR)
-	cp -p $(TEST_SRC_DIR)/test-* $(TEST_DIR)
-	cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
+	@cp -p $(TEST_SRC_DIR)/test-* $(TEST_DIR)
+	@cp -p $(TEST_SRC_DIR)/log4sh.properties $(TEST_DIR)
+	@cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
 
 dist: build docs
 	@mkdir $(DIST_DIR)
