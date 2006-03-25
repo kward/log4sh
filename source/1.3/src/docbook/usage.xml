@@ -98,19 +98,19 @@ log4sh.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
 #
 
 # source log4sh (disabling properties file warning)
-LOG4SH_CONFIGURATION="none" . ./log4sh
+LOG4SH_CONFIGURATION='none' . ./log4sh
 
 # set the global logging level
 logger_setLevel INFO
 
-# close the STDOUT appender, and add a new STDERR appender
+# close the default STDOUT appender, and add a new STDERR appender
 appender_close stdout
 logger_addAppender stderr
 appender_setType stderr FileAppender
 appender_file_setFile stderr STDERR
 
 # say Hello to the world
-logger_info "Hello, world"
+logger_info 'Hello, world'
 ]]></programlisting>
     </example>
   </section>
@@ -118,4 +118,5 @@ logger_info "Hello, world"
   <section id="usage-logging"><title>Logging with log4sh</title>
     <para>Once log4sh is loaded, logging is as simple as calling the appropriate logging function with a message to be logged.  Take a look at the above examples to see just how easy it was to log the statement <literal>"Hello, world"</literal> at an &info; level.</para>
   </section>
+
 </chapter>
