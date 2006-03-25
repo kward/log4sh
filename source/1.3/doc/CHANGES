@@ -1,5 +1,13 @@
 Changes with 1.3.4
 
+[kwd] added support for a LOG4SH_CONFIG_PREFIX variable.  if this variable is
+set before log4sh is loaded, then the default prefix (normally 'log4sh') will
+be overridden.  added so that log4j.properties files can be read with no
+changes necessary.  (e.g. "LOG4SH_CONFIG_PREFIX='log4j'")
+
+[kwd] changed the handling of the LOG4SH_CONFIGURATION property to make the
+implementation a bit cleaner
+
 [kwd] reworked the test scripts so that there is a test-prop-config script that
 sets up a logging environment from a log4sh.properties file, and a
 test-runtime-config script that sets up the exact same environment, but at
