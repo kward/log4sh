@@ -20,6 +20,9 @@
 # </s:header>
 #*/
 
+# treat unset variables as an error when substituting
+set -u
+
 # configure log4sh debugging.  set the LOG4SH_DEBUG environment variable to any
 # non-empty value to enable debugging.
 LOG4SH_DEBUG=${LOG4SH_DEBUG:+' '}
@@ -81,9 +84,6 @@ unset _const
 #
 # variables
 #
-
-# treat unset variables as an error when substituting
-set -u
 
 __log4sh_filename=`basename $0`
 __log4sh_tmpDir=''
@@ -2586,7 +2586,7 @@ trap '_log4sh_cleanup EXIT' EXIT
 trap '_log4sh_cleanup TERM' TERM
 
 # load the properties file
-$LOG4SH_DEBUG echo "log4sh:DEBUG LOG4SH_CONFIGURATION=${LOG4SH_CONFIGURATION}" >&2
+${LOG4SH_DEBUG} echo "log4sh:DEBUG LOG4SH_CONFIGURATION=${LOG4SH_CONFIGURATION}" >&2
 if [ -r "${LOG4SH_CONFIGURATION}" ]; then
   log4sh_readProperties "${LOG4SH_CONFIGURATION}"
 else
