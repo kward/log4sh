@@ -18,6 +18,9 @@ all: build docs
 build: build-prep
 	@cp -p $(SHELL_SRC_DIR)/log4sh $(BUILD_DIR)
 
+build-clean:
+	rm -fr $(BUILD_DIR)
+
 build-prep:
 	@mkdir -p $(BUILD_DIR)
 
@@ -55,6 +58,9 @@ test: test-prep
 	@sleep 2
 	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-runtime-config )
 
+test-clean:
+	rm -fr $(TEST_DIR)
+
 test-prep: build
 	@mkdir -p $(TEST_DIR)
 	@cp -p $(TEST_SRC_DIR)/test-* $(TEST_DIR)
@@ -66,8 +72,7 @@ dist: build docs
 	cp -p $(BUILD_DIR)/log4sh $(DIST_DIR)
 	cp -p $(BUILD_DIR)/log4sh.html $(DIST_DIR)
 
-clean:
-	rm -fr $(BUILD_DIR)
+clean: build-clean test-clean
 
 distclean: clean
 	rm -fr $(DIST_DIR)
