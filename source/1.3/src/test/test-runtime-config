@@ -32,41 +32,44 @@ loadLog4sh()
 }
 
 #-----------------------------------------------------------------------------
-# preconfigure log4sh
+# pre-configure log4sh
 #
 # the functions called in this section are meant to exactly reproduce what the
 # log4sh.properties does so that the common tests that are run generate the
 # same output.
 #
 
-# close the default console appender
-appender_close stdout
-
-# setup the default logging level to INFO
-logger_setLevel INFO
-
-# add a file appender at the default level that logs to STDERR
-logger_addAppender mySTDERR
-appender_setType mySTDERR FileAppender
-appender_file_setFile mySTDERR STDERR
-
-# add a file appender at the DEBUG level with the default layout
-logger_addAppender mySimple
-appender_setLevel mySimple DEBUG
-appender_setType mySimple FileAppender
-appender_file_setFile mySimple log4sh-simple.log
-
-# add file appender at the default level with a Pattern layout
-logger_addAppender myPattern
-appender_setType myPattern FileAppender
-appender_file_setFile myPattern log4sh-pattern.log
-appender_setLayout myPattern PatternLayout
-appender_setPattern myPattern '%d [%p] (%F) - %m%n'
-
-# add a syslog appender at the default level with a facility of local4
-logger_addAppenderWithPattern mySyslog '[%p] (%F) - %m%n'
-appender_setType mySyslog SyslogAppender
-appender_syslog_setFacility mySyslog local4
+configLog4sh()
+{
+  # close the default console appender
+  appender_close stdout
+  
+  # setup the default logging level to INFO
+  logger_setLevel INFO
+  
+  # add a file appender at the default level that logs to STDERR
+  logger_addAppender mySTDERR
+  appender_setType mySTDERR FileAppender
+  appender_file_setFile mySTDERR STDERR
+  
+  # add a file appender at the DEBUG level with the default layout
+  logger_addAppender mySimple
+  appender_setLevel mySimple DEBUG
+  appender_setType mySimple FileAppender
+  appender_file_setFile mySimple log4sh-simple.log
+  
+  # add file appender at the default level with a Pattern layout
+  logger_addAppender myPattern
+  appender_setType myPattern FileAppender
+  appender_file_setFile myPattern log4sh-pattern.log
+  appender_setLayout myPattern PatternLayout
+  appender_setPattern myPattern '%d [%p] (%F) - %m%n'
+  
+  # add a syslog appender at the default level with a facility of local4
+  logger_addAppenderWithPattern mySyslog '[%p] (%F) - %m%n'
+  appender_setType mySyslog SyslogAppender
+  appender_syslog_setFacility mySyslog local4
+}
 
 #-----------------------------------------------------------------------------
 # main
@@ -75,8 +78,9 @@ appender_syslog_setFacility mySyslog local4
 # setup trap handler.  must be done before loading log4sh
 trap 'test_cleanup' EXIT
 
-# load log4sh (with no configuration file)
+# load and configure log4sh
 loadLog4sh none
+configLog4sh
 
 # load and run the common tests
 commonTests='test-common'

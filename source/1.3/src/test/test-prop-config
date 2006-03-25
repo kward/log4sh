@@ -38,6 +38,11 @@ loadLog4sh()
 # runtime configuration test script does so that the common tests that are run
 # generate the same output.
 
+configLog4sh()
+{
+  :
+}
+
 #-----------------------------------------------------------------------------
 # main
 #
@@ -45,8 +50,9 @@ loadLog4sh()
 # setup trap handler.  must be done before loading log4sh
 trap 'test_cleanup' EXIT
 
-# load log4sh
+# load and configure log4sh
 loadLog4sh
+configLog4sh
 
 # load and run the common tests
 commonTests='test-common'
