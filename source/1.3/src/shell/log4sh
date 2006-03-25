@@ -1120,7 +1120,7 @@ logger_popThreadName()
     __log4shThreadStack=`_log4sh_popStack "$__log4shThreadStack"`
     __log4shThreadName=`_log4sh_peekStack "$__log4shThreadStack"`
   else
-    echo "log4sh:WARN no more thread names available on thread name stack." >&2
+    echo 'log4sh:WARN no more thread names available on thread name stack.' >&2
   fi
 }
 
@@ -1681,7 +1681,7 @@ appender_setLevel()
 #*/
 appender_close()
 {
-  appender_setLevel $1 CLOSED
+  appender_setLevel $1 'CLOSED'
 }
 
 #-----------------------------------------------------------------------------
@@ -1772,20 +1772,20 @@ appender_file_setFile()
 
     # create the file (if it isn't already)
     if [ $_return -eq $__LOG4SH_TRUE \
-      -a ! "$_file" '=' "-" \
-      -a ! "$_file" '=' "STDERR" \
+      -a ! "$_file" '=' '-' \
+      -a ! "$_file" '=' 'STDERR' \
       -a ! -f "$_file" \
     ]; then
       touch $_file 2>/dev/null
       _result=$?
       # determine success of touch command
       if [ $_result -eq 1 ]; then
-	echo "log4sh:ERROR appender_file_setFile(): could not create file; closing appender" >&2
+	echo 'log4sh:ERROR appender_file_setFile(): could not create file; closing appender' >&2
 	appender_setLevel $_appender $__LOG4SH_LEVEL_CLOSED
       fi
     fi
   else
-    echo "log4sh:ERROR appender_file_setFile(): missing appender and/or file" >&2
+    echo 'log4sh:ERROR appender_file_setFile(): missing appender and/or file' >&2
     _return=$__LOG4SH_FALSE
   fi
 
@@ -2197,7 +2197,7 @@ appender_syslog_setFacility()
   _facility=$2
 
   if [ $# -ne 2 ]; then
-    echo "log4sh:ERROR appender_syslog_setFacility(): missing attributes" >&2
+    echo 'log4sh:ERROR appender_syslog_setFacility(): missing attributes' >&2
     return $__LOG4SH_FALSE
   fi
 
@@ -2319,9 +2319,9 @@ appender_syslog_setHost()
 #*/
 log()
 {
-  _tag=${1}
+  _tag=$1
   shift
-  _msg="${@}"
+  _msg="$@"
 
   _thisLevel=`_log4sh_tag2level ${_tag}`
 
@@ -2329,7 +2329,7 @@ log()
   for _appenderIndex in ${__log4shAppenderCounts}; do
     # determine appender level
     _appenderLevelTag=`_appender_getLevelByIndex ${_appenderIndex}`
-    if [ "${_appenderLevelTag}" = "-" ]; then
+    if [ "${_appenderLevelTag}" = '-' ]; then
       # continue if requested is level less than general level
       [ ! ${__log4shLevel} -le ${_thisLevel} ] && continue
     else
@@ -2361,7 +2361,7 @@ log()
       ${__LOG4SH_APPENDER_ROLLING_FILE}|\
       ${__LOG4SH_APPENDER_DAILY_ROLLING_FILE})
 	_appenderFile=`_appender_file_getFileByIndex ${_appenderIndex}`
-	if [ "${_appenderFile}" = "STDERR" ]; then
+	if [ "${_appenderFile}" = 'STDERR' ]; then
 	  echo "${_thisLayout}" >&2
 	elif [ "${_appenderFile}" != "-" ]; then
 	  # do rotation
@@ -2586,19 +2586,22 @@ trap '_log4sh_cleanup EXIT' EXIT
 trap '_log4sh_cleanup TERM' TERM
 
 # load the properties file
-${LOG4SH_DEBUG} echo "log4sh:DEBUG LOG4SH_CONFIGURATION=${LOG4SH_CONFIGURATION}" >&2
-if [ -r "${LOG4SH_CONFIGURATION}" ]; then
+${LOG4SH_DEBUG} \
+  echo "log4sh:DEBUG LOG4SH_CONFIGURATION=${LOG4SH_CONFIGURATION}" >&2
+if [ "${LOG4SH_CONFIGURATION}" != 'none' -a -r "${LOG4SH_CONFIGURATION}" ]
+then
   log4sh_readProperties "${LOG4SH_CONFIGURATION}"
 else
-  if [ "${LOG4SH_CONFIGURATION}" != "none" ]; then
+  if [ "${LOG4SH_CONFIGURATION}" != 'none' ]; then
     echo 'log4sh:WARN No appenders could be found.' >&2
     echo 'log4sh:WARN Please initalize the log4sh system properly.' >&2
   fi
+
   logger_setLevel ERROR
   logger_addAppender stdout
   appender_setType stdout ConsoleAppender
   appender_setLayout stdout PatternLayout
-  appender_setPattern stdout "%-4r [%t] %-5p %c %x - %m%n"
+  appender_setPattern stdout '%-4r [%t] %-5p %c %x - %m%n'
 fi
 
 # treat unset variables as an error when substituting (disable)
