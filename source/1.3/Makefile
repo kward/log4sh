@@ -16,7 +16,7 @@ HTML_XSL=$(PWD)/share/docbook/tldp-xsl/21MAR2004/html/tldp-one-page.xsl
 all: build docs
 
 build: build-prep
-	@cp -p $(SHELL_SRC_DIR)/log4sh $(BUILD_DIR)
+	cp -p $(SHELL_SRC_DIR)/log4sh $(BUILD_DIR)
 
 build-clean:
 	rm -fr $(BUILD_DIR)
@@ -63,9 +63,9 @@ test-clean:
 
 test-prep: build
 	@mkdir -p $(TEST_DIR)
-	@cp -p $(TEST_SRC_DIR)/test-* $(TEST_DIR)
-	@cp -p $(TEST_SRC_DIR)/log4sh.properties $(TEST_DIR)
-	@cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
+	cp -p $(TEST_SRC_DIR)/test-* $(TEST_DIR)
+	cp -p $(TEST_SRC_DIR)/log4sh.properties $(TEST_DIR)
+	cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
 
 dist: build docs
 	@mkdir $(DIST_DIR)
