@@ -20,28 +20,25 @@
 # </s:header>
 #*/
 
-# (possibly) declare variables that might come in from outside
-[ -z "${LOG4SH_CONFIGURATION}" ] && LOG4SH_CONFIGURATION=''
-
 # configure log4sh debugging.  set the LOG4SH_DEBUG environment variable to any
 # non-empty value to enable debugging.
 LOG4SH_DEBUG=${LOG4SH_DEBUG:+' '}
 LOG4SH_DEBUG=${LOG4SH_DEBUG:-':'}
 ${LOG4SH_DEBUG} echo 'log4sh:DEBUG debug output enabled' >&2
 
-# treat unset variables as an error when substituting
-set -u
-
 #
 # constants
 #
-__LOG4SH_VERSION=1.3.4pre
+__LOG4SH_VERSION=1.3.4
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
 __LOG4SH_ERROR=2
 
 __LOG4SH_CONFIGURATION='log4sh.properties'
+LOG4SH_CONFIGURATION="${LOG4SH_CONFIGURATION:-$__LOG4SH_CONFIGURATION}"
+__LOG4SH_CONFIG_PREFIX='log4sh'
+LOG4SH_CONFIG_PREFIX="${LOG4SH_CONFIG_PREFIX:-$__LOG4SH_CONFIG_PREFIX}"
 
 __LOG4SH_APPENDER_CONSOLE='ConsoleAppender'
 __LOG4SH_APPENDER_DAILY_ROLLING_FILE='DailyRollingFileAppender'
@@ -84,6 +81,10 @@ unset _const
 #
 # variables
 #
+
+# treat unset variables as an error when substituting
+set -u
+
 __log4sh_filename=`basename $0`
 __log4sh_tmpDir=''
 __log4sh_trapsFile=''
@@ -825,7 +826,8 @@ log4sh_readProperties()
   _file=$1
 
   _tmpFile="${__log4sh_tmpDir}/properties"
-  grep "^log4sh\." $_file >$_tmpFile
+  $LOG4SH_DEBUG echo "log4sh:DEBUG LOG4SH_CONFIG_PREFIX=${LOG4SH_CONFIG_PREFIX}"
+  grep "^${LOG4SH_CONFIG_PREFIX}\." $_file >$_tmpFile
   _rp_count=`cat $_tmpFile |wc -l`
   _rp_i=1
   while [ $_rp_i -le $_rp_count ]; do
@@ -2584,14 +2586,13 @@ trap '_log4sh_cleanup EXIT' EXIT
 trap '_log4sh_cleanup TERM' TERM
 
 # load the properties file
-if [ -n "$LOG4SH_CONFIGURATION" -a -r "$LOG4SH_CONFIGURATION" ]; then
-  log4sh_readProperties $LOG4SH_CONFIGURATION
-elif [ -z "$LOG4SH_CONFIGURATION" -a -r "$__LOG4SH_CONFIGURATION" ]; then
-  log4sh_readProperties $__LOG4SH_CONFIGURATION
+$LOG4SH_DEBUG echo "log4sh:DEBUG LOG4SH_CONFIGURATION=${LOG4SH_CONFIGURATION}" >&2
+if [ -r "${LOG4SH_CONFIGURATION}" ]; then
+  log4sh_readProperties "${LOG4SH_CONFIGURATION}"
 else
-  if [ "$LOG4SH_CONFIGURATION" != "none" ]; then
-    echo "log4sh:WARN No appenders could be found." >&2
-    echo "log4sh:WARN Please initalize the log4sh system properly." >&2
+  if [ "${LOG4SH_CONFIGURATION}" != "none" ]; then
+    echo 'log4sh:WARN No appenders could be found.' >&2
+    echo 'log4sh:WARN Please initalize the log4sh system properly.' >&2
   fi
   logger_setLevel ERROR
   logger_addAppender stdout
