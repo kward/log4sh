@@ -10,16 +10,26 @@ whereAmI=`dirname $0`
 whereAmI=`cd "${whereAmI}" 2>/dev/null && pwd || echo "${whereAmI}"`
 
 #-----------------------------------------------------------------------------
-# load log4sh
+# functions
 #
 
-if [ -r log4sh ]; then
-  . ./log4sh
-else
-  echo "ERROR: could not load (log4sh) >&2"
-  exit 1
-fi
-logger_trace "whoAmI=${whoAmI} whereAmI=${whereAmI}"
+test_cleanup()
+{
+  echo '### test script cleanup function called###'
+}
+
+loadLog4sh()
+{
+  config="$1"
+
+  if [ -r log4sh ]; then
+    LOG4SH_CONFIGURATION="${config}" . ./log4sh
+  else
+    echo "ERROR: could not load (log4sh) >&2"
+    exit 1
+  fi
+  logger_trace "whoAmI=${whoAmI} whereAmI=${whereAmI}"
+}
 
 #-----------------------------------------------------------------------------
 # pre-configure log4sh
@@ -29,9 +39,16 @@ logger_trace "whoAmI=${whoAmI} whereAmI=${whereAmI}"
 # generate the same output.
 
 #-----------------------------------------------------------------------------
-# load and run the common tests
+# main
 #
 
+# setup trap handler.  must be done before loading log4sh
+trap 'test_cleanup' EXIT
+
+# load log4sh
+loadLog4sh
+
+# load and run the common tests
 commonTests='test-common'
 if [ -r "${commonTests}" ]; then
   . ${whereAmI}/${commonTests}

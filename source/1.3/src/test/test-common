@@ -6,13 +6,6 @@
 # from log4j.
 #
 
-# setup an exit trap handler
-test_cleanup()
-{
-  echo "### test script cleanup function called ###"
-}
-trap 'test_cleanup' EXIT
-
 #
 # setup the initial logging environment
 #
