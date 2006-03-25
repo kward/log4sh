@@ -25,7 +25,7 @@ loadLog4sh()
   if [ -r log4sh ]; then
     LOG4SH_CONFIGURATION="${config}" . ./log4sh
   else
-    echo "ERROR: could not load (log4sh) >&2"
+    echo "ERROR: could not load (log4sh)" >&2
     exit 1
   fi
   logger_trace "whoAmI=${whoAmI} whereAmI=${whereAmI}"
