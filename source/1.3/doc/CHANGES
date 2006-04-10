@@ -36,7 +36,7 @@ showing.  (thanks to Stephan Hegel for pointing out the mismatch)
 [kwd] fixed bug that caused only the first conversion character in a
 PatternLayout to be replaced.  (credits to Aaron Rodden for the patch)
 
-[kwd] worked on the PatternLayout 'd' conversion character .  it now supports
+[kwd] worked on the PatternLayout 'd' conversion character.  it now supports
 giving a date specifier (e.g. %d{ISODATE}), but whatever is specified is
 ignored.  it was done to better support log4j properties files that are
 converted.
