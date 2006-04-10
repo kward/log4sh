@@ -1,3 +1,9 @@
+Changes with 1.3.5
+
+[kwd] fixed bug where newlines in a message caused parsing problems. (credits
+to Tim Kordick for pointing this out)
+
+
 Changes with 1.3.4
 
 [kwd] added support for a LOG4SH_CONFIG_PREFIX variable.  if this variable is

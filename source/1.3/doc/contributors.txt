@@ -1,4 +1,4 @@
-The following people have contributed to log4sh.
+The following people have contributed in some way or another to log4sh.
 
 Aaron Rodden
 Aaron Walker
@@ -7,5 +7,6 @@ Kate Ward
 Mickael Canevet
 Omner Calhoun
 Steve Etchelecu
+Tim Kordick
 
 $Revision$
