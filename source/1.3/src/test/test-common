@@ -141,5 +141,9 @@ appender_setPattern mySTDERR '%d %p - %m%n'
 logger_info "this message should have a backslash character hier >\<"
 logger_info "this message should have an andpersand character hier >&<"
 
+# test grabbing output from the uname command
+logger_info "this system's uname: `uname -a`"
+logger_info "output of 'ls -l': `ls -l`"
+
 # test the calling of the previous trap handler
 logger_info "after this message, you should see a non-log4sh message that a cleanup function was called.  if you do, than you know that the trap handler of this test script was called, and that log4sh was able to properly call that handler upon exit."
