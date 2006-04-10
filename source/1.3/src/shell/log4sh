@@ -1234,7 +1234,10 @@ _appender_parsePattern()
   # escape any '\' and '&' chars in the message
   _msg=`echo "${_msg}" |sed 's/\\\\/\\\\\\\\/g;s/&/\\\\&/g'`
 
-  # parse the pattern
+  # deal with any newlines in the message
+  _msg=`echo "${_msg}" |tr '\n' ''`
+
+  # parse the pattern, and restore newlines
   _pattern=`echo "${_pattern}" |sed \
     -e 's/%c/shell/g' \
     -e 's/%d{[^}]*}/%d/g' -e "s/%d/${_date}/g" \
@@ -1247,7 +1250,7 @@ _appender_parsePattern()
     -e 's/%x//g' \
     -e 's/%X{/$\{/g' \
     -e 's/%%m/%%%m/g' -e 's/%%/%/g' \
-    -e "s%m${_msg}"`
+    -e "s%m${_msg};y//\n/"`
   if [ ${_doEval} -eq ${__LOG4SH_FALSE} ]; then
     echo "${_pattern}"
   else
