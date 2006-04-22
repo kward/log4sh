@@ -1,4 +1,5 @@
 # $Id$
+# vim:syntax=sh:sw=2:ts=2:expandtab
 #
 # Author: Kate Ward <kate.ward@forestent.com>
 #
@@ -141,9 +142,15 @@ appender_setPattern mySTDERR '%d %p - %m%n'
 logger_info "this message should have a backslash character hier >\<"
 logger_info "this message should have an andpersand character hier >&<"
 
-# test grabbing output from the uname command
+# test grabbing output from some various commands
 logger_info "this system's uname: `uname -a`"
 logger_info "output of 'ls -l': `ls -l`"
+
+# test sending things to log4sh via pipes
+echo "if this message is seen, then the sending of a message via a pipe works" |logger_info
+# try the same 'ls -l' like above, but with a pipe
+logger_info "output of 'ls -l' [again] via pipe in next logging statement..."
+ls -l |logger_info
 
 # test the calling of the previous trap handler
 logger_info "after this message, you should see a non-log4sh message that a cleanup function was called.  if you do, than you know that the trap handler of this test script was called, and that log4sh was able to properly call that handler upon exit."
