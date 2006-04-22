@@ -1,4 +1,5 @@
 # $Id$
+# vim:syntax=sh:sw=2:ts=2:expandtab
 #/**
 # <?xml version="1.0" encoding="UTF-8"?>
 # <s:shelldoc xmlns:s="http://www.forestent.com/2005/XSL/ShellDoc">
@@ -2324,6 +2325,7 @@ log()
 {
   _tag=$1
   shift
+  [ $# -gt 0 ] && _msg="$@" || _msg=`cat`
   _msg="$@"
 
   _thisLevel=`_log4sh_tag2level ${_tag}`
@@ -2445,7 +2447,7 @@ log()
 #*/
 logger_trace()
 {
-  log TRACE "$@"
+  [ $# -gt 0 ] && log TRACE "$@" || log TRACE `cat`
 }
 
 #/**
@@ -2470,7 +2472,7 @@ logger_trace()
 #*/
 logger_debug()
 {
-  log DEBUG "$@"
+  [ $# -gt 0 ] && log DEBUG "$@" || log DEBUG `cat`
 }
 
 #/**
@@ -2495,7 +2497,7 @@ logger_debug()
 #*/
 logger_info()
 {
-  log INFO "$@"
+  [ $# -gt 0 ] && log INFO "$@" || log INFO `cat`
 }
 
 #/**
@@ -2520,7 +2522,7 @@ logger_info()
 #*/
 logger_warn()
 {
-  log WARN "$@"
+  [ $# -gt 0 ] && log WARN "$@" || log WARN `cat`
 }
 
 #/**
@@ -2545,7 +2547,7 @@ logger_warn()
 #*/
 logger_error()
 {
-  log ERROR "$@"
+  [ $# -gt 0 ] && log ERROR "$@" || log ERROR `cat`
 }
 
 #/**
@@ -2570,7 +2572,7 @@ logger_error()
 #*/
 logger_fatal()
 {
-  log FATAL "$@"
+  [ $# -gt 0 ] && log FATAL "$@" || log FATAL `cat`
 }
 
 #
