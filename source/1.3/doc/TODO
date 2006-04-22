@@ -13,29 +13,6 @@ SyslogAppender
 
 - add more error checking on the appender_*set* functions.  see smtp_setSubject
 
-- add get*ByName functions
-
-- try a `wc -l` in the _log4sh_getArrayLength function
-
-- look into using $(< file) to replace cat command
-
-- look into something like 'trap ". $HOME/.atexit" 0' for use when log4sh
-closes to remove temporary files/dirs
-
-TmpBase=${TMPDIR:=/tmp}/myscript.$$
-mkdir "$TmpBase" || exit 1	# create directory
-chmod 700 "$TmpBase" || exit 1	# restrict access
-
-# Remove all temporary files after program termination
-# or at receiption of a signal:
-trap 'rm -rf "$TmpBase" >/dev/null 2>&1' 0
-trap "exit 2" 1 2 3 15
-
-# The following files will be remove automatically:
-input=$TmpBase/input
-output=$TmpBase/output
-#...
-
 - resolve absolute filename
 D=`dirname "$relpath"`
 B=`basename "$relpath"`
