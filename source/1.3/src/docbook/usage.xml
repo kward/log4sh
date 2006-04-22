@@ -126,7 +126,7 @@ logger_info 'Hello, world'
       <programlisting>logger_info 'message to log'</programlisting>
     </example>
     
-    <para>There is a second way of logging as well. The second method is via pipes. What this method is really good for is logging the standard output (STDOUT) of a command to the logfile. Piping <command>echo</command> statements is a bit silly, but something like piping the output of a <command>ls</command> is more practical (e.g. <literal>ls -l |logger_info</literal>).
+    <para>There is a second way of logging as well. The second method is via pipes. What this method is really good for is logging the standard output (STDOUT) of a command to the logfile. Piping <command>echo</command> statements is a bit silly, but something like piping the output of a <command>ls</command> is more practical (e.g. <literal>ls -l |logger_info</literal>).</para>
 
     <example><title>Alternate method of logging a message</title>
       <programlisting>echo 'message to log' |logger_info</programlisting>
