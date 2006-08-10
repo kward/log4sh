@@ -1,5 +1,22 @@
 Changes with 1.3.5
 
+[kwd] implemented passing data to logger_*() functions via pipes. this was
+implemented once before, but it somehow got lost.
+
+[kwd] added dynamic caching of the appenders as function calls to reduce the
+amount of work needed for each logger_*() function call. done to increase
+performance, especially under cygwin and on slower cpus.
+
+[kwd] added functionality so that filenames specified for FileAppenders in the
+properties file can contain shell variables that will be evaluated at runtime
+(e.g. 'log4sh.appender.log.File = ${TMPDIR}/output.log')
+
+[kwd] fixed bug where the IFS was not being correctly set back after a logging
+statement was called
+
+[kwd] now saves the current set of shell options stored in $- and restores them
+after log4sh is sourced into memory
+
 [kwd] fixed bug where newlines in a message caused parsing problems. (credits
 to Tim Kordick for pointing this out)
 
