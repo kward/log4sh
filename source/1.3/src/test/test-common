@@ -127,7 +127,7 @@ appender_close mySyslog
 # test the sending of multiple options to a logger function
 logger_info this is a test message without quotes to verify that a logging function can be called without wrapping the message in quotes.
 
-# test conversion characters
+# testing %X conversion character - MDC (Mapped Diagnostic Context)
 logger_info "the next test tests the %X and %% conversion characters"
 appender_setPattern mySTDERR '%d %p [%X{percent}%%] - %m%n'
 percent=30
@@ -136,6 +136,13 @@ percent=75
 logger_info "got some work more done"
 percent=100
 logger_info "our work is done"
+appender_setPattern mySTDERR '%d %p - %m%n'
+
+# workaround implementation of separated date and time
+logInfo() { mdcD=`date "+%Y-%m-%d"`;mdcT=`date "+%H:%M:%S"`;logger_info "$@"; }
+
+appender_setPattern mySTDERR '%X{mdcD}|%X{mdcT}|%m%n'
+logInfo "MDC test including the date/time"
 appender_setPattern mySTDERR '%d %p - %m%n'
 
 # test proper parsing of the '\' and '&' characters
@@ -154,3 +161,7 @@ ls -l |logger_info
 
 # test the calling of the previous trap handler
 logger_info "after this message, you should see a non-log4sh message that a cleanup function was called.  if you do, than you know that the trap handler of this test script was called, and that log4sh was able to properly call that handler upon exit."
+
+# test sending info to a log via a pipe
+echo "test an ls via pipe" |logger_info
+ls -l / |logger_info
