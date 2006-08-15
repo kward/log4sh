@@ -5,7 +5,9 @@ implemented once before, but it somehow got lost.
 
 [kwd] added dynamic caching of the appenders as function calls to reduce the
 amount of work needed for each logger_*() function call. done to increase
-performance, especially under cygwin and on slower cpus.
+performance, especially under cygwin and on slower cpus. unfortunately, it
+seems that I have added enough other stuff to the script that it is now even
+slower under cygwin, despite reducing the work needed to happen.
 
 [kwd] added functionality so that filenames specified for FileAppenders in the
 properties file can contain shell variables that will be evaluated at runtime

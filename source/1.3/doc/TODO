@@ -1,6 +1,16 @@
 # $Id$
 
-- reimplement pipes (e.g. ls |logger_info)??
+- the logger command is now wrapped in a ( exec ) wrapper in case it isn't
+  there. an error should be thrown at least the first time it was attempted to
+  be used. same goes for mail and trap.
+
+- implement file descriptor functions allocFD and freeFD and replace the hard
+  coded FD usage in the log4sh_readProperties and _appender_source functions
+
+- validate that the return_test shell test works under cygwin and solaris. if
+  so, remove the "unset" stuff before returns as they aren't needed
+
+- replace usage of __log4sh_tmpDir with a call to _log4sh_getTempDir
 
 - make logger level's case insensitive??
 
