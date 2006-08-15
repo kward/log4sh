@@ -293,8 +293,7 @@ _log4sh_mktempDir()
   ( exec mktemp -dqt log4sh.XXXXXX 2>/dev/null ) && return
 
   # the standard mktemp didn't work.  doing our own.
-  RANDOM="${RANDOM:-}"
-  if [ -n "${RANDOM}" ]; then
+  if [ -n "${RANDOM:-}" ]; then
     # $RANDOM works
     _random=${RANDOM}${RANDOM}${RANDOM}$$
   else
@@ -308,6 +307,8 @@ _log4sh_mktempDir()
     echo 'log4sh:FATAL could not create temporary directory! exiting' >&2
     exit 1
   }
+
+  ${LOG4SH_DEBUG} echo "log4sh:DEBUG temporary directory (${_tmpDir})" >&2
   echo ${_tmpDir}
   unset _date _random _tmpDir
 }
@@ -1295,6 +1296,7 @@ _appender_parsePattern()
   _priority=$2
   _msg=$3
 
+  _date=''
   _doEval=${__LOG4SH_FALSE}
 
   # determine if various commands must be run
@@ -1329,7 +1331,8 @@ _appender_parsePattern()
     -e 's/%x//g' \
     -e 's/%X{/$\{/g' \
     -e 's/%%m/%%%m/g' -e 's/%%/%/g' \
-    -e "s%m${_msg};y//\n/"`
+    -e "s%m${_msg};y//
+/"`
   if [ ${_doEval} -eq ${__LOG4SH_FALSE} ]; then
     echo "${_pattern}"
   else
