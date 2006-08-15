@@ -161,7 +161,3 @@ ls -l |logger_info
 
 # test the calling of the previous trap handler
 logger_info "after this message, you should see a non-log4sh message that a cleanup function was called.  if you do, than you know that the trap handler of this test script was called, and that log4sh was able to properly call that handler upon exit."
-
-# test sending info to a log via a pipe
-echo "test an ls via pipe" |logger_info
-ls -l / |logger_info
