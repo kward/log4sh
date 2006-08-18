@@ -1,0 +1,248 @@
+#! /bin/sh
+# $Id$
+
+myName=`basename $0`
+myPath=`dirname $0`
+
+DEBUG=${DEBUG:+' '}
+DEBUG=${DEBUG:-':'}
+${DEBUG} echo 'DEBUG output enabled' >&2
+
+APP_NAME='stdout'
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+commonPatternAssert()
+{
+  pattern=$1
+  expected=$2
+  msg=$3
+
+  appender_setPattern ${APP_NAME} "${pattern}"
+  actual=`logger_info 'dummy'`
+  ${DEBUG} echo "pattern='${pattern}' expected='${expected}' actual='${actual}'"
+  msg=`eval "echo \"${msg}\""`
+  assertEquals "${msg}" "${expected}" "${actual}"
+}
+
+testCategoryPattern()
+{
+  pattern='%c'
+  expected='shell'
+  msg="category \(%c\) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+commonDatePatternAssert()
+{
+  pattern=$1
+  regex=$2
+
+  appender_setPattern ${APP_NAME} "${pattern}"
+  result=`logger_info 'dummy'`
+  matched=`echo ${result} |sed "s/${regex}//"`
+  ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
+
+  assertFalse \
+    "date pattern '${pattern}' failed: empty result '${result}'" \
+    "[ -z \"${result}\" ]" || return
+  assertTrue \
+    "date pattern '${pattern}' failed: result '${result}' did not match the regex '${regex}'" \
+    "[ -z \"${matched}\" ]" || return
+}
+
+testDatePattern()
+{
+  # without conversion specifier (Unix date format '+%Y-%m-%d %H:%M:%S')
+  pattern='%d'
+  regex='^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}'
+  commonDatePatternAssert "${pattern}" "${regex}" || return
+
+  # ISODATE conversion specifier
+  pattern='%d{ISODATE}'
+  regex='^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}'
+  commonDatePatternAssert "${pattern}" "${regex}" || return
+
+  # custom conversion specifier
+  pattern='%d{HH:mm:ss,SSS}'
+  regex='^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}'
+  commonDatePatternAssert "${pattern}" "${regex}" || return
+}
+
+testFileNamePattern()
+{
+  pattern='%F'
+  expected="${myName}"
+  msg="file name \(%F\) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+testLineNumberPattern()
+{
+  pattern='%L'
+  expected=''
+  msg="line number \(%L\) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+testLineSeparatorPattern()
+{
+  pattern='%n'
+  expected=''
+  msg="line separator \(%n\) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+testMessagePattern()
+{
+  pattern='%m'
+  expected='dummy'
+  msg="message \(%m\) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+commonPriorityPatternAssert()
+{
+  expected=$2
+  msg=$3
+
+  appender_setPattern ${APP_NAME} "${pattern}"
+  actual=`logger_info 'dummy'`
+  ${DEBUG} echo "pattern='${pattern}' expected='${expected}' actual='${actual}'"
+  msg=`eval echo "${msg}"`
+  assertEquals "${msg}" "${expected}" "${actual}"
+}
+
+# note: this function using the base log() function rather than the logger_*()
+# functions as the functionality is effectively the same
+testPriorityPattern()
+{
+  currPriority=`appender_getLevel ${APP_NAME}`
+
+  pattern='%p'
+  appender_setPattern ${APP_NAME} "${pattern}"
+  for priority in TRACE DEBUG INFO WARN ERROR FATAL; do
+    appender_setLevel ${APP_NAME} ${priority}
+    result=`log ${priority} 'dummy'`
+    ${DEBUG} echo "pattern='${pattern}' priority='${priority}' result='${result}'"
+    assertTrue \
+      "priority pattern '${pattern}' failed: the requested priority of '${priority}' does not match the returned priority of '${result}'" \
+    "[ \"${priority}\" = \"${result}\" ]" || break
+  done
+
+  appender_setLevel ${APP_NAME} ${currPriority}
+}
+
+testRunTimePattern()
+{
+  pattern='%r'
+  regex='[0-9]*'
+
+  appender_setPattern ${APP_NAME} "${pattern}"
+  result=`logger_info 'dummy'`
+  matched=`echo ${result} |sed "s/${regex}//"`
+  ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
+
+  assertFalse \
+    "run time pattern '${pattern}' failed: empty result '${result}'" \
+    "[ -z \"${result}\" ]" || return
+  assertTrue \
+    "run time pattern '${pattern}' failed: result '${result}' did not match the regex '${regex}'" \
+    "[ -z \"${matched}\" ]" || return
+}
+
+testThreadNamePattern()
+{
+  pattern='%t'
+  expected=${__LOG4SH_THREAD_DEFAULT}
+  msg="thread name \(%t\) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+# NDC (Nested Diagnostic Context)
+testNDCPattern()
+{
+  pattern='%x'
+  expected=''
+  msg="NDC \(%x\) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+# MDC (Mapped Diagnostic Context)
+testMDCPattern()
+{
+  pattern='%X{LOGNAME}'
+  expected=${LOGNAME}
+  msg="MDC (\${pattern}) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+
+  # the %X pattern should not parse unless it has an environment variable name
+  # enclosed in {} chars following the 'X'
+  pattern='%X'
+  expected=${pattern}
+  msg="MDC (\${pattern}) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+testPercentPattern()
+{
+  pattern='%%'
+  expected='%'
+  msg="percent (\${pattern}) pattern failed: '\${expected}' != '\${actual}'"
+  commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
+}
+
+testDefaultPattern()
+{
+  # the pattern should be '%d %p - %m%n'
+  pattern=${__LOG4SH_PATTERN_DEFAULT}
+  regex='^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} INFO - dummy'
+  result=`logger_info 'dummy'`
+  matched=`echo ${result} |sed "s/${regex}//"`
+  ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
+
+  assertFalse \
+    "default pattern '${pattern}' failed: empty result '${result}'" \
+    "[ -z \"${result}\" ]" || return
+  assertTrue \
+    "default pattern '${pattern}' failed: result '${result}' did not match the regex '${regex}'" \
+    "[ -z \"${matched}\" ]" || return
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  # source log4sh
+  ${DEBUG} echo "loading log4sh" >&2
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+  logger_setLevel INFO
+  appender_setLayout ${APP_NAME} PatternLayout
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+suite()
+{
+  suite_addTest testCategoryPattern
+  suite_addTest testDatePattern
+  suite_addTest testFileNamePattern
+  suite_addTest testLineNumberPattern
+  suite_addTest testLineSeparatorPattern
+  suite_addTest testMessagePattern
+  suite_addTest testPriorityPattern
+  suite_addTest testRunTimePattern
+  suite_addTest testThreadNamePattern
+  suite_addTest testNDCPattern
+  suite_addTest testMDCPattern
+  suite_addTest testPercentPattern
+}
+
+# load shUnit and execute the unit tests
+. ./shunit

@@ -1,0 +1,19 @@
+# $Id$
+
+# 20-2F (escaping the leading space)
+\ !"#$%&'()*+,-./
+
+# 30-3F
+0123456789:;<=>?
+
+# 40-4F
+@ABCDEFGHIJKLMNO
+
+# 50-5F (escaping the backslash)
+PQRSTUVWXYZ[\\]^_
+
+# 60-6F
+`abcdefghijklmno
+
+# 70-7E (7F is the unprintable DEL char)
+pqrstuvwxzy{|}~

@@ -1,0 +1,59 @@
+#! /bin/sh
+# $Id$
+
+myName=`basename $0`
+myPath=`dirname $0`
+
+DEBUG=${DEBUG:+' '}
+DEBUG=${DEBUG:-':'}
+${DEBUG} echo 'DEBUG output enabled' >&2
+
+TEST_DATA="$0.data"
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+testAsciiCharset()
+{
+  # save stdin, and redirect it from a file
+  exec 9<&0 <"${TEST_DATA}"
+  while read expected; do
+    # ignore comment lines or blank lines
+    echo "${expected}" |egrep -v '^(#|$)' >/dev/null || continue
+
+    actual="`logger_info \"${expected}\"`"
+    ${DEBUG} echo "expected='${expected}' actual='${actual}'"
+    assertEquals "'${expected}' != '${actual}'" "${expected}" "${actual}"
+  done
+  # restore stdin
+  exec 0<&9 9<&-
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  # source log4sh
+  ${DEBUG} echo "loading log4sh" >&2
+  LOG4SH_CONFIGURATION="$0.log4sh" . ./log4sh
+}
+
+oneTimeTearDown()
+{
+  :
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+suite()
+{
+  suite_addTest testAsciiCharset
+}
+
+# load shUnit and execute the unit tests
+. ./shunit

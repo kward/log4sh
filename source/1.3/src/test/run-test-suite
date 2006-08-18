@@ -1,0 +1,19 @@
+#! /bin/sh
+# $Id$
+
+first=1
+for suite in test[A-Z]*; do
+  if [ -x ${suite} ]; then
+    # separate test runs with a blank line
+    if [ ${first} -eq 0 ]; then
+      echo
+    else
+      first=0
+    fi
+
+    # execute the test
+    suiteName=`expr "${suite}" : 'test\(.*\)'`
+    echo "--- executing the '${suiteName}' test suite ---" >&2
+    ( exec ./${suite} )
+  fi
+done
