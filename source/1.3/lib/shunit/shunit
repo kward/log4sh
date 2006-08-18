@@ -1,0 +1,198 @@
+# $Id$
+# vim:syntax=sh:sts=2
+#
+# shUnit 1.0.0
+# Shell Unit Test Framework
+#
+# written by Kate Ward <kate.ward@forestent.com>
+# released under the LGPL
+#
+# this module implements a unit test framework similar to JUnit
+#
+
+# shell flags for shunit:
+# u - treat unset variables as an error when performing parameter expansion
+__SHUNIT_SHELL_FLAGS='u'
+
+# save the current set of shell flags, and then set some for log4sh
+__shunit_oldShellFlags="$-"
+for _su_shellFlag in `echo "${__SHUNIT_SHELL_FLAGS}" |sed 's/\(.\)/\1 /g'`
+do
+  set -${_shunit_shellFlag}
+done
+
+# constants
+__SHUNIT_TRUE=0
+__SHUNIT_FALSE=1
+
+for _su_const in `set |grep "^__SHUNIT_" |cut -d= -f1`; do
+  readonly ${_su_const}
+done
+unset _su_const
+
+# variables
+__shunit_suite=''
+
+__shunit_testsPassed=0
+__shunit_testsFailed=0
+__shunit_testsTotal=0
+
+#------------------------------------------------------------------------------
+# unit test functions
+#
+
+assertEquals()
+{
+  _su_message=''
+  if [ $# -eq 3 ]; then
+    _su_message=$1
+    shift
+  fi
+  _su_expected=$1
+  _su_actual=$2
+
+  if [ "${_su_expected}" = "${_su_actual}" ]; then
+    _shunit_testPassed
+    return ${__SHUNIT_TRUE}
+  else
+    _shunit_testFailed "${_su_message}"
+    return ${__SHUNIT_FALSE}
+  fi
+}
+
+assertTrue()
+{
+  _su_message=''
+  if [ $# -eq 2 ]; then
+    _su_message=$1
+    shift
+  fi
+  _su_condition=$1
+
+  ( eval ${_su_condition} ) >/dev/null 2>&1
+  if [ $? -eq ${__SHUNIT_TRUE} ]; then
+    _shunit_testPassed
+    return ${__SHUNIT_TRUE}
+  else
+    _shunit_testFailed "${_su_message}"
+    return ${__SHUNIT_FALSE}
+  fi
+}
+
+assertFalse()
+{
+  _su_message=''
+  if [ $# -eq 2 ]; then
+    _su_message=$1
+    shift
+  fi
+  _su_condition=$1
+
+  ( eval ${_su_condition} ) >/dev/null 2>&1
+  if [ $? -eq ${__SHUNIT_FALSE} ]; then
+    _shunit_testPassed
+    return ${__SHUNIT_TRUE}
+  else
+    _shunit_testFailed "${_su_message}"
+    return ${__SHUNIT_FALSE}
+  fi
+}
+
+suite_addTest()
+{
+  _su_func=$1
+
+  _shunit_functionExists ${_su_func}
+  if [ $? -eq ${__SHUNIT_FALSE} ]; then
+    echo "shUnit WARN: failed to add '${_su_func}' to the test suite" >&2
+    return ${__SHUNIT_FALSE}
+  fi
+
+  __shunit_suite="${__shunit_suite:+${__shunit_suite} }${_su_func}"
+}
+
+#------------------------------------------------------------------------------
+# shUnit functions
+#
+
+_shunit_executeSuite()
+{
+  for _su_func in ${__shunit_suite}; do
+    # execute the per-test setup function
+    _shunit_functionExists setUp && setUp
+
+    # execute the test
+    eval ${_su_func}
+
+    # execute the per-test tear-down function
+    _shunit_functionExists tearDown && tearDown
+  done
+}
+
+_shunit_functionExists()
+{
+  _su__func=$1
+  type ${_su__func} 2>/dev/null |grep "is a function$" >/dev/null
+}
+
+_shunit_generateReport()
+{
+  cat <<EOF
+#
+# Test report
+#
+tests passed: ${__shunit_testsPassed}
+tests failed: ${__shunit_testsFailed}
+tests total:  ${__shunit_testsTotal}
+EOF
+}
+
+_shunit_testPassed()
+{
+  __shunit_testsPassed=`expr ${__shunit_testsPassed} + 1`
+  __shunit_testsTotal=`expr ${__shunit_testsTotal} + 1`
+}
+
+_shunit_testFailed()
+{
+  _su__msg=''
+  [ $# -eq 1 ] && _su__msg=$1
+
+  __shunit_testsFailed=`expr ${__shunit_testsFailed} + 1`
+  __shunit_testsTotal=`expr ${__shunit_testsTotal} + 1`
+
+  echo "shUnit assert: ${_su__msg}"
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+# check for presence of a suite function
+_shunit_functionExists suite
+if [ $? -ne 0 ]; then
+  echo "shUnit ERROR: no suite() function defined" >&2
+  exit 1
+fi
+
+# execute the oneTimeSetUp function (if it exists)
+_shunit_functionExists oneTimeSetUp && oneTimeSetUp
+
+# execute the suite function defined in the parent test script
+suite
+
+# execute the tests
+_shunit_executeSuite
+
+# execute the oneTimeTearDown function (if it exists)
+_shunit_functionExists oneTimeTearDown && oneTimeTearDown
+
+# generate report
+_shunit_generateReport
+
+# restore the previous set of shell flags
+for _shunit_shellFlag in ${__SHUNIT_SHELL_FLAGS}; do
+  echo ${__shunit_oldShellFlags} |grep ${_shunit_shellFlag} >/dev/null \
+    || set +${_shunit_shellFlag}
+done
+unset _shunit_shellFlag
