@@ -9,6 +9,7 @@ BIN_DIR=$(PWD)/bin
 BUILD_DIR=$(PWD)/build
 DIST_DIR=$(PWD)/dist
 DOCBOOK_BUILD_DIR=$(BUILD_DIR)/docbook
+LIB_DIR=$(PWD)/lib
 TEST_DIR=$(PWD)/test
 
 HTML_XSL=$(PWD)/share/docbook/tldp-xsl/21MAR2004/html/tldp-one-page.xsl
@@ -51,20 +52,23 @@ docs-transform-docbook: docs-prep
 test: test-prep
 	@echo -------------------------------------------------------------------------------
 	@echo "testing log4sh from an initial properties configuration"
-	@sleep 2
 	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-prop-config )
 	@echo -------------------------------------------------------------------------------
 	@echo "testing log4sh via runtime configuration"
-	@sleep 2
 	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-runtime-config )
+	@echo -------------------------------------------------------------------------------
+	@echo "executing log4sh unit tests"
+	( cd $(TEST_DIR); $(TEST_SRC_DIR)/log4sh-test-suite )
 
 test-clean:
 	rm -fr $(TEST_DIR)
 
-test-prep: build
+test-prep: build test-clean
 	@mkdir -p $(TEST_DIR)
-	cp -p $(TEST_SRC_DIR)/test-* $(TEST_DIR)
-	cp -p $(TEST_SRC_DIR)/log4sh.properties $(TEST_DIR)
+	cp -p $(TEST_SRC_DIR)/test* $(TEST_DIR)
+	cp -p $(TEST_SRC_DIR)/log4sh-test-suite $(TEST_DIR)
+	cp -p $(TEST_SRC_DIR)/*.properties $(TEST_DIR)
+	cp -p $(LIB_DIR)/shunit/shunit $(TEST_DIR)
 	cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
 
 dist: build docs
