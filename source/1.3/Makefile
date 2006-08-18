@@ -66,7 +66,7 @@ test-clean:
 test-prep: build test-clean
 	@mkdir -p $(TEST_DIR)
 	cp -p $(TEST_SRC_DIR)/test* $(TEST_DIR)
-	cp -p $(TEST_SRC_DIR)/log4sh-test-suite $(TEST_DIR)
+	cp -p $(TEST_SRC_DIR)/run-test-suite $(TEST_DIR)
 	cp -p $(TEST_SRC_DIR)/*.properties $(TEST_DIR)
 	cp -p $(LIB_DIR)/shunit/shunit $(TEST_DIR)
 	cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
