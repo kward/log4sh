@@ -88,10 +88,10 @@ __LOG4SH_ARRAY_IFS="
 __LOG4SH_TRAP_EXIT='log4sh-EXIT'
 
 # set the constants to readonly
-for _const in `set |grep "^__LOG4SH_" |cut -d= -f1`; do
-  readonly $_const
+for _log4sh_const in `set |grep "^__LOG4SH_" |cut -d= -f1`; do
+  readonly ${_log4sh_const}
 done
-unset _const
+unset _log4sh_const
 
 #
 # variables
@@ -1300,14 +1300,14 @@ _appender_parsePattern()
   _doEval=${__LOG4SH_FALSE}
 
   # determine if various commands must be run
-  _oldIFS="${IFS}"; IFS="%"; set -- x${_pattern}; IFS="${_oldIFS}"
+  _oldIFS="${IFS}"; IFS='%'; set -- x${_pattern}; IFS="${_oldIFS}"
   if [ $# -gt 1 ]; then
     # run the date command??
-    IFS="d"; set -- ${_pattern}; IFS="${_oldIFS}"
+    IFS='d'; set -- ${_pattern}x; IFS="${_oldIFS}"
     [ $# -gt 1 ] && _date=`date '+%Y-%m-%d %H:%M:%S'`
 
     # run the eval command?
-    IFS="X"; set -- ${_pattern}; IFS="${_oldIFS}"
+    IFS='X'; set -- ${_pattern}x; IFS="${_oldIFS}"
     [ $# -gt 1 ] && _doEval=${__LOG4SH_TRUE}
   fi
   unset _oldIFS
@@ -1331,8 +1331,7 @@ _appender_parsePattern()
     -e 's/%x//g' \
     -e 's/%X{/$\{/g' \
     -e 's/%%m/%%%m/g' -e 's/%%/%/g' \
-    -e "s%m${_msg};y//
-/"`
+    -e "s%m${_msg}" |tr '' '\n'`
   if [ ${_doEval} -eq ${__LOG4SH_FALSE} ]; then
     echo "${_pattern}"
   else
@@ -1403,7 +1402,6 @@ appender_getPattern()
 #       <funcdef><function>appender_setPattern</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #       <paramdef>string <parameter>pattern</parameter></paramdef>
-#       <paramdef>boolean <parameter>resource</parameter> (optional) [default=true]</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Sets the Pattern of an Appender</para>
@@ -1417,17 +1415,15 @@ appender_setPattern()
 {
   asp_appender=$1
   asp_pattern=$2
-  asp_resource=${3:-${__LOG4SH_TRUE}}
 
   _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asp_appender}`
   __log4shAppenderPatterns=`_log4sh_setArrayElement \
     "${__log4shAppenderPatterns}" ${_index} "${asp_pattern}"`
 
-  # resource
-  [ ${asp_resource} -eq ${__LOG4SH_TRUE} ] \
-    && _appender_cache ${asp_appender}
+  # resource the appender
+  _appender_cache ${asp_appender}
 
-  unset asp_appender asp_pattern asp_resource _index
+  unset asp_appender asp_pattern _index
   return ${__LOG4SH_TRUE}
 }
 
@@ -1517,7 +1513,6 @@ appender_getAppenderType()
 #       <funcdef><function>appender_setType</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #       <paramdef>string <parameter>type</parameter></paramdef>
-#       <paramdef>boolean <parameter>resource</parameter> (optional) [default=true]</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Sets the Type of an Appender (e.g. FileAppender)</para>
@@ -1531,7 +1526,6 @@ appender_setType()
 {
   ast_appender="$1"
   ast_type="$2"
-  ast_resource=${3:-${__LOG4SH_TRUE}}
 
   # XXX need to verify types
 
@@ -1540,10 +1534,10 @@ appender_setType()
   __log4shAppenderTypes=`_log4sh_setArrayElement \
     "${__log4shAppenderTypes}" ${_index} "${ast_type}"`
 
-  # resource
-  [ ${ast_resource} -eq ${__LOG4SH_TRUE} ] && _appender_cache ${ast_appender}
+  # resource the appender
+  _appender_cache ${ast_appender}
 
-  unset ast_appender ast_type ast_resource _index
+  unset ast_appender ast_type _index
   return ${__LOG4SH_TRUE}
 }
 
@@ -1634,7 +1628,6 @@ appender_getLayout()
 #       <funcdef><function>appender_setLayout</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #       <paramdef>string <parameter>layout</parameter></paramdef>
-#       <paramdef>boolean <parameter>resource</parameter> (optional) [default=true]</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Sets the Layout of an Appender (e.g. PatternLayout)</para>
@@ -1648,7 +1641,6 @@ appender_setLayout()
 {
   asl_appender="$1"
   asl_layout="$2"
-  asl_resource=${3:-${__LOG4SH_TRUE}}
 
   case ${asl_layout} in
     ${__LOG4SH_LAYOUT_HTML}|\
@@ -1666,10 +1658,10 @@ appender_setLayout()
   __log4shAppenderLayouts=`_log4sh_setArrayElement \
     "${__log4shAppenderLayouts}" ${_index} "${asl_layout}"`
 
-  # resource
-  [ ${asl_resource} -eq ${__LOG4SH_TRUE} ] && _appender_cache ${asl_appender}
+  # resource the appender
+  _appender_cache ${asl_appender}
 
-  unset asl_appender asl_layout asl_resource _index
+  unset asl_appender asl_layout _index
   return ${__LOG4SH_TRUE}
 }
 
@@ -1771,8 +1763,8 @@ _appender_generate()
 
   # header
   echo "${__LOG4SH_APPENDER_FUNC_PREFIX}${__ag_appender}() {"
-  echo "  _la_level=\"\$1\""
-  echo "  _la_message=\"\$2\""
+  echo "  _la_level=\$1"
+  echo "  _la_message=\$2"
 
   # determine the 'layout'
   __layout=`_appender_getLayoutByIndex ${__index}`
@@ -1813,7 +1805,7 @@ _appender_generate()
 	    # check whether the max file size has been exceeded
 	    cat <<EOF
   __rotSize=${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}
-  __size=\`ls -s '${__file}' |cut -d' ' -f1\`
+  __size=\`ls -s '${__file}' |awk '{print \$1}'\`
   if [ \${__size} -gt \${__rotSize} ]; then
     # rotate the appender file(s)
     __rotIndex=${__LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX}
@@ -1949,7 +1941,6 @@ appender_getLevel()
 #       <funcdef><function>appender_setLevel</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #       <paramdef>string <parameter>level</parameter></paramdef>
-#       <paramdef>boolean <parameter>resource</parameter> (optional) [default=true]</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Sets the Level of an Appender (e.g. INFO)</para>
@@ -1963,16 +1954,15 @@ appender_setLevel()
 {
   asl_appender=$1
   asl_level=$2
-  asl_resource=${3:-${__LOG4SH_TRUE}}
 
   _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asl_appender}`
   __log4shAppenderLevels=`_log4sh_setArrayElement \
     "${__log4shAppenderLevels}" ${_index} "${asl_level}"`
 
-  # resource
-  [ ${asl_resource} -eq ${__LOG4SH_TRUE} ] && _appender_cache ${asl_appender}
+  # resource the appender
+  _appender_cache ${asl_appender}
 
-  unset asl_appender asl_type asl_resource _index
+  unset asl_appender asl_type _index
   return ${__LOG4SH_TRUE}
 }
 
@@ -1999,7 +1989,7 @@ appender_setLevel()
 #*/
 appender_close()
 {
-  appender_setLevel $1 'CLOSED'
+  appender_setLevel $1 ${__LOG4SH_LEVEL_CLOSED_STR}
 }
 
 #-----------------------------------------------------------------------------
@@ -2067,7 +2057,6 @@ appender_file_getFile()
 #       <funcdef><function>appender_file_setFile</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #       <paramdef>string <parameter>filename</parameter></paramdef>
-#       <paramdef>boolean <parameter>resource</parameter> (optional) [default=true]</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Set the filename for a FileAppender (e.g. "STDERR" or
@@ -2082,8 +2071,7 @@ appender_file_setFile()
 {
   afsf_appender=$1
   afsf_file=$2
-  afsf_resource=${3:-${__LOG4SH_TRUE}}
-  ${LOG4SH_TRACE} echo "log4sh:TRACE afsf_appender='${afsf_appender}' afsf_file='${afsf_file}' afsf_resource='${afsf_resource}'" >&2
+  ${LOG4SH_TRACE} echo "log4sh:TRACE afsf_appender='${afsf_appender}' afsf_file='${afsf_file}'" >&2
 
   if [ -n "${afsf_appender}" -a -n "${afsf_file}" ]; then
     # set the file
@@ -2103,7 +2091,7 @@ appender_file_setFile()
       # determine success of touch command
       if [ ${_result} -eq 1 ]; then
         echo 'log4sh:ERROR appender_file_setFile(): could not create file; closing appender' >&2
-        appender_setLevel ${afsf_appender} ${__LOG4SH_LEVEL_CLOSED}
+        appender_setLevel ${afsf_appender} ${__LOG4SH_LEVEL_CLOSED_STR}
       fi
       unset _result
     fi
@@ -2112,10 +2100,10 @@ appender_file_setFile()
     _return=${__LOG4SH_FALSE}
   fi
 
-  # resource
-  [ ${afsf_resource} -eq ${__LOG4SH_TRUE} ] && _appender_cache ${afsf_appender}
+  # resource the appender
+  _appender_cache ${afsf_appender}
 
-  unset afsf_appender afsf_file afsf_resource _index
+  unset afsf_appender afsf_file _index
   return ${_return}
 }
 
@@ -2210,7 +2198,6 @@ appender_smtp_getTo()
 #       <funcdef><function>appender_smtp_setTo</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #       <paramdef>string <parameter>email</parameter></paramdef>
-#       <paramdef>boolean <parameter>resource</parameter> (optional) [default=true]</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Set the to address for the given appender</para>
@@ -2224,17 +2211,15 @@ appender_smtp_setTo()
 {
   asst_appender=$1
   asst_email=$2
-  asst_resource=${3:-${__LOG4SH_TRUE}}
 
   _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asst_appender}`
   __log4shAppender_smtp_tos=`_log4sh_setArrayElement \
     "${__log4shAppender_smtp_tos}" ${_index} "${asst_email}"`
 
-  # resource
-  [ ${asst_resource} -eq ${__LOG4SH_TRUE} ] \
-    && _appender_cache ${asst_appender}
+  # resource the appender
+  _appender_cache ${asst_appender}
 
-  unset asst_appender asst_email asst_resource _index
+  unset asst_appender asst_email _index
 }
 
 #/**
@@ -2324,7 +2309,6 @@ appender_smtp_getSubject()
 #       <funcdef><function>appender_smtp_setSubject</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #       <paramdef>string <parameter>subject</parameter></paramdef>
-#       <paramdef>boolean <parameter>resource</parameter> (optional) [default=true]</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Sets the email subject for an SMTP appender</para>
@@ -2338,7 +2322,6 @@ appender_smtp_setSubject()
 {
   asss_appender=$1
   asss_subject=$2
-  asss_resource=${3:-${__LOG4SH_TRUE}}
 
   # set the Subject
   _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asss_appender}`
@@ -2351,11 +2334,10 @@ appender_smtp_setSubject()
     _return=${__LOG4SH_FALSE}
   fi
 
-  # resource
-  [ ${asss_resource} -eq ${__LOG4SH_TRUE} ] \
-    && _appender_cache ${asss_appender}
+  # resource the appender
+  _appender_cache ${asss_appender}
 
-  unset asss_appender asss_subject asss_resource _index
+  unset asss_appender asss_subject _index
   return ${_return}
 }
 
@@ -2529,7 +2511,6 @@ appender_syslog_getFacilityByName()
 #       <funcdef><function>appender_syslog_setFacility</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #       <paramdef>string <parameter>facility</parameter></paramdef>
-#       <paramdef>boolean <parameter>resource</parameter> (optional) [default=true]</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Set the syslog facility for the given appender</para>
@@ -2543,7 +2524,6 @@ appender_syslog_setFacility()
 {
   assf_appender=$1
   assf_facility=$2
-  assf_resource=${3:-${__LOG4SH_TRUE}}
 
   if [ $# -ne 2 ]; then
     echo 'log4sh:ERROR appender_syslog_setFacility(): missing attributes' >&2
@@ -2559,16 +2539,15 @@ appender_syslog_setFacility()
   fi
 
   # set appender facility
-  _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${assf_appender}`
+  assf_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${assf_appender}`
   # TODO: put check for valid _index here
   __log4shAppender_syslog_facilities=`_log4sh_setArrayElement \
-    "${__log4shAppender_syslog_facilities}" ${_index} "${assf_facility}"`
+    "${__log4shAppender_syslog_facilities}" ${assf_index} "${assf_facility}"`
 
-  # resource
-  [ ${assf_resource} -eq ${__LOG4SH_TRUE} ] \
-    && _appender_cache ${assf_appender}
+  # resource the appender
+  _appender_cache ${assf_appender}
 
-  unset assf_appender assf_facility assf_resource_index
+  unset assf_appender assf_facility assf_index
 }
 
 #/**
