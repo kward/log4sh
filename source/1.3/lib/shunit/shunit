@@ -18,12 +18,14 @@ __SHUNIT_SHELL_FLAGS='u'
 __shunit_oldShellFlags="$-"
 for _su_shellFlag in `echo "${__SHUNIT_SHELL_FLAGS}" |sed 's/\(.\)/\1 /g'`
 do
-  set -${_shunit_shellFlag}
+  set -${_su_shellFlag}
 done
 
 # constants
 __SHUNIT_TRUE=0
 __SHUNIT_FALSE=1
+
+__SHUNIT_UNAME_S=`uname -s`
 
 for _su_const in `set |grep "^__SHUNIT_" |cut -d= -f1`; do
   readonly ${_su_const}
@@ -58,6 +60,54 @@ assertEquals()
     _shunit_testFailed "${_su_message}"
     return ${__SHUNIT_FALSE}
   fi
+}
+
+assertNull()
+{
+  _su_message=''
+  if [ $# -eq 2 ]; then
+    _su_message=$1
+    shift
+  fi
+  _su_value=$1
+
+  _su_value2=`eval echo "${_su_value}"`
+  if [ -z "${_su_value2}" ]; then
+    _shunit_testPassed
+    return ${__SHUNIT_TRUE}
+  else
+    _shunit_testFailed "${_su_message}"
+    return ${__SHUNIT_FALSE}
+  fi
+}
+
+assertNotNull()
+{
+  _su_message=''
+  if [ $# -eq 2 ]; then
+    _su_message=$1
+    shift
+  fi
+  _su_value=$1
+
+  _su_value2=`eval echo "${_su_value}"`
+  if [ -n "${_su_value2}" ]; then
+    _shunit_testPassed
+    return ${__SHUNIT_TRUE}
+  else
+    _shunit_testFailed "${_su_message}"
+    return ${__SHUNIT_FALSE}
+  fi
+}
+
+assertSame()
+{
+  :
+}
+
+assertNotSame()
+{
+  :
 }
 
 assertTrue()
@@ -98,15 +148,14 @@ assertFalse()
   fi
 }
 
+fail()
+{
+  :
+}
+
 suite_addTest()
 {
   _su_func=$1
-
-  _shunit_functionExists ${_su_func}
-  if [ $? -eq ${__SHUNIT_FALSE} ]; then
-    echo "shUnit WARN: failed to add '${_su_func}' to the test suite" >&2
-    return ${__SHUNIT_FALSE}
-  fi
 
   __shunit_suite="${__shunit_suite:+${__shunit_suite} }${_su_func}"
 }
@@ -115,17 +164,17 @@ suite_addTest()
 # shUnit functions
 #
 
-_shunit_executeSuite()
+_shunit_execSuite()
 {
   for _su_func in ${__shunit_suite}; do
     # execute the per-test setup function
-    _shunit_functionExists setUp && setUp
+    setUp
 
     # execute the test
     eval ${_su_func}
 
     # execute the per-test tear-down function
-    _shunit_functionExists tearDown && tearDown
+    tearDown
   done
 }
 
@@ -133,10 +182,17 @@ _shunit_functionExists()
 {
   _su__func=$1
   type ${_su__func} 2>/dev/null |grep "is a function$" >/dev/null
+  return $?
 }
 
 _shunit_generateReport()
 {
+  if [ ${__shunit_testsTotal} -gt 0 ]; then
+    _su__success=`expr ${__shunit_testsPassed} \* 100 / ${__shunit_testsTotal}`
+  else
+    _su__success=0
+  fi
+
   cat <<EOF
 #
 # Test report
@@ -144,7 +200,43 @@ _shunit_generateReport()
 tests passed: ${__shunit_testsPassed}
 tests failed: ${__shunit_testsFailed}
 tests total:  ${__shunit_testsTotal}
+success rate: ${_su__success}%
 EOF
+}
+
+_shunit_mktempDir()
+{
+  # try the standard mktemp function
+  ( exec mktemp -dqt shunit.XXXXXX 2>/dev/null ) && return
+
+  # the standard mktemp didn't work.  doing our own.
+  if [ -n "${RANDOM:-}" ]; then
+    # $RANDOM works
+    _su__random=${RANDOM}${RANDOM}${RANDOM}$$
+  else
+    # $RANDOM doesn't work
+    _su__date=`date '+%Y%m%d%H%M%S'`
+    _su__random=`expr ${_su__date} / $$`
+  fi
+
+  _su__tmpDir="${TMPDIR-/tmp}/shunit.${_su__random}"
+  ( umask 077 && mkdir "${_su__tmpDir}" ) || {
+    echo 'shUnit:FATAL could not create temporary directory! exiting' >&2
+    exit 1
+  }
+
+  echo ${_su__tmpDir}
+  unset _su__date _su__random _su__tmpDir
+}
+
+# this function is here to work around issues in Cygwin
+_shunit_mktempFunc()
+{
+  for _su__func in oneTimeSetUp oneTimeTearDown setUp tearDown suite; do
+    _su__file="${__shunit_tmpDir}/${_su__func}"
+    echo ':' >"${_su__file}"
+    chmod +x ${_su__file}
+  done
 }
 
 _shunit_testPassed()
@@ -168,27 +260,29 @@ _shunit_testFailed()
 # main
 #
 
-# check for presence of a suite function
-_shunit_functionExists suite
-if [ $? -ne 0 ]; then
-  echo "shUnit ERROR: no suite() function defined" >&2
-  exit 1
-fi
+# create phantom functions to work around issues with Cygwin
+__shunit_tmpDir=`_shunit_mktempDir`
+_shunit_mktempFunc
+PATH="${__shunit_tmpDir}:${PATH}"
 
 # execute the oneTimeSetUp function (if it exists)
-_shunit_functionExists oneTimeSetUp && oneTimeSetUp
+#_shunit_functionExists oneTimeSetUp && oneTimeSetUp
+oneTimeSetUp
 
 # execute the suite function defined in the parent test script
 suite
 
 # execute the tests
-_shunit_executeSuite
+_shunit_execSuite
 
 # execute the oneTimeTearDown function (if it exists)
-_shunit_functionExists oneTimeTearDown && oneTimeTearDown
+oneTimeTearDown
 
 # generate report
 _shunit_generateReport
+
+# remove temporary directory
+rm -fr "${__shunit_tmpDir}"
 
 # restore the previous set of shell flags
 for _shunit_shellFlag in ${__SHUNIT_SHELL_FLAGS}; do
