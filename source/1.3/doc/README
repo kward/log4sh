@@ -90,5 +90,17 @@ POST TO SOURCEFORGE AND FRESHMEAT
 http://sourceforge.net/projects/log4sh/
 http://freshmeat.net/
 
+#------------------------------------------------------------------------------
+# Testing a release
+#
+
+To test a release, shUnit unit tests are included. Prepare the test
+environment, and then you can run the tests. Hopefully all of the tests will
+pass with a 100% success rate.
+
+$ make test-prep
+$ cd test
+$ ./run-test-suite
+
 
 $Revision$
