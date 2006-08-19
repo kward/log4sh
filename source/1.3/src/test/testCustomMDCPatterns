@@ -1,0 +1,156 @@
+#! /bin/sh 
+# $Id$
+
+myName=`basename $0`
+myPath=`dirname $0`
+
+DEBUG=${DEBUG:+' '}
+DEBUG=${DEBUG:-':'}
+${DEBUG} echo 'DEBUG output enabled' >&2
+
+APP_NAME='stdout'
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+loadLog4sh()
+{
+  # load log4sh
+  ${DEBUG} echo "loading log4sh" >&2
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+  logger_setLevel INFO
+  appender_setLayout ${APP_NAME} PatternLayout
+}
+
+testCustomDateMDC()
+{
+  mdcDateFmt='+%Y.%m.%d'
+  pattern='%X{mdcDate}'
+  regex='^[0-9]\{4\}\.[0-9]\{2\}\.[0-9]\{2\}'
+
+  (
+    loadLog4sh
+
+    # override the logger_info function
+    logger_info()
+    {
+      mdcDate=`date ${mdcDateFmt}`
+      log INFO "$@"
+    }
+
+    # set the custom pattern
+    appender_setPattern ${APP_NAME} ${pattern}
+
+    ${DEBUG} echo "sending message using custom MDC pattern" >&2
+    logger_info 'dummy'
+  ) >"${resultFile}"
+
+  result=`cat "${resultFile}"`
+  matched=`echo ${result} |sed "s/${regex}//"`
+  ${DEBUG} echo "dateFormat='${mdcDateFmt}' pattern='${pattern}' result='${result}' matched='${matched}'" >&2
+
+  assertNotNull \
+    "custom pattern '${pattern}' failed with empty result" \
+    "${result}" || return
+  assertNull \
+    "custom pattern '${pattern}' output of '${matched}' did not match the regex '${regex}'" \
+    "${matched}" || return
+}
+
+testCustomTimeMDC()
+{
+  mdcTimeFmt='+%H:%M:%S'
+  pattern='%X{mdcTime}'
+  regex='^[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}'
+
+  (
+    loadLog4sh
+
+    # override the logger_info function
+    logger_info()
+    {
+      mdcTime=`date ${mdcTimeFmt}`
+      log INFO "$@"
+    }
+
+    # set the custom pattern
+    appender_setPattern ${APP_NAME} ${pattern}
+
+    ${DEBUG} echo "sending message using custom MDC pattern" >&2
+    logger_info 'dummy'
+  ) >"${resultFile}"
+
+  result=`cat "${resultFile}"`
+  matched=`echo ${result} |sed "s/${regex}//"`
+  ${DEBUG} echo "timeFormat='${mdcTimeFmt}' pattern='${pattern}' result='${result}' matched='${matched}'" >&2
+
+  assertNotNull \
+    "custom pattern '${pattern}' failed with empty result" \
+    "${result}" || return
+  assertNull \
+    "custom pattern '${pattern}' output of '${matched}' did not match the regex '${regex}'" \
+    "${matched}" || return
+}
+
+testCustomUserHostMDC()
+{
+  pattern='%X{LOGNAME}@%X{HOSTNAME}'
+  regex='[A-Za-z0-9]*@[A-Za-z0-9-]*'
+
+  (
+    loadLog4sh
+
+    # override the logger_info function
+    logger_info()
+    {
+      log INFO "$@"
+    }
+
+    # set the custom pattern
+    appender_setPattern ${APP_NAME} ${pattern}
+
+    ${DEBUG} echo "sending message using custom MDC pattern" >&2
+    logger_info 'dummy'
+  ) >"${resultFile}"
+
+  result=`cat "${resultFile}"`
+  matched=`echo ${result} |sed "s/${regex}//"`
+  ${DEBUG} echo "pattern='${pattern}' result='${result}' matched='${matched}'" >&2
+
+  assertNotNull \
+    "custom pattern '${pattern}' failed with empty result" \
+    "${result}" || return
+  assertNull \
+    "custom pattern '${pattern}' output of '${matched}' did not match the regex '${regex}'" \
+    "${matched}" || return
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  resultFile="${__shunit_tmpDir}/result.dat"
+}
+
+tearDown()
+{
+  rm -f "${resultFile}"
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+suite()
+{
+  suite_addTest testCustomDateMDC
+  suite_addTest testCustomTimeMDC
+  suite_addTest testCustomUserHostMDC
+}
+
+# load and run shUnit
+${DEBUG} echo "loading shUnit" >&2
+. ./shunit

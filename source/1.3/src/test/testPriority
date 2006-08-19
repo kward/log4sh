@@ -1,0 +1,78 @@
+#! /bin/sh 
+# $Id$
+
+myName=`basename $0`
+myPath=`dirname $0`
+
+DEBUG=${DEBUG:+' '}
+DEBUG=${DEBUG:-':'}
+${DEBUG} echo 'DEBUG output enabled' >&2
+
+APP_NAME='stdout'
+PRIORITY_NAMES='TRACE DEBUG INFO WARN ERROR FATAL'
+PRIORITY_POS='1 2 3 4 5 6'
+TEST_DATA="$0.data"
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+testPriority()
+{
+  # save stdin, and redirect it from a file
+  exec 9<&0 <"${TEST_DATA}"
+  while read priority outputs; do
+    # ignore comment lines or blank lines
+    echo "${priority}" |egrep -v '^(#|$)' >/dev/null || continue
+
+    ${DEBUG} echo "setting appender priority to '${priority}' priority"
+    appender_setLevel ${APP_NAME} ${priority}
+
+    # the number of outputs must match the number of priority names and
+    # positions for this to work
+    for pos in ${PRIORITY_POS}; do
+      testPriority=`echo ${PRIORITY_NAMES} |cut -d' ' -f${pos}`
+      shouldOutput=`echo ${outputs} |cut -d' ' -f${pos}`
+
+      ${DEBUG} echo "generating '${testPriority}' message"
+      result=`log ${testPriority} 'dummy'`
+      ${DEBUG} echo "result=${result}"
+
+      if [ ${shouldOutput} -eq 1 ]; then
+        assertTrue \
+          "'${priority}' priority appender did not emit a '${testPriority}' message" \
+          "[ -n \"${result}\" ]" || break
+      else
+        assertFalse \
+          "'${priority}' priority appender emitted a '${testPriority}' message" \
+          "[ -n \"${result}\" ]" || break
+      fi
+    done
+  done
+  # restore stdin
+  exec 0<&9 9<&-
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  # source log4sh
+  ${DEBUG} echo "loading log4sh" >&2
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+suite()
+{
+  suite_addTest testPriority
+}
+
+# load and run shUnit
+${DEBUG} echo "loading shUnit" >&2
+. ./shunit

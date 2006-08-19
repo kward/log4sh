@@ -1,0 +1,214 @@
+#! /bin/sh 
+# $Id$
+
+myName=`basename $0`
+myPath=`dirname $0`
+
+DEBUG=${DEBUG:+' '}
+DEBUG=${DEBUG:-':'}
+${DEBUG} echo 'DEBUG output enabled' >&2
+
+APP_SIMPLE='mySimple'
+APP_SIMPLE_FILE='mySimple.out'
+APP_SIMPLE_LOG4SH="${myName}-${APP_SIMPLE}.log4sh"
+
+APP_STDERR='mySTDERR'
+APP_STDERR_LOG4SH="${myName}-${APP_STDERR}.log4sh"
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+commonSTDERR_runtime()
+{
+  assert=$1
+  msg=$2
+  cmd=$3
+
+  (
+    # load log4sh
+    ${DEBUG} echo "loading log4sh" >&2
+    LOG4SH_CONFIGURATION='none' . ./log4sh
+
+    # close the default console appender
+    appender_close stdout
+
+    # setup the default logging level to INFO
+    logger_setLevel INFO
+
+    # add a file appender at the default level that logs to STDERR
+    logger_addAppender ${APP_STDERR}
+    appender_setType ${APP_STDERR} FileAppender
+    appender_file_setFile ${APP_STDERR} STDERR
+
+    ${DEBUG} echo "sending a message to ${APP_STDERR}"
+    result=`eval ${cmd}`
+    ${DEBUG} echo "assert='${assert}' cmd='${cmd}' result='${result}'" >&2
+    eval ${assert} \"${msg}\" \"${result}\"
+    echo $? >"${assertFile}"
+  )
+  return `cat "${assertFile}"`
+}
+
+testSTDERR_runtime()
+{
+  commonSTDERR_runtime \
+    'assertNotNull' \
+    "${APP_STDERR} runtime FileAppender didn't go to STDERR" \
+    "logger_info \'dummy\' 2>&1 1>/dev/null"
+  assertEquals $? ${__SHUNIT_TRUE} || return
+
+  commonSTDERR_runtime \
+    'assertNull' \
+    "${APP_STDERR} runtime FileAppender went to STDOUT" \
+    "logger_info \'dummy\' 2>/dev/null"
+  assertEquals $? ${__SHUNIT_TRUE} || return
+}
+
+commonSTDERR_config()
+{
+  assert=$1
+  msg=$2
+  cmd=$3
+
+  (
+    # loading log4sh
+    ${DEBUG} echo "loading log4sh" >&2
+    LOG4SH_CONFIGURATION="${APP_STDERR_LOG4SH}" . ./log4sh
+
+    ${DEBUG} echo "sending a message to ${APP_STDERR}"
+    result=`eval ${cmd}`
+    ${DEBUG} echo "assert='${assert}' cmd='${cmd}' result='${result}'" >&2
+    eval ${assert} \"${msg}\" \"${result}\"
+    echo $? >"${assertFile}"
+  )
+  return `cat "${assertFile}"`
+}
+
+testSTDERR_config()
+{
+  commonSTDERR_config \
+    'assertNotNull' \
+    "${APP_STDERR} config FileAppender didn't go to STDERR" \
+    "logger_info \'dummy\' 2>&1 1>/dev/null"
+  assertEquals $? ${__SHUNIT_TRUE} || return
+
+  commonSTDERR_config \
+    'assertNull' \
+    "${APP_STDERR} config FileAppender went to STDOUT" \
+    "logger_info \'dummy\' 2>/dev/null"
+  assertEquals $? ${__SHUNIT_TRUE} || return
+}
+
+commonSimple_runtime()
+{
+  assert=$1
+  msg=$2
+  cmd=$3
+
+  (
+    # loading log4sh
+    ${DEBUG} echo "loading log4sh" >&2
+    LOG4SH_CONFIGURATION='none' . ./log4sh
+
+    # close the default console appender
+    appender_close stdout
+
+    # setup the default logging level to INFO
+    logger_setLevel INFO
+
+    # add a file appender at the DEBUG level with the default layout
+    logger_addAppender ${APP_SIMPLE}
+    appender_setLevel ${APP_SIMPLE} DEBUG
+    appender_setType ${APP_SIMPLE} FileAppender
+    appender_file_setFile ${APP_SIMPLE} ${APP_SIMPLE_FILE}
+
+    ${DEBUG} echo "sending a message to ${APP_SIMPLE}"
+    result=`eval ${cmd}`
+    ${DEBUG} echo "assert='${assert}' cmd='${cmd}' result='${result}'" >&2
+    eval ${assert} \"${msg}\" \"${result}\"
+    echo $? >"${assertFile}"
+  )
+  return `cat "${assertFile}"`
+}
+
+testSimple_runtime()
+{
+  commonSimple_runtime \
+    'assertNull' \
+    "${APP_SIMPLE} config FileAppender went to STDOUT or STDERR" \
+    "logger_info \'dummy\' 2>&1"
+  assertEquals $? ${__SHUNIT_TRUE} || return
+
+  commonSimple_runtime \
+    'assertNotNull' \
+    "${APP_SIMPLE} config FileAppender didn't go to file" \
+    "logger_info \'dummy\'; cat ${APP_SIMPLE_FILE}"
+  assertEquals $? ${__SHUNIT_TRUE} || return
+}
+
+commonSimple_config()
+{
+  assert=$1
+  msg=$2
+  cmd=$3
+
+  (
+    # load log4sh
+    ${DEBUG} echo "loading log4sh" >&2
+    LOG4SH_CONFIGURATION="${APP_SIMPLE_LOG4SH}" . ./log4sh
+
+    ${DEBUG} echo "sending a message to ${APP_SIMPLE}"
+    result=`eval ${cmd}`
+    ${DEBUG} echo "assert='${assert}' cmd='${cmd}' result='${result}'" >&2
+    eval ${assert} \"${msg}\" \"${result}\"
+    echo $? >"${assertFile}"
+  )
+  return `cat "${assertFile}"`
+}
+
+testSimple_config()
+{
+  commonSimple_config \
+    'assertNull' \
+    "${APP_SIMPLE} runtime FileAppender went to STDOUT or STDERR" \
+    "logger_info \'dummy\' 2>&1"
+  assertEquals $? ${__SHUNIT_TRUE} || return
+
+  commonSimple_config \
+    'assertNotNull' \
+    "${APP_SIMPLE} runtime FileAppender didn't go to file" \
+    "logger_info \'dummy\'; cat ${APP_SIMPLE_FILE}"
+  assertEquals $? ${__SHUNIT_TRUE} || return
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  assertFile="${__shunit_tmpDir}/assert.dat"
+}
+
+tearDown()
+{
+  rm -f "${assertFile}" "${APP_SIMPLE_FILE}"
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+suite()
+{
+  suite_addTest testSTDERR_runtime
+  suite_addTest testSTDERR_config
+
+  suite_addTest testSimple_runtime
+  suite_addTest testSimple_config
+}
+
+# load and run shUnit
+${DEBUG} echo "loading shUnit" >&2
+. ./shunit

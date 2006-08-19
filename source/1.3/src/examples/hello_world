@@ -1,0 +1,19 @@
+#! /bin/sh
+# $Id$
+#
+# Author: Kate Ward <kate.ward@forestent.com>
+#
+
+# load log4sh
+if [ -r log4sh ]; then
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+else
+  echo "ERROR: could not load (log4sh)" >&2
+  exit 1
+fi
+
+# change the default message level from ERROR to INFO
+logger_setLevel INFO
+
+# say hello to the world
+logger_info "Hello, world!"
