@@ -31,7 +31,7 @@ testCategoryPattern()
 {
   pattern='%c'
   expected='shell'
-  msg="category \(%c\) pattern failed: '\${expected}' != '\${actual}'"
+  msg="category '%c' pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
@@ -45,12 +45,12 @@ commonDatePatternAssert()
   matched=`echo ${result} |sed "s/${regex}//"`
   ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
 
-  assertFalse \
+  assertNotNull \
     "date pattern '${pattern}' failed: empty result '${result}'" \
-    "[ -z \"${result}\" ]" || return
-  assertTrue \
+    "${result}" || return
+  assertNull \
     "date pattern '${pattern}' failed: result '${result}' did not match the regex '${regex}'" \
-    "[ -z \"${matched}\" ]" || return
+    "${matched}" || return
 }
 
 testDatePattern()
@@ -75,7 +75,7 @@ testFileNamePattern()
 {
   pattern='%F'
   expected="${myName}"
-  msg="file name \(%F\) pattern failed: '\${expected}' != '\${actual}'"
+  msg="file name '%F' pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
@@ -83,7 +83,7 @@ testLineNumberPattern()
 {
   pattern='%L'
   expected=''
-  msg="line number \(%L\) pattern failed: '\${expected}' != '\${actual}'"
+  msg="line number '%L' pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
@@ -91,7 +91,7 @@ testLineSeparatorPattern()
 {
   pattern='%n'
   expected=''
-  msg="line separator \(%n\) pattern failed: '\${expected}' != '\${actual}'"
+  msg="line separator '%n' pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
@@ -99,7 +99,7 @@ testMessagePattern()
 {
   pattern='%m'
   expected='dummy'
-  msg="message \(%m\) pattern failed: '\${expected}' != '\${actual}'"
+  msg="message '%m' pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
@@ -127,9 +127,9 @@ testPriorityPattern()
     appender_setLevel ${APP_NAME} ${priority}
     result=`log ${priority} 'dummy'`
     ${DEBUG} echo "pattern='${pattern}' priority='${priority}' result='${result}'"
-    assertTrue \
+    assertEquals \
       "priority pattern '${pattern}' failed: the requested priority of '${priority}' does not match the returned priority of '${result}'" \
-    "[ \"${priority}\" = \"${result}\" ]" || break
+      "${priority}" "${result}" || break
   done
 
   appender_setLevel ${APP_NAME} ${currPriority}
@@ -145,19 +145,19 @@ testRunTimePattern()
   matched=`echo ${result} |sed "s/${regex}//"`
   ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
 
-  assertFalse \
+  assertNotNull \
     "run time pattern '${pattern}' failed: empty result '${result}'" \
-    "[ -z \"${result}\" ]" || return
-  assertTrue \
+    "${result}" || return
+  assertNull \
     "run time pattern '${pattern}' failed: result '${result}' did not match the regex '${regex}'" \
-    "[ -z \"${matched}\" ]" || return
+    "${matched}" || return
 }
 
 testThreadNamePattern()
 {
   pattern='%t'
   expected=${__LOG4SH_THREAD_DEFAULT}
-  msg="thread name \(%t\) pattern failed: '\${expected}' != '\${actual}'"
+  msg="thread name '%t' pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
@@ -166,23 +166,23 @@ testNDCPattern()
 {
   pattern='%x'
   expected=''
-  msg="NDC \(%x\) pattern failed: '\${expected}' != '\${actual}'"
+  msg="NDC '%x' pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
 # MDC (Mapped Diagnostic Context)
 testMDCPattern()
 {
+  msg="MDC '\${pattern}' pattern failed: '\${expected}' != '\${actual}'"
+
   pattern='%X{LOGNAME}'
   expected=${LOGNAME}
-  msg="MDC (\${pattern}) pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 
   # the %X pattern should not parse unless it has an environment variable name
   # enclosed in {} chars following the 'X'
   pattern='%X'
   expected=${pattern}
-  msg="MDC (\${pattern}) pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
@@ -190,7 +190,7 @@ testPercentPattern()
 {
   pattern='%%'
   expected='%'
-  msg="percent (\${pattern}) pattern failed: '\${expected}' != '\${actual}'"
+  msg="percent '\${pattern}' pattern failed: '\${expected}' != '\${actual}'"
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 }
 
@@ -203,12 +203,12 @@ testDefaultPattern()
   matched=`echo ${result} |sed "s/${regex}//"`
   ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
 
-  assertFalse \
+  assertNotNull \
     "default pattern '${pattern}' failed: empty result '${result}'" \
-    "[ -z \"${result}\" ]" || return
-  assertTrue \
+    "${result}" || return
+  assertNull \
     "default pattern '${pattern}' failed: result '${result}' did not match the regex '${regex}'" \
-    "[ -z \"${matched}\" ]" || return
+    "${matched}" || return
 }
 
 #------------------------------------------------------------------------------
@@ -244,5 +244,6 @@ suite()
   suite_addTest testPercentPattern
 }
 
-# load shUnit and execute the unit tests
+# load and run shUnit
+${DEBUG} echo "loading shUnit" >&2
 . ./shunit
