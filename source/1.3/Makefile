@@ -2,6 +2,7 @@
 
 
 DOCBOOK_SRC_DIR=$(PWD)/src/docbook
+EXAMPLES_SRC_DIR=$(PWD)/src/examples
 SHELL_SRC_DIR=$(PWD)/src/shell
 TEST_SRC_DIR=$(PWD)/src/test
 
@@ -65,6 +66,7 @@ test-clean:
 
 test-prep: build test-clean
 	@mkdir -p $(TEST_DIR)
+	cp -p $(EXAMPLES_SRC_DIR)/hello_world $(TEST_DIR)
 	cp -p $(TEST_SRC_DIR)/test* $(TEST_DIR)
 	cp -p $(TEST_SRC_DIR)/run-test-suite $(TEST_DIR)
 	cp -p $(TEST_SRC_DIR)/*.properties $(TEST_DIR)
