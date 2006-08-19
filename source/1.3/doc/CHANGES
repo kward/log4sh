@@ -31,6 +31,9 @@ a '%d' would return nothing instead of the date
 [kwd] developed a shUnit unit test framework similar to JUnit. I didn't like
 what I found on Internet, so I rolled my own. finding bugs with it already!
 
+[kwd] added conditional declaration of the SECONDS variable in case it is
+missing from the shell implementation being used (e.g. under Bourne shell)
+
 
 Changes with 1.3.4
 
