@@ -144,6 +144,10 @@ __log4shAppender_syslog_facilities=''
 __log4shThreadName=${__LOG4SH_THREAD_DEFAULT}
 __log4shThreadStack=${__LOG4SH_THREAD_DEFAULT}
 
+# missing bourne variables
+
+[ -z "${SECONDS:-}" ] && SECONDS=''
+
 #=============================================================================
 # log4sh private functions
 #
