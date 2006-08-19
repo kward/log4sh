@@ -48,17 +48,17 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
         </affiliation>
       </author>
     </authorgroup>
-  
+
     <!-- All dates specified in ISO "YYYY-MM-DD" format -->
     <pubdate>&isoDate;</pubdate>
-  
+
     <!-- TODO flush out like bookinfo in docbook-tdg -->
-  
+
     <!-- Most recent revision goes at the top; list in descending order -->
     <revhistory>
       <revision>
         <revnumber>1.3.5</revnumber>
-        <date>2006-04-22</date>
+        <date>2006-08-19</date>
         <authorinitials>kwd</authorinitials>
       </revision>
 
@@ -79,26 +79,26 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
         <date>2006-01-18</date>
         <authorinitials>kwd</authorinitials>
       </revision>
-  
+
       <revision>
         <revnumber>1.3.0</revnumber>
         <date>2005-08-15</date>
         <authorinitials>kwd</authorinitials>
       </revision>
-  
+
       <revision>
         <revnumber>1.2.6</revnumber>
         <date>2005-02-01</date>
         <authorinitials>kwd</authorinitials>
       </revision>
-  
+
       <revision>
         <revnumber>1.2.4</revnumber>
         <date>2004-12-28</date>
         <authorinitials>kwd</authorinitials>
       </revision>
     </revhistory>
-  
+
     <!-- Provide a good abstract; a couple of sentences is sufficient -->
     <abstract>
       <para>log4sh is a logging framework for shell scripts that works similar to the other wonderful <ulink url="http://logging.apache.org/">logging products</ulink> available from the <ulink url="http://www.apache.org/">Apache Software Foundataion</ulink> (eg. log4j, log4perl). Although not as powerful as the others, it can make the task of adding advanced logging to shell scripts easier.  It has much more power than just using simple "echo" commands throughout.  In addition, it can be configured from a properties file so that scripts in a production environment do not need to be altered to change the amount of logging they produce.</para>
