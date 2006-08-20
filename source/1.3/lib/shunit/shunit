@@ -25,7 +25,7 @@ done
 __SHUNIT_TRUE=0
 __SHUNIT_FALSE=1
 
-__SHUNIT_UNAME_S=`uname -s`
+__SHUNIT_ASSERT_MSG_PREFIX='ASSERT:'
 
 for _su_const in `set |grep "^__SHUNIT_" |cut -d= -f1`; do
   readonly ${_su_const}
@@ -166,11 +166,15 @@ suite_addTest()
 
 _shunit_execSuite()
 {
+  echo '#'
+  echo '# Performing tests'
+  echo '#'
   for _su_func in ${__shunit_suite}; do
     # execute the per-test setup function
     setUp
 
     # execute the test
+    echo "${_su_func}"
     eval ${_su_func}
 
     # execute the per-test tear-down function
@@ -194,6 +198,7 @@ _shunit_generateReport()
   fi
 
   cat <<EOF
+
 #
 # Test report
 #
@@ -253,7 +258,7 @@ _shunit_testFailed()
   __shunit_testsFailed=`expr ${__shunit_testsFailed} + 1`
   __shunit_testsTotal=`expr ${__shunit_testsTotal} + 1`
 
-  echo "shUnit assert: ${_su__msg}"
+  echo "${__SHUNIT_ASSERT_MSG_PREFIX} ${_su__msg}"
 }
 
 #------------------------------------------------------------------------------
