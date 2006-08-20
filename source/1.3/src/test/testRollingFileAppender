@@ -1,0 +1,248 @@
+#! /bin/sh
+# $Id$
+
+DEBUG=${DEBUG:+' '}
+DEBUG=${DEBUG:-':'}
+${DEBUG} echo 'DEBUG output enabled' >&2
+
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
+MY_LOG4SH="${MY_NAME}.log4sh"
+
+APP_NAME='R'
+APP_MAX_FILE_SIZE='10KB'
+APP_MAX_FILE_SIZE_REAL=10240
+
+appFile=''
+resultFile=''
+
+#------------------------------------------------------------------------------
+# custom asserts
+#
+
+assertFileExists()
+{
+  ${DEBUG} echo "assertFileExists($@)"
+  if [ $# -eq 2 ]; then
+    assertTrue "$1" "[ -f '$2' ]"
+  else
+    assertTrue "[ -f '$1' ]"
+  fi
+}
+
+assertFileNotExists()
+{
+  ${DEBUG} echo "assertFileNotExists($@)"
+  if [ $# -eq 2 ]; then
+    assertTrue "$1" "[ ! -f '$2' ]"
+  else
+    assertTrue "[ ! -f '$1' ]"
+  fi
+}
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+loadLog4sh_runtime()
+{
+  # load log4sh
+  ${DEBUG} echo "loading log4sh" >&2
+  LOG4SH_CONFIGURATION='none' . ${MY_PATH}/log4sh
+
+  # close the default console appender
+  appender_close stdout
+
+  # leave the default logging level at ERROR
+  #logger_setLevel ERROR
+
+  # add a rolling file appender at the INFO level
+  logger_addAppender ${APP_NAME}
+  appender_setType ${APP_NAME} RollingFileAppender
+  appender_setLevel ${APP_NAME} INFO
+  appender_file_setFile ${APP_NAME} "${appFile}"
+  appender_file_setMaxFileSize ${APP_NAME} ${APP_MAX_FILE_SIZE}
+}
+
+loadLog4sh_config()
+{
+  # load log4sh
+  ${DEBUG} echo "loading log4sh" >&2
+  LOG4SH_CONFIGURATION=${MY_LOG4SH} . ${MY_PATH}/log4sh
+}
+
+createSizedFile()
+{
+  file=$1
+  size=$2
+
+  # this could be slow...
+  ${DEBUG} echo "creating ${size} byte file..."
+  if [ ${size} -gt 0 ]; then
+    result=`dd if=/dev/zero of="${file}" bs=1 count=${size} 2>&1`
+    if [ $? -ne 0 ]; then
+      echo "ERROR: had problems creating the '${file}' of ${size} bytes"
+      return 1
+    fi
+  else
+    touch "${file}"
+  fi
+}
+
+testEmptyFile_runtime()
+{ testEmptyFile runtime; }
+testEmptyFile_config()
+{ testEmptyFile config; }
+testEmptyFile()
+{
+  ${DEBUG} echo "testing empty file" >&2
+  useLog4sh=$1
+
+  createSizedFile ${appFile} 0 \
+    || return 1
+
+  (
+    loadLog4sh_${useLog4sh}
+    logger_error 'dummy'
+  )
+
+  # as we started with a empty file, writing a single logging message should
+  # not have caused an overrun, nor a rotation
+  assertFileNotExists \
+    "the file rotated, but it shouldn't have" \
+    "${appFile}.1"
+}
+
+testOneByteUnderSize_runtime()
+{ testOneByteUnderSize runtime; }
+testOneByteUnderSize_config()
+{ testOneByteUnderSize config; }
+testOneByteUnderSize()
+{
+  ${DEBUG} echo "testing one byte under sized file" >&2
+  useLog4sh=$1
+
+  createSizedFile ${appFile} `expr ${APP_MAX_FILE_SIZE_REAL} - 1` \
+    || return 1
+
+  (
+    loadLog4sh_${useLog4sh}
+    logger_error 'dummy'
+  )
+
+  # this time, the file was just under the limit for doing a rotation, so
+  # again, no rotation should have occurred
+  assertFileNotExists \
+    "the file rotated, but it shouldn't have" \
+    "${appFile}.1"
+}
+
+testExactlyRightSize_runtime()
+{ testExactlyRightSize runtime; }
+testExactlyRightSize_config()
+{ testExactlyRightSize config; }
+testExactlyRightSize()
+{
+  ${DEBUG} echo "testing exactly right sized file" >&2
+  useLog4sh=$1
+
+  createSizedFile ${appFile} ${APP_MAX_FILE_SIZE_REAL} \
+    || return 1
+
+  (
+    loadLog4sh_${useLog4sh}
+    logger_error 'dummy'
+  )
+
+  # this time, the file was exactly the right size for doing a rotation. a
+  # rotation should have occurred
+  assertFileExists \
+    "the file should have rotated, but it didn't" \
+    "${appFile}.1"
+}
+
+testOneByteOverSize_runtime()
+{ testOneByteOverSize runtime; }
+testOneByteOverSize_config()
+{ testOneByteOverSize config; }
+testOneByteOverSize()
+{
+  ${DEBUG} echo "testing one byte oversize file" >&2
+  useLog4sh=$1
+
+  createSizedFile ${appFile} `expr ${APP_MAX_FILE_SIZE_REAL} + 1` \
+    || return 1
+
+  (
+    loadLog4sh_${useLog4sh}
+    logger_error 'dummy'
+  )
+
+  # this time, the file was just above the threshold for rotation. a rotation
+  # should have occurred
+  assertFileExists \
+    "the file should have rotated, but it didn't" \
+    "${appFile}.1"
+}
+
+testOrderOfMagnitudeLarger_runtime()
+{ testOrderOfMagnitudeLarger runtime; }
+testOrderOfMagnitudeLarger_config()
+{ testOrderOfMagnitudeLarger config; }
+testOrderOfMagnitudeLarger()
+{
+  ${DEBUG} echo "testing one byte oversize file" >&2
+  useLog4sh=$1
+
+  createSizedFile ${appFile} `expr ${APP_MAX_FILE_SIZE_REAL} \* 10` \
+    || return 1
+
+  (
+    loadLog4sh_${useLog4sh}
+    logger_error 'dummy'
+  )
+
+  # this time, the file was way above the threshold for rotation. a rotation
+  # should have occurred
+  assertFileExists \
+    "the file should have rotated, but it didn't" \
+    "${appFile}.1"
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  appFile="${__shunit_tmpDir}/rfa.log"
+  resultFile="${__shunit_tmpDir}/result.dat"
+}
+
+tearDown()
+{
+  rm -f "${appFile}" "${appFile}.*"
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+suite()
+{
+  suite_addTest testEmptyFile_runtime
+  suite_addTest testOneByteUnderSize_runtime
+  suite_addTest testExactlyRightSize_runtime
+  suite_addTest testOneByteOverSize_runtime
+  suite_addTest testOrderOfMagnitudeLarger_runtime
+
+  suite_addTest testEmptyFile_config
+  suite_addTest testOneByteUnderSize_config
+  suite_addTest testExactlyRightSize_config
+  suite_addTest testOneByteOverSize_config
+  suite_addTest testOrderOfMagnitudeLarger_config
+}
+
+# load and run shUnit
+${DEBUG} echo "loading shUnit" >&2
+. ./shunit
