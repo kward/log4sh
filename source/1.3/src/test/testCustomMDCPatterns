@@ -101,11 +101,11 @@ testCustomUserHostMDC()
   (
     loadLog4sh
 
-    # override the logger_info function
-    logger_info()
-    {
-      log INFO "$@"
-    }
+    # set variables (if needed)
+    if [ -z "${HOSTNAME:-}" ]; then
+      HOSTNAME=`hostname`
+      export HOSTNAME
+    fi
 
     # set the custom pattern
     appender_setPattern ${APP_NAME} ${pattern}
