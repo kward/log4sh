@@ -59,7 +59,7 @@ test: test-prep
 	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-runtime-config )
 	@echo -------------------------------------------------------------------------------
 	@echo "executing log4sh unit tests"
-	( cd $(TEST_DIR); $(TEST_SRC_DIR)/log4sh-test-suite )
+	( cd $(TEST_DIR); $(TEST_SRC_DIR)/run-test-suite )
 
 test-clean:
 	rm -fr $(TEST_DIR)
