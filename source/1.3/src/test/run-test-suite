@@ -13,7 +13,7 @@ for suite in test[A-Z]*; do
 
     # execute the test
     suiteName=`expr "${suite}" : 'test\(.*\)'`
-    echo "--- executing the '${suiteName}' test suite ---" >&2
+    echo "--- Executing the '${suiteName}' test suite ---" >&2
     ( exec ./${suite} )
   fi
 done
