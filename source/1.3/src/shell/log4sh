@@ -751,7 +751,7 @@ _log4sh_propAppender()
         appender_file_setFile $_lpa_appender "$_lpa_value"
         ;;
       MaxBackupIndex) ;;  # unsupported
-      MaxFileSize) ;;  # unsupported
+      MaxFileSize) appender_file_setMaxFileSize ;;
 
       # SMTPAppender
       To) appender_smtp_setTo $_lpa_appender "$_lpa_value" ;;
@@ -2135,6 +2135,32 @@ appender_file_setFile()
 appender_setAppenderFile()
 {
   appender_file_setFile "$@"
+}
+
+# XXX this function needs to be implemented
+appender_file_setMaxFileSize()
+{
+  return ${__LOG4SH_FALSE}
+
+  # split the file size into parts
+  _l4s_size=`expr ${APP_MAX_FILE_SIZE} : '\([0-9]*\)'`
+  _l4s_unit=`expr ${APP_MAX_FILE_SIZE} : '[0-9]*\([A-Za-z]\{2,3\}\)'`
+
+  # determine multiplier and file size
+  case "${_l4s_unit}" in
+    B) _l4s_mul=1 ;;
+    KB|KiB) _l4s_mul=1024 ;;
+    MB|MiB) _l4s_mul=1048576 ;;
+    GB|GiB) _l4s_mul=1073741824 ;;
+    TB|TiB) _l4s_mul=1099511627776 ;;
+    *)
+      echo "log4sh:ERROR unrecognized file size unit '${_l4s_unit}'" >&2
+      return ${__LOG4SH_FALSE}
+      ;;
+  esac
+  _l4s_maxFileSize=`expr ${_l4s_size} \* ${_l4s_mul}`
+
+  unset _l4s_size _l4s_unit _l4s_mul _l4s_maxFileSize
 }
 
 #-----------------------------------------------------------------------------
