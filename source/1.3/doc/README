@@ -6,11 +6,11 @@ This project is stored on SourceForge as http://sf.net/projects/log4sh.  CVS
 can be accessed using the following information.
 
 * Anonymous CVS access
-$ cvs -d :pserver:anonymous@cvs.sourceforge.net:/cvsroot/log4sh login
-$ cvs -d :pserver:anonymous@cvs.sourceforge.net:/cvsroot/log4sh co -P <modulename>
+$ cvs -d :pserver:anonymous@log4sh.cvs.sourceforge.net:/cvsroot/log4sh login
+$ cvs -d :pserver:anonymous@log4sh.cvs.sourceforge.net:/cvsroot/log4sh co -P <modulename>
 
 * Developer CVS access
-$ cvs -d :ext:<developer>@cvs.sourceforge.net:/cvsroot/log4sh co -P <modulename>
+$ cvs -d :ext:<developer>@log4sh.cvs.sourceforge.net:/cvsroot/log4sh co -P <modulename>
 
 CVS may also be browsed via a web browser at
 http://cvs.sourceforge.net/viewcvs.py/log4sh/.
@@ -70,7 +70,7 @@ EXPORT THE RELEASE
 
 $ pwd
 .../log4sh/builds
-$ cvs -d :ext:sfsetse@cvs.sourceforge.net:/cvsroot/log4sh export -r rel-1-3-0 -d log4sh-1.3.0 1.3
+$ cvs -d :ext:sfsetse@log4sh.cvs.sourceforge.net:/cvsroot/log4sh export -r rel-1-3-0 -d log4sh-1.3.0 1.3
 
 CREATE TARBALL
 
