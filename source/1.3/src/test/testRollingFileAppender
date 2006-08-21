@@ -12,6 +12,7 @@ MY_LOG4SH="${MY_NAME}.log4sh"
 APP_NAME='R'
 APP_MAX_FILE_SIZE='10KB'
 APP_MAX_FILE_SIZE_REAL=10240
+APP_MAX_BACKUP_INDEX='1'
 
 appFile=''
 resultFile=''
@@ -62,6 +63,7 @@ loadLog4sh_runtime()
   appender_setLevel ${APP_NAME} INFO
   appender_file_setFile ${APP_NAME} "${appFile}"
   appender_file_setMaxFileSize ${APP_NAME} ${APP_MAX_FILE_SIZE}
+  appender_file_setMaxBackupIndex ${APP_NAME} ${APP_MAX_BACKUP_INDEX}
 }
 
 loadLog4sh_config()
@@ -209,6 +211,21 @@ testOrderOfMagnitudeLarger()
     "${appFile}.1"
 }
 
+testTwoMaxBackups()
+{
+  assertTrue false
+}
+
+testOneMaxBackup()
+{
+  assertTrue false
+}
+
+testZeroMaxBackups()
+{
+  assertTrue false
+}
+
 #------------------------------------------------------------------------------
 # suite functions
 #
@@ -241,6 +258,10 @@ suite()
   suite_addTest testExactlyRightSize_config
   suite_addTest testOneByteOverSize_config
   suite_addTest testOrderOfMagnitudeLarger_config
+
+  suite_addTest testTwoMaxBackups
+  suite_addTest testOneMaxBackup
+  suite_addTest testZeroMaxBackups
 }
 
 # load and run shUnit
