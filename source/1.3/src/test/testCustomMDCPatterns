@@ -96,7 +96,7 @@ testCustomTimeMDC()
 testCustomUserHostMDC()
 {
   pattern='%X{LOGNAME}@%X{HOSTNAME}'
-  regex='[A-Za-z0-9]*@[A-Za-z0-9-]*'
+  regex='[A-Za-z0-9]*@[-.A-Za-z0-9]*'
 
   (
     loadLog4sh
