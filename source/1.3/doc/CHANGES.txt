@@ -1,5 +1,8 @@
 Changes with 1.3.6
 
+[kwd] fixed a bug when trying to restore old trap signal handlers. had a bad
+regex and was missing some "'" chars
+
 
 Changes with 1.3.5
 
