@@ -293,8 +293,10 @@ _log4sh_cleanup()
 #*/
 _log4sh_mktempDir()
 {
+  _tmpPrefix='log4sh'
+
   # try the standard mktemp function
-  ( exec mktemp -dqt log4sh.XXXXXX 2>/dev/null ) && return
+  ( exec mktemp -dqt ${_tmpPrefix}.XXXXXX 2>/dev/null ) && return
 
   # the standard mktemp didn't work.  doing our own.
   if [ -n "${RANDOM:-}" ]; then
@@ -306,7 +308,7 @@ _log4sh_mktempDir()
     _random=`expr ${_date} / $$`
   fi
 
-  _tmpDir="${TMPDIR-/tmp}/log4sh.${_random}"
+  _tmpDir="${TMPDIR:-/tmp}/${_tmpPrefix}.${_random}"
   ( umask 077 && mkdir "${_tmpDir}" ) || {
     echo 'log4sh:FATAL could not create temporary directory! exiting' >&2
     exit 1
@@ -314,7 +316,7 @@ _log4sh_mktempDir()
 
   ${LOG4SH_DEBUG} echo "log4sh:DEBUG temporary directory (${_tmpDir})" >&2
   echo ${_tmpDir}
-  unset _date _random _tmpDir
+  unset _date _random _tmpDir _tmpPrefix
 }
 
 #/**
