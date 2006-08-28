@@ -208,7 +208,7 @@ log4sh_cleanup()
 #*/
 _log4sh_cleanup()
 {
-  _trap="${1}"
+  _trap="$1"
 
   ${LOG4SH_INFO} echo "log4sh:INFO _log4sh_cleanup(): the ${_trap} signal was caught" >&2
 
@@ -230,7 +230,7 @@ _log4sh_cleanup()
       ${LOG4SH_DEBUG} echo 'log4sh:DEBUG newer POSIX trap command'
       _restoreTrap=${__LOG4SH_TRUE}
       _oldTrap=`grep "${_trap}$" "${__log4sh_trapsFile}" |\
-        sed "s/^trap -- \(.*\) [A-Z]*$/\1/"`
+        sed "s/^trap -- '\(.*\)' [A-Z]*$/\1/"`
     elif [ `grep "[0-9]*: " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # older trap command
