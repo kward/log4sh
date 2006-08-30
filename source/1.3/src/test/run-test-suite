@@ -1,19 +1,38 @@
 #! /bin/sh
 # $Id$
 
-first=1
-for suite in test[A-Z]*; do
-  if [ -x ${suite} ]; then
-    # separate test runs with a blank line
-    if [ ${first} -eq 0 ]; then
-      echo
-    else
-      first=0
-    fi
+myName=`basename $0`
 
-    # execute the test
-    suiteName=`expr "${suite}" : 'test\(.*\)'`
-    echo "--- Executing the '${suiteName}' test suite ---" >&2
-    ( exec ./${suite} )
+first=1
+for shell in \
+  /bin/bash \
+  /bin/ksh \
+  /bin/sh
+do
+  # check for existance of shell
+  if [ ! -x ${shell} ]; then
+    echo "${myName}:WARN unable to run tests with the ${shell} shell"
+    continue
   fi
+
+  # separate test runs with a blank line
+  if [ ${first} -eq 0 ]; then
+    echo
+  else
+    first=0
+  fi
+
+  echo "#------------------------------------------------------------------------------"
+  echo "# Running the test suite with ${shell}"
+  echo "#"
+
+  for suite in test[A-Z]*; do
+    if [ -x ${suite} ]; then
+      # execute the test
+      suiteName=`expr "${suite}" : 'test\(.*\)'`
+      echo
+      echo "--- Executing the '${suiteName}' test suite ---" >&2
+      ( exec ${shell} ./${suite} )
+    fi
+  done
 done
