@@ -1,5 +1,7 @@
 # $Id$
 
+- look into traps. exit codes seem to be lost
+
 - enable passing the configuration filename on the source line instead of
   requiring the LOG4SH_CONFIGURATION variable
 
