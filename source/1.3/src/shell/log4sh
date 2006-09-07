@@ -26,7 +26,7 @@
 __LOG4SH_SHELL_FLAGS='u'
 
 # save the current set of shell flags, and then set some for log4sh
-__log4sh_oldShellFlags="$-"
+__log4sh_oldShellFlags=$-
 for _log4sh_shellFlag in `echo "${__LOG4SH_SHELL_FLAGS}" |sed 's/\(.\)/\1 /g'`
 do
   set -${_log4sh_shellFlag}
@@ -40,7 +40,7 @@ __LOG4SH_VERSION='1.3.6pre'
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
 __LOG4SH_ERROR=2
-__LOG4SH_NULL='-'
+__LOG4SH_NULL='~'
 
 __LOG4SH_APPENDER_FUNC_PREFIX='_log4sh_app_'
 __LOG4SH_APPENDER_DATA_EXT='.app'
@@ -81,11 +81,30 @@ __LOG4SH_LEVEL_CLOSED_STR='CLOSED'
 __LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
 __LOG4SH_THREAD_DEFAULT='main'
 
-__LOG4SH_DEFAULT_IFS=' '
+__LOG4SH_CONFIGURATION="${LOG4SH_CONFIGURATION:-log4sh.properties}"
+__LOG4SH_CONFIG_PREFIX="${LOG4SH_CONFIG_PREFIX:-log4sh}"
+
 # the following IFS is *supposed* to be on two lines!!
-__LOG4SH_ARRAY_IFS="
+__LOG4SH_IFS_ARRAY="
 "
+__LOG4SH_IFS_DEFAULT=' '
+
 __LOG4SH_TRAP_EXIT='log4sh-EXIT'
+
+# configure log4sh debugging. set the LOG4SH_INFO environment variable to any
+# non-empty value to enable info output, LOG4SH_DEBUG enable debugging, or
+# LOG4SH_TRACE to enable tracing. log4sh ERROR and above messages are always
+# printed. to send the debug output to a file, set the LOG4SH_DEBUG_FILE with
+# the filename you want debug output to be written to.
+
+__LOG4SH_TRACE=${LOG4SH_TRACE:+_log4sh_trace }
+__LOG4SH_TRACE=${__LOG4SH_TRACE:-:}
+[ -n "${LOG4SH_TRACE:-}" ] && LOG4SH_DEBUG=1
+__LOG4SH_DEBUG=${LOG4SH_DEBUG:+_log4sh_debug }
+__LOG4SH_DEBUG=${__LOG4SH_DEBUG:-:}
+[ -n "${LOG4SH_DEBUG:-}" ] && LOG4SH_INFO=1
+__LOG4SH_INFO=${LOG4SH_INFO:+_log4sh_info }
+__LOG4SH_INFO=${__LOG4SH_INFO:-:}
 
 # set the constants to readonly
 for _log4sh_const in `set |grep "^__LOG4SH_" |cut -d= -f1`; do
@@ -94,52 +113,12 @@ done
 unset _log4sh_const
 
 #
-# variables
-#
-
-# external variables
-
-# configure log4sh logging. set the LOG4SH_INFO environment variable to any
-# non-empty value to enable info output, LOG4SH_DEBUG enable debugging, or
-# LOG4SH_TRACE to enable tracing. log4sh ERROR and above messages are always
-# printed
-
-LOG4SH_TRACE=${LOG4SH_TRACE:+' '}
-LOG4SH_TRACE=${LOG4SH_TRACE:-':'}
-${LOG4SH_TRACE} eval LOG4SH_DEBUG=1
-${LOG4SH_TRACE} echo 'log4sh:TRACE output enabled' >&2
-
-LOG4SH_DEBUG=${LOG4SH_DEBUG:+' '}
-LOG4SH_DEBUG=${LOG4SH_DEBUG:-':'}
-${LOG4SH_DEBUG} eval LOG4SH_INFO=1
-${LOG4SH_DEBUG} echo 'log4sh:DEBUG output enabled' >&2
-
-LOG4SH_INFO=${LOG4SH_INFO:+' '}
-LOG4SH_INFO=${LOG4SH_INFO:-':'}
-${LOG4SH_INFO} echo 'log4sh:INFO output enabled' >&2
-
-LOG4SH_CONFIGURATION="${LOG4SH_CONFIGURATION:-log4sh.properties}"
-LOG4SH_CONFIG_PREFIX="${LOG4SH_CONFIG_PREFIX:-log4sh}"
-
 # internal variables
+#
 
 __log4sh_filename=`basename $0`
 __log4sh_tmpDir=''
 __log4sh_trapsFile=''
-
-__log4shAppenders=''
-__log4shAppenderCount=0
-__log4shAppenderCounts=''
-__log4shAppenderLayouts=''
-__log4shAppenderLevels=''
-__log4shAppenderPatterns=''
-__log4shAppenderTypes=''
-__log4shAppender_file_files=''
-__log4shAppender_rollingFile_maxBackupIndexes=''
-__log4shAppender_rollingFile_maxFileSizes=''
-__log4shAppender_smtp_tos=''
-__log4shAppender_smtp_subjects=''
-__log4shAppender_syslog_facilities=''
 
 __log4shThreadName=${__LOG4SH_THREAD_DEFAULT}
 __log4shThreadStack=${__LOG4SH_THREAD_DEFAULT}
@@ -151,6 +130,204 @@ __log4shThreadStack=${__LOG4SH_THREAD_DEFAULT}
 #=============================================================================
 # log4sh private functions
 #
+
+#-----------------------------------------------------------------------------
+# internal debugging
+#
+
+#/**
+# <s:function group="debugging">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_log</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     This is an internal debugging function. It should not be called.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_log</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_log()
+{
+  _ll__level=$1 shift
+  if [ -z "${LOG4SH_DEBUG_FILE:-}" ]; then
+    echo "log4sh:${_ll__level} $@" >&2
+  else
+    echo "${_ll__level} $@" >>${LOG4SH_DEBUG_FILE}
+  fi
+  unset _ll__level
+}
+
+#/**
+# <s:function group="debugging">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_trace</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     This is an internal debugging function. It should not be called.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_log</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_trace()
+{
+  _log4sh_log "${__LOG4SH_LEVEL_TRACE_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]})} - $@";
+ }
+
+#/**
+# <s:function group="debugging">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_debug</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     This is an internal debugging function. It should not be called.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_log</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_debug()
+{
+  _log4sh_log "${__LOG4SH_LEVEL_DEBUG_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]})} - $@";
+}
+
+#/**
+# <s:function group="debugging">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_info</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     This is an internal debugging function. It should not be called.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_log</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_info()
+{
+  _log4sh_log "${__LOG4SH_LEVEL_INFO_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]})} - $@";
+}
+
+#/**
+# <s:function group="debugging">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_warn</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     This is an internal debugging function. It should not be called.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_log</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_warn()
+{
+  echo "log4sh:${__LOG4SH_LEVEL_WARN_STR} $@" >&2
+  [ -n "${LOG4SH_DEBUG_FILE:-}" ] \
+    && _log4sh_log "${__LOG4SH_LEVEL_WARN_STR}" "$@"
+}
+
+#/**
+# <s:function group="debugging">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_error</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     This is an internal debugging function. It should not be called.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_log</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_error()
+{
+  echo "log4sh:${__LOG4SH_LEVEL_ERROR_STR} $@" >&2
+  [ -n "${LOG4SH_DEBUG_FILE:-}" ] \
+    && _log4sh_log "${__LOG4SH_LEVEL_ERROR_STR}" "$@"
+}
+
+#/**
+# <s:function group="debugging">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_fatal</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     This is an internal debugging function. It should not be called.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_log</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_fatal()
+{
+  echo "log4sh:${__LOG4SH_LEVEL_FATAL_STR} $@" >&2
+  [ -n "${LOG4SH_DEBUG_FILE:-}" ] \
+    && _log4sh_log "${__LOG4SH_LEVEL_FATAL_STR}" "$@"
+}
 
 #-----------------------------------------------------------------------------
 # miscellaneous
@@ -208,9 +385,9 @@ log4sh_cleanup()
 #*/
 _log4sh_cleanup()
 {
-  _trap="$1"
+  _trap=$1
 
-  ${LOG4SH_INFO} echo "log4sh:INFO _log4sh_cleanup(): the ${_trap} signal was caught" >&2
+  ${__LOG4SH_INFO} "_log4sh_cleanup(): the ${_trap} signal was caught"
 
   _restoreTrap=${__LOG4SH_FALSE}
   _oldTrap=''
@@ -227,20 +404,20 @@ _log4sh_cleanup()
     if [ `grep "^trap -- " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # newer trap command
-      ${LOG4SH_DEBUG} echo 'log4sh:DEBUG newer POSIX trap command'
+      ${__LOG4SH_DEBUG} 'newer POSIX trap command'
       _restoreTrap=${__LOG4SH_TRUE}
       _oldTrap=`grep "${_trap}$" "${__log4sh_trapsFile}" |\
         sed "s/^trap -- '\(.*\)' [A-Z]*$/\1/"`
     elif [ `grep "[0-9]*: " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # older trap command
-      ${LOG4SH_DEBUG} echo 'log4sh:DEBUG older style trap command'
+      ${__LOG4SH_DEBUG} 'older style trap command'
       _restoreTrap=${__LOG4SH_TRUE}
       _oldTrap=`grep "^${_signal}: " "${__log4sh_trapsFile}" |\
         sed 's/^[0-9]*: //'`
     else
       # unrecognized trap output
-      echo 'log4sh:ERROR unable to restore old traps! unrecognized trap command output' >&2
+      _log4sh_error 'unable to restore old traps! unrecognized trap command output'
     fi
   fi
 
@@ -265,7 +442,7 @@ _log4sh_cleanup()
   esac
 
   # exit if the trap was not the special log4sh-EXIT trap
-  [ "${_trap}" = ${__LOG4SH_TRAP_EXIT} ] || exit ${_return}
+  [ "${_trap}" = "${__LOG4SH_TRAP_EXIT}" ] || exit ${_return}
 
   unset _oldTrap _signal _restoreTrap _trap
   return ${_return}
@@ -310,102 +487,13 @@ _log4sh_mktempDir()
 
   _tmpDir="${TMPDIR:-/tmp}/${_tmpPrefix}.${_random}"
   ( umask 077 && mkdir "${_tmpDir}" ) || {
-    echo 'log4sh:FATAL could not create temporary directory! exiting' >&2
+    _log4sh_fatal 'could not create temporary directory! exiting'
     exit 1
   }
 
-  ${LOG4SH_DEBUG} echo "log4sh:DEBUG temporary directory (${_tmpDir})" >&2
+  ${__LOG4SH_DEBUG} "created temporary directory (${_tmpDir})"
   echo ${_tmpDir}
   unset _date _random _tmpDir _tmpPrefix
-}
-
-#/**
-# <s:function group="miscellaneous">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>_log4sh_level2tag</function></funcdef>
-#       <paramdef>integer <parameter>level</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Converts an internally used level constant into its external tag
-#   equivalent</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>tag=`_log4sh_level2tag 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-# TODO use arrays instead of case statement ??
-_log4sh_level2tag()
-{
-  _level=$1
-
-  _return=${__LOG4SH_TRUE}
-  _tag=''
-
-  case ${_level} in
-    ${__LOG4SH_LEVEL_TRACE}) _tag=${__LOG4SH_LEVEL_TRACE_STR} ;;
-    ${__LOG4SH_LEVEL_DEBUG}) _tag=${__LOG4SH_LEVEL_DEBUG_STR} ;;
-    ${__LOG4SH_LEVEL_INFO}) _tag=${__LOG4SH_LEVEL_INFO_STR} ;;
-    ${__LOG4SH_LEVEL_WARN}) _tag=${__LOG4SH_LEVEL_WARN_STR} ;;
-    ${__LOG4SH_LEVEL_ERROR}) _tag=${__LOG4SH_LEVEL_ERROR_STR} ;;
-    ${__LOG4SH_LEVEL_FATAL}) _tag=${__LOG4SH_LEVEL_FATAL_STR} ;;
-    ${__LOG4SH_LEVEL_OFF}) _tag=${__LOG4SH_LEVEL_OFF_STR} ;;
-    ${__LOG4SH_LEVEL_CLOSED}) _tag=${__LOG4SH_LEVEL_CLOSED_STR} ;;
-    *) _return=${__LOG4SH_FALSE} ;;
-  esac
-
-  echo ${_tag}
-  unset _level _tag
-  return ${_return}
-}
-
-#/**
-# <s:function group="miscellaneous">
-# <entry align="right">
-#   <code>integer</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>_log4sh_tag2level</function></funcdef>
-#       <paramdef>string <parameter>tag</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Converts an externally used level tag into its internal constant
-#   equivalent</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>level=`_log4sh_tag2level WARN`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-_log4sh_tag2level()
-{
-  _tag=$1
-
-  _level=''
-  _return=${__LOG4SH_TRUE}
-
-  case $_tag in
-    ${__LOG4SH_LEVEL_TRACE_STR}) _level=${__LOG4SH_LEVEL_TRACE} ;;
-    ${__LOG4SH_LEVEL_DEBUG_STR}) _level=${__LOG4SH_LEVEL_DEBUG} ;;
-    ${__LOG4SH_LEVEL_INFO_STR}) _level=${__LOG4SH_LEVEL_INFO} ;;
-    ${__LOG4SH_LEVEL_WARN_STR}) _level=${__LOG4SH_LEVEL_WARN} ;;
-    ${__LOG4SH_LEVEL_ERROR_STR}) _level=${__LOG4SH_LEVEL_ERROR} ;;
-    ${__LOG4SH_LEVEL_FATAL_STR}) _level=${__LOG4SH_LEVEL_FATAL} ;;
-    ${__LOG4SH_LEVEL_OFF_STR}) _level=${__LOG4SH_LEVEL_OFF} ;;
-    ${__LOG4SH_LEVEL_CLOSED_STR}) _level=${__LOG4SH_LEVEL_CLOSED} ;;
-    *) _return=${__LOG4SH_FALSE} ;;
-  esac
-
-  echo ${_level}
-  unset _level _tag
-  return ${_return}
 }
 
 #-----------------------------------------------------------------------------
@@ -465,17 +553,20 @@ _log4sh_findArrayElement()
 #*/
 _log4sh_getArrayElement()
 {
-  _lgae_array="$1"
-  _lgae_index=$2
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}() (called from ${BASH_LINENO[0]})"
+  _lgae__array=$1
+  _lgae__index=$2
+  ${__LOG4SH_TRACE} "_lgae__array='${_lgae__array}' _lgae__index='${_lgae__index}'"
 
-  __oldIFS="${IFS}"; IFS="${__LOG4SH_ARRAY_IFS}"
-  set -- junk ${_lgae_array}
-  IFS="${__oldIFS}"; unset __oldIFS
+  _lgae__oldIFS=${IFS} IFS=${__LOG4SH_IFS_ARRAY}
+  set -- junk ${_lgae__array}
+  IFS=${_lgae__oldIFS}
+  ${__LOG4SH_TRACE} "1='${1:-}' 2='${2:-}' 3='${3:-}' ..."
 
-  shift ${_lgae_index}
+  shift ${_lgae__index}
   echo $1
 
-  unset _lgae_index __oldIFS
+  unset _lgae__array _lgae__index _lgae__oldIFS
 }
 
 #/**
@@ -499,9 +590,9 @@ _log4sh_getArrayElement()
 #*/
 _log4sh_getArrayLength()
 {
-  _oldIFS="${IFS}"; IFS="$__LOG4SH_ARRAY_IFS"
-  set -- ${1}
-  IFS="${_oldIFS}"; unset _oldIFS
+  _oldIFS=${IFS} IFS=${__LOG4SH_IFS_ARRAY}
+  set -- $1
+  IFS=${_oldIFS} unset _oldIFS
   echo $#
 }
 
@@ -579,9 +670,9 @@ _log4sh_peekStack()
 #*/
 _log4sh_popStack()
 {
-  _array="$1"
-  _length=`_log4sh_getArrayLength "$_array"`
-  echo "$_array" |awk '{if(NR<r){print $0}}' r=$_length
+  _array=$1
+  _length=`_log4sh_getArrayLength "${_array}"`
+  echo "${_array}" |awk '{if(NR<r){print $0}}' r=${_length}
   unset _array _length
 }
 
@@ -609,7 +700,7 @@ _log4sh_popStack()
 #*/
 _log4sh_pushStack()
 {
-  echo "${1:+${1}${__LOG4SH_ARRAY_IFS}}${2}"
+  echo "${1:+$1${__LOG4SH_IFS_ARRAY}}$2"
 }
 
 #-----------------------------------------------------------------------------
@@ -639,10 +730,10 @@ _log4sh_pushStack()
 #*/
 _log4sh_getPropPrefix()
 {
-  _oldIFS="${IFS}"; IFS="."
-  set -- ${1}
-  IFS="${_oldIFS}"; unset _oldIFS
-  echo ${1}
+  _oldIFS=${IFS} IFS='.'
+  set -- $1
+  IFS=${_oldIFS} unset _oldIFS
+  echo $1
 }
 
 #/**
@@ -668,7 +759,7 @@ _log4sh_getPropPrefix()
 #*/
 _log4sh_stripPropPrefix()
 {
-  expr ${1} : '[^.]*\.\(.*\)'
+  expr "$1" : '[^.]*\.\(.*\)'
 }
 
 #/**
@@ -699,7 +790,7 @@ _log4sh_propAppender()
   _lpa_appender=''
 
   # strip the leading 'appender' keyword prefix
-  _lpa_key=`_log4sh_stripPropPrefix $_lpa_key`
+  _lpa_key=`_log4sh_stripPropPrefix ${_lpa_key}`
 
   # handle appender definitions
   if [ "${_lpa_key}" '=' "`expr \"${_lpa_key}\" : '\([^.]*\)'`" ]; then
@@ -711,7 +802,7 @@ _log4sh_propAppender()
   # does the appender exist?
   appender_exists ${_lpa_appender}
   if [ $? -eq ${__LOG4SH_FALSE} ]; then
-    echo "log4sh:ERROR attempt to configure the non-existant appender (${_lpa_appender})" >&2
+    _log4sh_error "attempt to configure the non-existant appender (${_lpa_appender})"
     unset _lpa_appender _lpa_key _lpa_value
     return ${__LOG4SH_ERROR}
   fi
@@ -732,7 +823,7 @@ _log4sh_propAppender()
       $__LOG4SH_TYPE_SYSLOG)
         appender_setType $_lpa_appender $_lpa_value ;;
       *)
-        echo "log4sh:ERROR appender type ($_lpa_value) unrecognized" >&2 ;;
+        _log4sh_error "appender type ($_lpa_value) unrecognized" ;;
     esac
     unset _lpa_appender _lpa_key _lpa_value
     return ${__LOG4SH_TRUE}
@@ -764,7 +855,7 @@ _log4sh_propAppender()
       Facility) appender_syslog_setFacility ${_lpa_appender} "${_lpa_value}" ;;
 
       # catch unrecognized
-      *) echo "log4sh:ERROR appender value/method ($_lpa_key) unrecognized" >&2 ;;
+      *) _log4sh_error "appender value/method ($_lpa_key) unrecognized" ;;
     esac
     unset _lpa_appender _lpa_key _lpa_value
     return ${__LOG4SH_TRUE}
@@ -774,7 +865,7 @@ _log4sh_propAppender()
   _lpa_key=`_log4sh_stripPropPrefix $_lpa_key`
   case $_lpa_key in
     ConversionPattern) appender_setPattern $_lpa_appender "$_lpa_value" ;;
-    *) echo "log4sh:ERROR layout value/method ($_lpa_key) unrecognized" >&2 ;;
+    *) _log4sh_error "layout value/method ($_lpa_key) unrecognized" ;;
   esac
   unset _lpa_appender _lpa_key _lpa_value
   return ${__LOG4SH_TRUE}
@@ -804,7 +895,7 @@ _log4sh_propAppender()
 _log4sh_propLogger()
 {
   _prop=`_log4sh_stripPropPrefix $1`
-  echo "logger: $_prop $2"
+  echo "logger: ${_prop} $2"
   unset _prop
 }
 
@@ -853,7 +944,7 @@ _log4sh_propRootLogger()
       if [ $? -eq ${__LOG4SH_FALSE} ]; then
         logger_addAppender "${__lprl_operand}"
       else
-        echo "log4sh:ERROR attempt to add already existing appender of name (${__lprl_operand})" >&2
+        _log4sh_error "attempt to add already existing appender of name (${__lprl_operand})"
       fi
     fi
     __lprl_index=`expr ${__lprl_index} + 1`
@@ -870,26 +961,31 @@ _log4sh_propRootLogger()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>log4sh_readProperties</function></funcdef>
-#       <paramdef>string <parameter>filename</parameter></paramdef>
+#       <funcdef><function>log4sh_doConfiguration</function></funcdef>
+#       <paramdef>string <parameter>configFileName</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Reads a properties file and calls appropriate configuration
-#   functions.</para>
+#   <para>
+#     Read configuration from a file. <emphasis type="strong">The existing
+#     configuration is not cleared or reset.</emphasis> If you require a
+#     different behavior, then call the log4sh_resetConfiguration before
+#     calling log4sh_doConfigure.
+#   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>pos=`_log4sh_findArrayElement "$array" $element`</funcsynopsisinfo>
+#     <funcsynopsisinfo>log4sh_doConfiguration myconfig.properties</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-log4sh_readProperties()
+log4sh_doConfiguration()
 {
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}() (called from ${BASH_LINENO[0]})"
   _lrp_file=$1
 
   # strip the config prefix and dump output to a temporary file
   _lrp_tmpFile="${__log4sh_tmpDir}/properties"
-  $LOG4SH_DEBUG echo "log4sh:DEBUG LOG4SH_CONFIG_PREFIX=${LOG4SH_CONFIG_PREFIX}"
-  grep "^${LOG4SH_CONFIG_PREFIX}\." "${_lrp_file}" >"${_lrp_tmpFile}"
+  ${__LOG4SH_TRACE} "__LOG4SH_CONFIG_PREFIX='${__LOG4SH_CONFIG_PREFIX}'"
+  grep "^${__LOG4SH_CONFIG_PREFIX}\." "${_lrp_file}" >"${_lrp_tmpFile}"
 
   # read the file in. using awk here instead of piping the file into 'while'
   # and then reading with 'read' as the pipe causes a fork under the Solaris
@@ -908,109 +1004,92 @@ log4sh_readProperties()
       external) ;;
       logger) _log4sh_propLogger ${_lrp_key} "${_lrp_value}" ;;
       rootLogger) _log4sh_propRootLogger "${_lrp_value}" ;;
-      *) echo "log4sh:ERROR unrecognized properties keyword (${_lrp_keyword})" >&2 ;;
+      *) _log4sh_error "unrecognized properties keyword (${_lrp_keyword})" ;;
     esac
   done
   exec 0<&3 3<&-
 
+  # activate all of the appenders
+  for _lrp_appender in ${__log4shAppenders}; do
+    ${__LOG4SH_APPENDER_FUNC_PREFIX}${_lrp_appender}_activateOptions
+  done
+
   # remove the temporary file
   rm -f "${_lrp_tmpFile}"
 
-  unset _lrp_file _lrp_tmpFile _lrp_line _lrp_key _lrp_keyword _lrp_value
-}
-
-#=============================================================================
-# Logger
-#
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <emphasis>void</emphasis>/<code>boolean</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>logger_addAppender</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Add and initialize a new appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>logger_addAppender $appender</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-logger_addAppender()
-{
-  laa_appender=$1
-
-  # XXX should we be using setter functions here?? for performance, no.
-  __log4shAppenders=`_log4sh_pushStack "${__log4shAppenders}" $1`
-  __log4shAppenderCount=`expr ${__log4shAppenderCount} + 1`
-  __log4shAppenderCounts="${__log4shAppenderCounts} ${__log4shAppenderCount}"
-  __log4shAppenderLayouts=`_log4sh_pushStack \
-    "$__log4shAppenderLayouts" "${__LOG4SH_LAYOUT_SIMPLE}"`
-  __log4shAppenderLevels=`_log4sh_pushStack \
-    "${__log4shAppenderLevels}" ${__LOG4SH_NULL}`
-  __log4shAppenderPatterns=`_log4sh_pushStack \
-    "${__log4shAppenderPatterns}" "${__LOG4SH_PATTERN_DEFAULT}"`
-  __log4shAppenderTypes=`_log4sh_pushStack \
-    "${__log4shAppenderTypes}" ${__LOG4SH_TYPE_CONSOLE}`
-  __log4shAppender_file_files=`_log4sh_pushStack \
-    "${__log4shAppender_file_files}" ${__LOG4SH_NULL}`
-  __log4shAppender_rollingFile_maxBackupIndexes=`_log4sh_pushStack \
-    "${__log4shAppender_rollingFile_maxBackupIndexes}" \
-    ${__LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX}`
-  __log4shAppender_rollingFile_maxFileSizes=`_log4sh_pushStack \
-    "${__log4shAppender_rollingFile_maxFileSizes}" \
-    ${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}`
-  __log4shAppender_smtp_tos=`_log4sh_pushStack \
-    "${__log4shAppender_smtp_tos}" ${__LOG4SH_NULL}`
-  __log4shAppender_smtp_subjects=`_log4sh_pushStack \
-    "${__log4shAppender_smtp_subjects}" ${__LOG4SH_NULL}`
-  __log4shAppender_syslog_facilities=`_log4sh_pushStack \
-    "${__log4shAppender_syslog_facilities}" ${__LOG4SH_TYPE_SYSLOG_FACILITY}`
-
-  _appender_cache "${laa_appender}"
-
-  unset laa_appender
-
-  return ${__LOG4SH_TRUE}
+  unset _lrp_appender _lrp_file _lrp_tmpFile _lrp_line _lrp_key _lrp_keyword
+  unset _lrp_value
 }
 
 #/**
-# <s:function group="Appenders">
+# <s:function group="properties">
 # <entry align="right">
 #   <emphasis>void</emphasis>
 # </entry>
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>logger_addAppenderWithPattern</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>pattern</parameter></paramdef>
+#       <funcdef><function>log4sh_doConfiguration</function></funcdef>
+#       <paramdef>string <parameter>configFileName</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Add and initialize a new appender with a specific PatternLayout</para>
+#   <para><emphasis>(deprecated as of 1.3.6)</emphasis>
+#     Read configuration from a file. <emphasis type="strong">The existing
+#     configuration is not cleared or reset.</emphasis> If you require a
+#     different behavior, then call the log4sh_resetConfiguration before
+#     calling log4sh_doConfigure.
+#   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>logger_addAppenderWithPattern $appender '%d %p - %m%n'</funcsynopsisinfo>
+#     <funcsynopsisinfo>log4sh_readProperties myconfig.properties</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-logger_addAppenderWithPattern()
+log4sh_readProperties()
 {
-  _myAppender=$1
-  _myPattern=$2
-
-  logger_addAppender ${_myAppender}
-  appender_setLayout ${_myAppender} "${__LOG4SH_LAYOUT_PATTERN}"
-  appender_setPattern ${_myAppender} "${_myPattern}"
-
-  unset _myAppender _myPattern
+  log4sh_doConfiguration "$@"
 }
+
+#/**
+# <s:function group="properties">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>log4sh_resetConfiguration</function></funcdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para />
+#   <funcsynopsis>
+#     <funcsynopsisinfo>log4sh_resetConfiguration</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+log4sh_resetConfiguration()
+{
+  __log4shAppenders=''
+  __log4shAppenderCount=0
+  __log4shAppenderCounts=''
+  __log4shAppenderLayouts=''
+  __log4shAppenderLevels=''
+  __log4shAppenderPatterns=''
+  __log4shAppenderTypes=''
+  __log4shAppender_file_files=''
+  __log4shAppender_rollingFile_maxBackupIndexes=''
+  __log4shAppender_rollingFile_maxFileSizes=''
+  __log4shAppender_smtp_tos=''
+  __log4shAppender_smtp_subjects=''
+  __log4shAppender_syslog_facilities=''
+
+  logger_setLevel ERROR
+}
+
+#=============================================================================
+# Logger
+#
 
 #/**
 # <s:function group="PatternLayout">
@@ -1034,7 +1113,7 @@ logger_addAppenderWithPattern()
 #*/
 logger_setFilename()
 {
-  __log4sh_filename="$1"
+  __log4sh_filename=$1
 }
 
 #/**
@@ -1058,7 +1137,7 @@ logger_setFilename()
 #*/
 logger_getLevel()
 {
-  _log4sh_level2tag ${__log4shLevel}
+  _level_toLevel ${__log4shLevel}
 }
 
 #/**
@@ -1082,16 +1161,105 @@ logger_getLevel()
 #*/
 logger_setLevel()
 {
-  _tag=$1
+  _l_level=$1
 
-  _level=`_log4sh_tag2level ${_tag}`
+  _l_int=`_level_toInt ${_l_level}`
   if [ $? -eq ${__LOG4SH_TRUE} ]; then
-    __log4shLevel=${_level}
+    __log4shLevel=${_l_int}
   else
-    echo "log4sh:ERROR attempt to set invalid log level '${_tag}'" >&2
+    _log4sh_error "attempt to set invalid log level '${_l_level}'"
   fi
 
-  unset _level _tag
+  unset _l_int _l_level
+}
+
+#/**
+# <s:function group="Levels">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_level_toLevel</function></funcdef>
+#       <paramdef>integer <parameter>val</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Converts an internally used level integer into its external level
+#   equivalent</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>level=`_level_toLevel 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+# TODO use arrays instead of case statement ??
+_level_toLevel()
+{
+  _ltl__val=$1
+
+  _ltl__return=${__LOG4SH_TRUE}
+  _ltl__level=''
+
+  case ${_ltl__val} in
+    ${__LOG4SH_LEVEL_TRACE}) _ltl__level=${__LOG4SH_LEVEL_TRACE_STR} ;;
+    ${__LOG4SH_LEVEL_DEBUG}) _ltl__level=${__LOG4SH_LEVEL_DEBUG_STR} ;;
+    ${__LOG4SH_LEVEL_INFO}) _ltl__level=${__LOG4SH_LEVEL_INFO_STR} ;;
+    ${__LOG4SH_LEVEL_WARN}) _ltl__level=${__LOG4SH_LEVEL_WARN_STR} ;;
+    ${__LOG4SH_LEVEL_ERROR}) _ltl__level=${__LOG4SH_LEVEL_ERROR_STR} ;;
+    ${__LOG4SH_LEVEL_FATAL}) _ltl__level=${__LOG4SH_LEVEL_FATAL_STR} ;;
+    ${__LOG4SH_LEVEL_OFF}) _ltl__level=${__LOG4SH_LEVEL_OFF_STR} ;;
+    ${__LOG4SH_LEVEL_CLOSED}) _ltl__level=${__LOG4SH_LEVEL_CLOSED_STR} ;;
+    *) _ltl__return=${__LOG4SH_FALSE} ;;
+  esac
+
+  echo ${_ltl__level}
+  unset _ltl__val _ltl__level
+  return ${_ltl__return}
+}
+
+#/**
+# <s:function group="Levels">
+# <entry align="right">
+#   <code>integer</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_level_toInt</function></funcdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Converts an externally used level tag into its integer
+#   equivalent</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>levelInt=`_level_toInt WARN`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_level_toInt()
+{
+  _lti__level=$1
+
+  _lti__int=0
+  _lti__return=${__LOG4SH_TRUE}
+
+  case ${_lti__level} in
+    ${__LOG4SH_LEVEL_TRACE_STR}) _lti__int=${__LOG4SH_LEVEL_TRACE} ;;
+    ${__LOG4SH_LEVEL_DEBUG_STR}) _lti__int=${__LOG4SH_LEVEL_DEBUG} ;;
+    ${__LOG4SH_LEVEL_INFO_STR}) _lti__int=${__LOG4SH_LEVEL_INFO} ;;
+    ${__LOG4SH_LEVEL_WARN_STR}) _lti__int=${__LOG4SH_LEVEL_WARN} ;;
+    ${__LOG4SH_LEVEL_ERROR_STR}) _lti__int=${__LOG4SH_LEVEL_ERROR} ;;
+    ${__LOG4SH_LEVEL_FATAL_STR}) _lti__int=${__LOG4SH_LEVEL_FATAL} ;;
+    ${__LOG4SH_LEVEL_OFF_STR}) _lti__int=${__LOG4SH_LEVEL_OFF} ;;
+    ${__LOG4SH_LEVEL_CLOSED_STR}) _lti__int=${__LOG4SH_LEVEL_CLOSED} ;;
+    *) _lti__return=${__LOG4SH_FALSE} ;;
+  esac
+
+  echo ${_lti__int}
+  unset _lti__int _lti__level
+  return ${_lti__return}
 }
 
 #/**
@@ -1215,33 +1383,63 @@ logger_popThreadName()
 #
 
 #/**
-# <!-- XXX should this function even exist ?? -->
 # <s:function group="Appenders">
 # <entry align="right">
-#   <code>string</code>
+#   <emphasis>void</emphasis>/<code>boolean</code>
 # </entry>
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>_appender_getNameByIndex</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
+#       <funcdef><function>logger_addAppender</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Gets the name of the appender at the given position in the appender
-#   array.</para>
+#   <para>Add and initialize a new appender</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>appenderName=`_appender_getNameByIndex 3`</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_addAppender $appender</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-_appender_getNameByIndex()
+logger_addAppender()
 {
-  _log4sh_getArrayElement "$__log4shAppenderPatterns" $1
+  laa_appender=$1
+
+  # XXX should we be using setter functions here?? for performance, no.
+  __log4shAppenders=`_log4sh_pushStack "${__log4shAppenders}" $1`
+  __log4shAppenderCount=`expr ${__log4shAppenderCount} + 1`
+  __log4shAppenderCounts="${__log4shAppenderCounts} ${__log4shAppenderCount}"
+  __log4shAppenderLayouts=`_log4sh_pushStack \
+    "$__log4shAppenderLayouts" "${__LOG4SH_LAYOUT_SIMPLE}"`
+  __log4shAppenderLevels=`_log4sh_pushStack \
+    "${__log4shAppenderLevels}" "${__LOG4SH_NULL}"`
+  __log4shAppenderPatterns=`_log4sh_pushStack \
+    "${__log4shAppenderPatterns}" "${__LOG4SH_PATTERN_DEFAULT}"`
+  __log4shAppenderTypes=`_log4sh_pushStack \
+    "${__log4shAppenderTypes}" ${__LOG4SH_TYPE_CONSOLE}`
+  __log4shAppender_file_files=`_log4sh_pushStack \
+    "${__log4shAppender_file_files}" ${__LOG4SH_NULL}`
+  __log4shAppender_rollingFile_maxBackupIndexes=`_log4sh_pushStack \
+    "${__log4shAppender_rollingFile_maxBackupIndexes}" \
+    ${__LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX}`
+  __log4shAppender_rollingFile_maxFileSizes=`_log4sh_pushStack \
+    "${__log4shAppender_rollingFile_maxFileSizes}" \
+    ${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}`
+  __log4shAppender_smtp_tos=`_log4sh_pushStack \
+    "${__log4shAppender_smtp_tos}" ${__LOG4SH_NULL}`
+  __log4shAppender_smtp_subjects=`_log4sh_pushStack \
+    "${__log4shAppender_smtp_subjects}" ${__LOG4SH_NULL}`
+  __log4shAppender_syslog_facilities=`_log4sh_pushStack \
+    "${__log4shAppender_syslog_facilities}" ${__LOG4SH_TYPE_SYSLOG_FACILITY}`
+
+  _appender_cache "${laa_appender}"
+
+  unset laa_appender
+
+  return ${__LOG4SH_TRUE}
 }
 
 #/**
-# <!-- TODO write this function ?? -->
 # <s:function group="Appenders">
 # <entry align="right">
 #   <emphasis>void</emphasis>
@@ -1249,22 +1447,379 @@ _appender_getNameByIndex()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>_appender_setNameByIndex</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#       <paramdef>string <parameter>appenderName</parameter></paramdef>
+#       <funcdef><function>logger_addAppenderWithPattern</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>pattern</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>(future) Sets the name of the appender at the given position in the
-#   appender array.</para>
+#   <para>Add and initialize a new appender with a specific PatternLayout</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>_appender_setNameByIndex 3 "myAppender"`</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_addAppenderWithPattern $appender '%d %p - %m%n'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-_appender_setNameByIndex()
+logger_addAppenderWithPattern()
 {
-  return $__LOG4SH_TRUE
+  _myAppender=$1
+  _myPattern=$2
+
+  logger_addAppender ${_myAppender}
+  appender_setLayout ${_myAppender} "${__LOG4SH_LAYOUT_PATTERN}"
+  appender_setPattern ${_myAppender} "${_myPattern}"
+
+  unset _myAppender _myPattern
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_activateOptions</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Activate an appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_activateAppender myAppender</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_activateOptions()
+{
+  _aao_appender=$1
+  ${__LOG4SH_APPENDER_FUNC_PREFIX}${_aao_appender}_activateOptions
+  unset _aao_appender
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_close</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Disable any further logging via an appender.  Once closed, the
+#   appender can be reopened by setting it to any logging Level (e.g.
+#   INFO).</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_close myAppender</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_close()
+{
+  appender_setLevel $1 ${__LOG4SH_LEVEL_CLOSED_STR}
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>boolean</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_exists</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Checks for the existance of a named appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>exists=`appender_exists myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_exists()
+{
+  _index=`_log4sh_findArrayElement "${__log4shAppenders}" $1`
+  [ "${_index}" -gt 0 ] && _return=${__LOG4SH_TRUE} || _return=${__LOG4SH_FALSE}
+  unset _index
+  return ${_return}
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getLayout</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Layout of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`appender_getLayout myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_getLayout()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppenderLayouts" $_index
+  unset _index
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setLayout</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>layout</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the Layout of an Appender (e.g. PatternLayout)</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setLayout myAppender PatternLayout</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_setLayout()
+{
+  _asl_appender=$1
+  _asl_layout=$2
+
+  case ${_asl_layout} in
+    ${__LOG4SH_LAYOUT_HTML}|\
+    ${__LOG4SH_LAYOUT_SIMPLE}|\
+    ${__LOG4SH_LAYOUT_PATTERN})
+      :
+      ;;
+    *)
+      _log4sh_error "unknown layout: ${_asl_layout}"
+      return ${__LOG4SH_FALSE}
+      ;;
+  esac
+
+  _asl_index=`_log4sh_findArrayElement "${__log4shAppenders}" $1`
+  __log4shAppenderLayouts=`_log4sh_setArrayElement \
+    "${__log4shAppenderLayouts}" ${_asl_index} "${_asl_layout}"`
+
+  # resource the appender
+  _appender_cache ${_asl_appender}
+
+  unset _asl_appender _asl_index _asl_layout
+  return ${__LOG4SH_TRUE}
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_getLayoutByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Layout of an Appender at the given array index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`_appender_getLayoutByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_getLayoutByIndex()
+{
+  _log4sh_getArrayElement "$__log4shAppenderLayouts" $1
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getLevel</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the current logging Level of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`appender_getLevel myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_getLevel()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppenderLevels" $_index
+  unset _index
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>/<code>boolean</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setLevel</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>level</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the Level of an Appender (e.g. INFO)</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setLevel myAppender INFO</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_setLevel()
+{
+  asl_appender=$1
+  asl_level=$2
+
+  _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asl_appender}`
+  __log4shAppenderLevels=`_log4sh_setArrayElement \
+    "${__log4shAppenderLevels}" ${_index} "${asl_level}"`
+
+  # resource the appender
+  _appender_cache ${asl_appender}
+
+  unset asl_appender asl_type _index
+  return ${__LOG4SH_TRUE}
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_getLevelByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the current logging Level of an Appender at the given array
+#   index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>type=`_appender_getLevelByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_getLevelByIndex()
+{
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}() (called from ${BASH_LINENO[0]})"
+  _log4sh_getArrayElement "${__log4shAppenderLevels}" $1
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_getPattern</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Pattern of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>pattern=`appender_getPattern myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_getPattern()
+{
+  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
+  _log4sh_getArrayElement "$__log4shAppenderPatterns" $_index
+  unset _index
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <emphasis>void</emphasis>/<code>boolean</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_setPattern</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#       <paramdef>string <parameter>pattern</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Sets the Pattern of an Appender</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_setPattern myAppender '%d %p - %m%n'</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_setPattern()
+{
+  asp_appender=$1
+  asp_pattern=$2
+
+  _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asp_appender}`
+  __log4shAppenderPatterns=`_log4sh_setArrayElement \
+    "${__log4shAppenderPatterns}" ${_index} "${asp_pattern}"`
+
+  # resource the appender
+  _appender_cache ${asp_appender}
+
+  unset asp_appender asp_pattern _index
+  return ${__LOG4SH_TRUE}
+}
+
+#/**
+# <s:function group="Appenders">
+# <entry align="right">
+#   <code>string</code>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_appender_getPatternByIndex</function></funcdef>
+#       <paramdef>integer <parameter>index</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>Gets the Pattern of an Appender at the specified array index</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>pattern=`_appender_getPatternByIndex 3`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_appender_getPatternByIndex()
+{
+  _log4sh_getArrayElement "$__log4shAppenderPatterns" $1
 }
 
 #/**
@@ -1345,116 +1900,6 @@ _appender_parsePattern()
   fi
 
   unset _date _doEval _msg _pattern _tag
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>_appender_getPatternByIndex</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Gets the Pattern of an Appender at the specified array index</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>pattern=`_appender_getPatternByIndex 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-_appender_getPatternByIndex()
-{
-  _log4sh_getArrayElement "$__log4shAppenderPatterns" $1
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_getPattern</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Gets the Pattern of an Appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>pattern=`appender_getPattern myAppender`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_getPattern()
-{
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppenderPatterns" $_index
-  unset _index
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <emphasis>void</emphasis>/<code>boolean</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_setPattern</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>pattern</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Sets the Pattern of an Appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_setPattern myAppender '%d %p - %m%n'</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_setPattern()
-{
-  asp_appender=$1
-  asp_pattern=$2
-
-  _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asp_appender}`
-  __log4shAppenderPatterns=`_log4sh_setArrayElement \
-    "${__log4shAppenderPatterns}" ${_index} "${asp_pattern}"`
-
-  # resource the appender
-  _appender_cache ${asp_appender}
-
-  unset asp_appender asp_pattern _index
-  return ${__LOG4SH_TRUE}
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>_appender_getTypeByIndex</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Gets the Type of an Appender at the given array index</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>type=`_appender_getTypeByIndex 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-_appender_getTypeByIndex()
-{
-  _log4sh_getArrayElement "$__log4shAppenderTypes" $1
 }
 
 #/**
@@ -1581,119 +2026,20 @@ appender_setAppenderType()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>_appender_getLayoutByIndex</function></funcdef>
+#       <funcdef><function>_appender_getTypeByIndex</function></funcdef>
 #       <paramdef>integer <parameter>index</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Gets the Layout of an Appender at the given array index</para>
+#   <para>Gets the Type of an Appender at the given array index</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>type=`_appender_getLayoutByIndex 3`</funcsynopsisinfo>
+#     <funcsynopsisinfo>type=`_appender_getTypeByIndex 3`</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-_appender_getLayoutByIndex()
+_appender_getTypeByIndex()
 {
-  _log4sh_getArrayElement "$__log4shAppenderLayouts" $1
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_getLayout</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Gets the Layout of an Appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>type=`appender_getLayout myAppender`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_getLayout()
-{
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppenderLayouts" $_index
-  unset _index
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_setLayout</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>layout</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Sets the Layout of an Appender (e.g. PatternLayout)</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_setLayout myAppender PatternLayout</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_setLayout()
-{
-  asl_appender="$1"
-  asl_layout="$2"
-
-  case ${asl_layout} in
-    ${__LOG4SH_LAYOUT_HTML}|\
-    ${__LOG4SH_LAYOUT_SIMPLE}|\
-    ${__LOG4SH_LAYOUT_PATTERN})
-      :
-      ;;
-    *)
-      echo "log4sh:ERROR unknown layout ${asl_layout}" >&2
-      return ${__LOG4SH_FALSE}
-      ;;
-  esac
-
-  _index=`_log4sh_findArrayElement "${__log4shAppenders}" $1`
-  __log4shAppenderLayouts=`_log4sh_setArrayElement \
-    "${__log4shAppenderLayouts}" ${_index} "${asl_layout}"`
-
-  # resource the appender
-  _appender_cache ${asl_appender}
-
-  unset asl_appender asl_layout _index
-  return ${__LOG4SH_TRUE}
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>_appender_getLevelByIndex</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Gets the current logging Level of an Appender at the given array
-#   index</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>type=`_appender_getLevelByIndex 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-_appender_getLevelByIndex()
-{
-  _log4sh_getArrayElement "${__log4shAppenderLevels}" $1
+  _log4sh_getArrayElement "$__log4shAppenderTypes" $1
 }
 
 #/**
@@ -1718,19 +2064,26 @@ _appender_getLevelByIndex()
 #*/
 _appender_cache()
 {
-  _ac_appender="$1"
+  _ac__appender=$1
 
-  _ac_inc=${__log4sh_tmpDir}/${_ac_appender}${__LOG4SH_APPENDER_INCLUDE_EXT}
+  _ac__inc=${__log4sh_tmpDir}/${_ac__appender}${__LOG4SH_APPENDER_INCLUDE_EXT}
 
-  cat >"${_ac_inc}" <<EOF
-${__LOG4SH_APPENDER_FUNC_PREFIX}${_ac_appender}() {
-  _la_level=\$1
-  _la_message=\$2
-  _appender_generate ${_ac_appender}
-  ${__LOG4SH_APPENDER_FUNC_PREFIX}${_ac_appender} \${_la_level} "\${_la_message}"
+  cat >"${_ac__inc}" <<EOF
+${__LOG4SH_APPENDER_FUNC_PREFIX}${_ac__appender}_activateOptions()
+{
+  [ -n "\${FUNCNAME:-}" ] && \${__LOG4SH_TRACE} "\${FUNCNAME}() (called from \${BASH_LINENO[0]})"
+  _appender_activate ${_ac__appender}
 }
+
+${__LOG4SH_APPENDER_FUNC_PREFIX}${_ac__appender}_append() { :; }
 EOF
-  . "${_ac_inc}"
+
+  # source the new functions
+  . "${_ac__inc}"
+
+  # call the activateOptions function
+  # XXX will be removed in log4sh-1.4.x
+  appender_activateOptions ${_ac__appender}
 }
 
 #/**
@@ -1741,25 +2094,27 @@ EOF
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>_appender_generate</function></funcdef>
+#       <funcdef><function>_appender_activate</function></funcdef>
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Dynamically regenerates an appender function in memory that is fully
 #   instantiated for a specific logging task.</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>_appender_generate myAppender</funcsynopsisinfo>
+#     <funcsynopsisinfo>_appender_activate myAppender</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-_appender_generate()
+_appender_activate()
 {
-  __ag_appender="$1"
-  ${LOG4SH_TRACE} echo "log4sh:TRACE __ag_appender='${__ag_appender}'" >&2
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}() (called from ${BASH_LINENO[0]})"
+  ${__LOG4SH_TRACE} "_appender_activate($#)"
+  _ag__appender=$1
+  ${__LOG4SH_TRACE} "_ag__appender='${_ag__appender}'"
 
-  __index=`_log4sh_findArrayElement "${__log4shAppenders}" ${__ag_appender}`
-  __inc=${__log4sh_tmpDir}/${__ag_appender}${__LOG4SH_APPENDER_INCLUDE_EXT}
+  __index=`_log4sh_findArrayElement "${__log4shAppenders}" ${_ag__appender}`
+  __inc=${__log4sh_tmpDir}/${_ag__appender}${__LOG4SH_APPENDER_INCLUDE_EXT}
 
   ### generate function for inclusion
   # TODO can we modularize this in the future?
@@ -1768,22 +2123,26 @@ _appender_generate()
   exec 4>&1 >${__inc}
 
   # header
-  echo "${__LOG4SH_APPENDER_FUNC_PREFIX}${__ag_appender}() {"
-  echo "  _la_level=\$1"
-  echo "  _la_message=\$2"
+  cat <<EOF
+${__LOG4SH_APPENDER_FUNC_PREFIX}${_ag__appender}_append()
+{
+  [ -n "\${FUNCNAME:-}" ] && \${__LOG4SH_TRACE} "\${FUNCNAME}() (called from \${BASH_LINENO[0]})"
+  _la_level=\$1
+  _la_message=\$2
+EOF
 
   # determine the 'layout'
   __layout=`_appender_getLayoutByIndex ${__index}`
-  ${LOG4SH_TRACE} echo "log4sh:TRACE __layout='${__layout}'" >&2
+  ${__LOG4SH_TRACE} "__layout='${__layout}'"
   case ${__layout} in
     ${__LOG4SH_LAYOUT_SIMPLE}|\
     ${__LOG4SH_LAYOUT_HTML})
-      ${LOG4SH_DEBUG} echo "log4sh:DEBUG using simple/html layout" >&2
+      ${__LOG4SH_DEBUG} 'using simple/html layout'
       echo "  __layout=\"\${_la_level} - \${_la_message}\""
       ;;
 
     ${__LOG4SH_LAYOUT_PATTERN})
-      ${LOG4SH_DEBUG} echo "log4sh:DEBUG using pattern layout" >&2
+      ${__LOG4SH_DEBUG} 'using pattern layout'
       __pattern=`_appender_getPatternByIndex ${__index}`
       echo "  __layout=\`_appender_parsePattern '${__pattern}' \${_la_level} \"\${_la_message}\"\`"
       ;;
@@ -1791,7 +2150,7 @@ _appender_generate()
 
   # what appender 'type' do we have? TODO check not missing
   __type=`_appender_getTypeByIndex ${__index}`
-  ${LOG4SH_TRACE} echo "log4sh:TRACE __type='${__type}'" >&2
+  ${__LOG4SH_TRACE} "__type='${__type}'"
   case ${__type} in
     ${__LOG4SH_TYPE_CONSOLE})
       echo "  echo \"\${__layout}\""
@@ -1801,10 +2160,10 @@ _appender_generate()
     ${__LOG4SH_TYPE_ROLLING_FILE}|\
     ${__LOG4SH_TYPE_DAILY_ROLLING_FILE})
       __file=`_appender_file_getFileByIndex ${__index}`
-      ${LOG4SH_TRACE} echo "log4sh:TRACE __file='${__file}'" >&2
+      ${__LOG4SH_TRACE} "__file='${__file}'"
       if [ "${__file}" = 'STDERR' ]; then
         echo "  echo \"\${__layout}\" >&2"
-      elif [ "${__file}" != ${__LOG4SH_NULL} ]; then
+      elif [ "${__file}" != "${__LOG4SH_NULL}" ]; then
         # do rotation
 	case ${__type} in
 	  ${__LOG4SH_TYPE_ROLLING_FILE})
@@ -1864,138 +2223,27 @@ EOF
 EOF
       ;;
 
-    *)
-      echo "log4sh:ERROR unrecognized appender type (${__type})" >&2
-      ;;
+    *) _log4sh_error "unrecognized appender type (${__type})" ;;
   esac
 
   # footer
   echo "}"
 
+  # override the activateOptions function as we don't need it anymore
+  cat <<EOF
+${__LOG4SH_APPENDER_FUNC_PREFIX}${_ag__appender}_activateOptions() { :; }
+EOF
+
   # restore STDOUT
   exec 1>&4 4>&-
 
   # source the newly created function
+  ${__LOG4SH_DEBUG} 're-sourcing the newly created function'
   . "${__inc}"
 
-  unset __ag_appender
+  unset _ag__appender
   unset __inc __tmpl
   unset __layout __pattern __type
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <code>boolean</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_exists</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Checks for the existance of a named appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>exists=`appender_exists myAppender`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_exists()
-{
-  _index=`_log4sh_findArrayElement "${__log4shAppenders}" $1`
-  [ "${_index}" -gt 0 ] && _return=${__LOG4SH_TRUE} || _return=${__LOG4SH_FALSE}
-  unset _index
-  return ${_return}
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_getLevel</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Gets the current logging Level of an Appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>type=`appender_getLevel myAppender`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_getLevel()
-{
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppenderLevels" $_index
-  unset _index
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <emphasis>void</emphasis>/<code>boolean</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_setLevel</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>level</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Sets the Level of an Appender (e.g. INFO)</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_setLevel myAppender INFO</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_setLevel()
-{
-  asl_appender=$1
-  asl_level=$2
-
-  _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asl_appender}`
-  __log4shAppenderLevels=`_log4sh_setArrayElement \
-    "${__log4shAppenderLevels}" ${_index} "${asl_level}"`
-
-  # resource the appender
-  _appender_cache ${asl_appender}
-
-  unset asl_appender asl_type _index
-  return ${__LOG4SH_TRUE}
-}
-
-#/**
-# <s:function group="Appenders">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_close</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Disable any further logging via an appender.  Once closed, the
-#   appender can be reopened by setting it to any logging Level (e.g.
-#   INFO).</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_close myAppender</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_close()
-{
-  appender_setLevel $1 ${__LOG4SH_LEVEL_CLOSED_STR}
 }
 
 #-----------------------------------------------------------------------------
@@ -2077,7 +2325,7 @@ appender_file_setFile()
 {
   afsf_appender=$1
   afsf_file=$2
-  ${LOG4SH_TRACE} echo "log4sh:TRACE afsf_appender='${afsf_appender}' afsf_file='${afsf_file}'" >&2
+  ${__LOG4SH_TRACE} "afsf_appender='${afsf_appender}' afsf_file='${afsf_file}'"
 
   if [ -n "${afsf_appender}" -a -n "${afsf_file}" ]; then
     # set the file
@@ -2088,7 +2336,7 @@ appender_file_setFile()
 
     # create the file (if it isn't already)
     if [ ${_return} -eq ${__LOG4SH_TRUE} \
-      -a ! "${afsf_file}" '=' ${__LOG4SH_NULL} \
+      -a ! "${afsf_file}" '=' "${__LOG4SH_NULL}" \
       -a ! "${afsf_file}" '=' 'STDERR' \
       -a ! -f "${afsf_file}" \
     ]; then
@@ -2096,13 +2344,13 @@ appender_file_setFile()
       _result=$?
       # determine success of touch command
       if [ ${_result} -eq 1 ]; then
-        echo 'log4sh:ERROR appender_file_setFile(): could not create file; closing appender' >&2
+        _log4sh_error 'appender_file_setFile(): could not create file; closing appender'
         appender_setLevel ${afsf_appender} ${__LOG4SH_LEVEL_CLOSED_STR}
       fi
       unset _result
     fi
   else
-    echo 'log4sh:ERROR appender_file_setFile(): missing appender and/or file' >&2
+    _log4sh_error 'appender_file_setFile(): missing appender and/or file'
     _return=${__LOG4SH_FALSE}
   fi
 
@@ -2162,7 +2410,7 @@ appender_file_setMaxFileSize()
     GB|GiB) _l4s_mul=1073741824 ;;
     TB|TiB) _l4s_mul=1099511627776 ;;
     *)
-      echo "log4sh:ERROR unrecognized file size unit '${_l4s_unit}'" >&2
+      _log4sh_error "unrecognized file size unit '${_l4s_unit}'"
       return ${__LOG4SH_FALSE}
       ;;
   esac
@@ -2368,7 +2616,7 @@ appender_smtp_setSubject()
       "${__log4shAppender_smtp_subjects}" ${_index} "${asss_subject}"`
     _return=${__LOG4SH_TRUE}
   else
-    echo "log4sh:ERROR could not set Subject for appender (${asss_appender})" >&2
+    _log4sh_error "could not set Subject for appender (${asss_appender})"
     _return=${__LOG4SH_FALSE}
   fi
 
@@ -2564,7 +2812,7 @@ appender_syslog_setFacility()
   assf_facility=$2
 
   if [ $# -ne 2 ]; then
-    echo 'log4sh:ERROR appender_syslog_setFacility(): missing attributes' >&2
+    _log4sh_error 'appender_syslog_setFacility(): missing attributes'
     return ${__LOG4SH_FALSE}
   fi
 
@@ -2572,7 +2820,7 @@ appender_syslog_setFacility()
   echo ${__LOG4SH_TYPE_SYSLOG_FACILITIES} |grep " ${assf_facility} " >/dev/null
   if [ $? -ne 0 ]; then
     # the facility is not valid
-    echo "log4sh:ERROR [${assf_facility}] is an unknown syslog facility.  Defaulting to [USER]." >&2
+    _log4sh_error "[${assf_facility}] is an unknown syslog facility.  Defaulting to [USER]."
     assf_facility='user'
   fi
 
@@ -2690,37 +2938,36 @@ appender_syslog_setHost()
 #*/
 log()
 {
-  _tag=$1
+  _l_level=$1
   shift
-  [ $# -ne 0 ] && _msg="$@" || _msg=`cat`
+  [ $# -ne 0 ] && _l_msg="$@" || _l_msg=`cat`
 
-  _thisLevel=`_log4sh_tag2level ${_tag}`
+  _l_levelInt=`_level_toInt ${_l_level}`
 
-  _l_IFS="${IFS}"
-  IFS="${__LOG4SH_DEFAULT_IFS}" && \
-  for _appenderIndex in ${__log4shAppenderCounts}; do
+  _l_oldIFS=${IFS} IFS=${__LOG4SH_IFS_DEFAULT}
+  for _l_appenderIndex in ${__log4shAppenderCounts}; do
+    ${__LOG4SH_TRACE} "_l_appenderIndex='${_l_appenderIndex}'"
     # determine appender level
-    _appenderLevelTag=`_appender_getLevelByIndex ${_appenderIndex}`
-    if [ "${_appenderLevelTag}" = ${__LOG4SH_NULL} ]; then
+    _l_appenderLevel=`_appender_getLevelByIndex ${_l_appenderIndex}`
+    if [ "${_l_appenderLevel}" = "${__LOG4SH_NULL}" ]; then
       # continue if requested is level less than general level
-      [ ! ${__log4shLevel} -le ${_thisLevel} ] && continue
+      [ ! ${__log4shLevel} -le ${_l_levelInt} ] && continue
     else
-      _appenderLevel=`_log4sh_tag2level ${_appenderLevelTag}`
+      _l_appenderLevelInt=`_level_toInt ${_l_appenderLevel}`
       # continue if requested level is less than specific appender level
-      [ ! ${_appenderLevel} -le ${_thisLevel} ] && continue
+      ${__LOG4SH_TRACE} "_l_levelInt='${_l_levelInt}' _l_appenderLevelInt='${_l_appenderLevelInt}'"
+      [ ! ${_l_appenderLevelInt} -le ${_l_levelInt} ] && continue
     fi
 
     # execute dynamic appender function
-    _appenderName=`_log4sh_getArrayElement \
-      "${__log4shAppenders}" ${_appenderIndex}`
-    ${__LOG4SH_APPENDER_FUNC_PREFIX}${_appenderName} ${_tag} "${_msg}"
-
+    _l_appenderName=`_log4sh_getArrayElement \
+      "${__log4shAppenders}" ${_l_appenderIndex}`
+    ${__LOG4SH_APPENDER_FUNC_PREFIX}${_l_appenderName}_append ${_l_level} "${_l_msg}"
   done
-  IFS="${_l_IFS}"
+  IFS=${_l_oldIFS}
 
-  unset _msg _l_IFS _tag _thisLayout _thisLevel
-  unset _appenderFile _appenderIndex _appenderLayout _appenderLevel
-  unset _appenderLevelTag _appenderName _appenderPattern _appenderType
+  unset _l_msg _l_oldIFS _l_level _l_levelInt
+  unset _l_appenderIndex _l_appenderLevel _l_appenderLevelInt _l_appenderName
 }
 
 #/**
@@ -2892,19 +3139,21 @@ trap >"${__log4sh_trapsFile}"
 trap '_log4sh_cleanup EXIT' EXIT
 trap '_log4sh_cleanup TERM' TERM
 
+# prepare the environment for configuration
+log4sh_resetConfiguration
+
 # load the properties file
-${LOG4SH_DEBUG} \
-  echo "log4sh:DEBUG LOG4SH_CONFIGURATION=${LOG4SH_CONFIGURATION}" >&2
-if [ "${LOG4SH_CONFIGURATION}" != 'none' -a -r "${LOG4SH_CONFIGURATION}" ]
+${__LOG4SH_TRACE} "__LOG4SH_CONFIGURATION='${__LOG4SH_CONFIGURATION}'"
+if [ "${__LOG4SH_CONFIGURATION}" != 'none' -a -r "${__LOG4SH_CONFIGURATION}" ]
 then
-  ${LOG4SH_INFO} echo "log4sh:INFO configuring via properties file" >&2
-  log4sh_readProperties "${LOG4SH_CONFIGURATION}"
+  ${__LOG4SH_INFO} 'configuring via properties file'
+  log4sh_doConfiguration "${__LOG4SH_CONFIGURATION}"
 else
-  if [ "${LOG4SH_CONFIGURATION}" != 'none' ]; then
-    echo 'log4sh:WARN No appenders could be found.' >&2
-    echo 'log4sh:WARN Please initalize the log4sh system properly.' >&2
+  if [ "${__LOG4SH_CONFIGURATION}" != 'none' ]; then
+    _log4sh_warn 'No appenders could be found.'
+    _log4sh_warn 'Please initalize the log4sh system properly.'
   fi
-  ${LOG4SH_INFO} echo "log4sh:INFO configuring at runtime" >&2
+  ${__LOG4SH_INFO} 'configuring at runtime'
 
   # note: not using the constant variables here (e.g. for ConsoleAppender) so
   # that those perusing the code can have a working example
