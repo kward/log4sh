@@ -27,6 +27,7 @@ testPriority()
 
     ${DEBUG} echo "setting appender priority to '${priority}' priority"
     appender_setLevel ${APP_NAME} ${priority}
+    appender_activateOptions ${APP_NAME}
 
     # the number of outputs must match the number of priority names and
     # positions for this to work
@@ -41,11 +42,11 @@ testPriority()
       if [ ${shouldOutput} -eq 1 ]; then
         assertTrue \
           "'${priority}' priority appender did not emit a '${testPriority}' message" \
-          "[ -n \"${result}\" ]" || break
+          "[ -n \"${result}\" ]"
       else
         assertFalse \
           "'${priority}' priority appender emitted a '${testPriority}' message" \
-          "[ -n \"${result}\" ]" || break
+          "[ -n \"${result}\" ]"
       fi
     done
   done

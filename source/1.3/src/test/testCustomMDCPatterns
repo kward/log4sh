@@ -1,12 +1,12 @@
-#! /bin/sh 
+#! /bin/sh
 # $Id$
 
 myName=`basename $0`
 myPath=`dirname $0`
 
-DEBUG=${DEBUG:+' '}
-DEBUG=${DEBUG:-':'}
-${DEBUG} echo 'DEBUG output enabled' >&2
+debug() { echo "${MY_NAME}:DEBUG $@" >&2; }
+DEBUG=${DEBUG:+debug } DEBUG=${DEBUG:-:}
+${DEBUG} 'debugging enabled'
 
 APP_NAME='stdout'
 
@@ -14,41 +14,27 @@ APP_NAME='stdout'
 # suite tests
 #
 
-loadLog4sh()
-{
-  # load log4sh
-  ${DEBUG} echo "loading log4sh" >&2
-  LOG4SH_CONFIGURATION='none' . ./log4sh
-  logger_setLevel INFO
-  appender_setLayout ${APP_NAME} PatternLayout
-}
-
 testCustomDateMDC()
 {
   mdcDateFmt='+%Y.%m.%d'
   pattern='%X{mdcDate}'
   regex='^[0-9]\{4\}\.[0-9]\{2\}\.[0-9]\{2\}'
 
-  (
-    loadLog4sh
+  # define custom logger_info function
+  my_logger_info()
+  {
+    mdcDate=`date ${mdcDateFmt}`
+    log INFO "$@"
+  }
 
-    # override the logger_info function
-    logger_info()
-    {
-      mdcDate=`date ${mdcDateFmt}`
-      log INFO "$@"
-    }
+  # set the custom pattern
+  appender_setPattern ${APP_NAME} ${pattern}
+  appender_activateOptions ${APP_NAME}
 
-    # set the custom pattern
-    appender_setPattern ${APP_NAME} ${pattern}
-
-    ${DEBUG} echo "sending message using custom MDC pattern" >&2
-    logger_info 'dummy'
-  ) >"${resultFile}"
-
-  result=`cat "${resultFile}"`
+  ${DEBUG} 'sending message using custom MDC pattern'
+  result=`my_logger_info 'dummy'`
   matched=`echo ${result} |sed "s/${regex}//"`
-  ${DEBUG} echo "dateFormat='${mdcDateFmt}' pattern='${pattern}' result='${result}' matched='${matched}'" >&2
+  ${DEBUG} "dateFormat='${mdcDateFmt}' pattern='${pattern}' result='${result}' matched='${matched}'"
 
   assertNotNull \
     "custom pattern '${pattern}' failed with empty result" \
@@ -64,26 +50,21 @@ testCustomTimeMDC()
   pattern='%X{mdcTime}'
   regex='^[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}'
 
-  (
-    loadLog4sh
+  # define custom logger_info function
+  my_logger_info()
+  {
+    mdcTime=`date ${mdcTimeFmt}`
+    log INFO "$@"
+  }
 
-    # override the logger_info function
-    logger_info()
-    {
-      mdcTime=`date ${mdcTimeFmt}`
-      log INFO "$@"
-    }
+  # set the custom pattern
+  appender_setPattern ${APP_NAME} ${pattern}
+  appender_activateOptions ${APP_NAME}
 
-    # set the custom pattern
-    appender_setPattern ${APP_NAME} ${pattern}
-
-    ${DEBUG} echo "sending message using custom MDC pattern" >&2
-    logger_info 'dummy'
-  ) >"${resultFile}"
-
-  result=`cat "${resultFile}"`
+  ${DEBUG} 'sending message using custom MDC pattern'
+  result=`my_logger_info 'dummy'`
   matched=`echo ${result} |sed "s/${regex}//"`
-  ${DEBUG} echo "timeFormat='${mdcTimeFmt}' pattern='${pattern}' result='${result}' matched='${matched}'" >&2
+  ${DEBUG} "timeFormat='${mdcTimeFmt}' pattern='${pattern}' result='${result}' matched='${matched}'"
 
   assertNotNull \
     "custom pattern '${pattern}' failed with empty result" \
@@ -98,25 +79,20 @@ testCustomUserHostMDC()
   pattern='%X{LOGNAME}@%X{HOSTNAME}'
   regex='[A-Za-z0-9]*@[-.A-Za-z0-9]*'
 
-  (
-    loadLog4sh
+  # set variables (if needed)
+  if [ -z "${HOSTNAME:-}" ]; then
+    HOSTNAME=`hostname`
+    export HOSTNAME
+  fi
 
-    # set variables (if needed)
-    if [ -z "${HOSTNAME:-}" ]; then
-      HOSTNAME=`hostname`
-      export HOSTNAME
-    fi
+  # set the custom pattern
+  appender_setPattern ${APP_NAME} ${pattern}
+  appender_activateOptions ${APP_NAME}
 
-    # set the custom pattern
-    appender_setPattern ${APP_NAME} ${pattern}
-
-    ${DEBUG} echo "sending message using custom MDC pattern" >&2
-    logger_info 'dummy'
-  ) >"${resultFile}"
-
-  result=`cat "${resultFile}"`
+  ${DEBUG} 'sending message using custom MDC pattern'
+  result=`logger_info 'dummy'`
   matched=`echo ${result} |sed "s/${regex}//"`
-  ${DEBUG} echo "pattern='${pattern}' result='${result}' matched='${matched}'" >&2
+  ${DEBUG} "pattern='${pattern}' result='${result}' matched='${matched}'"
 
   assertNotNull \
     "custom pattern '${pattern}' failed with empty result" \
@@ -133,6 +109,21 @@ testCustomUserHostMDC()
 oneTimeSetUp()
 {
   resultFile="${__shunit_tmpDir}/result.dat"
+
+  # load log4sh
+  ${DEBUG} 'loading log4sh'
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+}
+
+setUp()
+{
+  # reset log4sh
+  log4sh_resetConfiguration
+
+  # configure log4sh
+  logger_setLevel INFO
+  logger_addAppender ${APP_NAME}
+  appender_setLayout ${APP_NAME} PatternLayout
 }
 
 tearDown()
@@ -152,5 +143,5 @@ suite()
 }
 
 # load and run shUnit
-${DEBUG} echo "loading shUnit" >&2
+${DEBUG} 'loading shUnit'
 . ./shunit

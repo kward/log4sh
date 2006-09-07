@@ -1,9 +1,7 @@
 # $Id$
 
-# set root logger to INFO, and give it one appender mySTDERR
 log4sh.rootLogger = INFO, mySimple
 
-# add a file appender
 log4sh.appender.mySimple = FileAppender
 log4sh.appender.mySimple.Threshold = DEBUG
 log4sh.appender.mySimple.File = ${APP_SIMPLE_FILE}

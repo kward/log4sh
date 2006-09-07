@@ -1,8 +1,6 @@
 # $Id$
 
-# set root logger to INFO, and give it one appender mySTDERR
 log4sh.rootLogger = INFO, mySTDERR
 
-# add a file appender at the default level that logs to STDERR
 log4sh.appender.mySTDERR = FileAppender
 log4sh.appender.mySTDERR.File = STDERR

@@ -1,185 +1,162 @@
-#! /bin/sh 
+#! /bin/sh
 # $Id$
 
-myName=`basename $0`
-myPath=`dirname $0`
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
 
-DEBUG=${DEBUG:+' '}
-DEBUG=${DEBUG:-':'}
-${DEBUG} echo 'DEBUG output enabled' >&2
+debug() { echo "${MY_NAME}:DEBUG $@" >&2; }
+DEBUG=${DEBUG:+debug } DEBUG=${DEBUG:-:}
+${DEBUG} 'debugging enabled'
+
+APP_ACCESSOR='accessors'
+APP_ACCESSOR_LOG4SH="${MY_NAME}-${APP_ACCESSOR}.log4sh"
 
 APP_SIMPLE='mySimple'
 APP_SIMPLE_FILE='mySimple.out'
-APP_SIMPLE_LOG4SH="${myName}-${APP_SIMPLE}.log4sh"
+APP_SIMPLE_LOG4SH="${MY_NAME}-${APP_SIMPLE}.log4sh"
 
 APP_STDERR='mySTDERR'
-APP_STDERR_LOG4SH="${myName}-${APP_STDERR}.log4sh"
+APP_STDERR_LOG4SH="${MY_NAME}-${APP_STDERR}.log4sh"
 
 #------------------------------------------------------------------------------
 # suite tests
 #
 
-commonSTDERR_runtime()
+commonSTDERR()
 {
   assert=$1
   msg=$2
   cmd=$3
 
-  (
-    # load log4sh
-    ${DEBUG} echo "loading log4sh" >&2
-    LOG4SH_CONFIGURATION='none' . ./log4sh
-
-    # close the default console appender
-    appender_close stdout
-
-    # setup the default logging level to INFO
-    logger_setLevel INFO
-
-    # add a file appender at the default level that logs to STDERR
-    logger_addAppender ${APP_STDERR}
-    appender_setType ${APP_STDERR} FileAppender
-    appender_file_setFile ${APP_STDERR} STDERR
-
-    ${DEBUG} echo "sending a message to ${APP_STDERR}"
-    result=`eval ${cmd}`
-    ${DEBUG} echo "assert='${assert}' cmd='${cmd}' result='${result}'" >&2
-    eval ${assert} \"${msg}\" \"${result}\"
-    echo $? >"${assertFile}"
-  )
-  return `cat "${assertFile}"`
+  ${DEBUG} "sending a message to ${APP_STDERR}"
+  result=`eval ${cmd}`
+  ${DEBUG} "assert='${assert}' cmd='${cmd}' result='${result}'"
+  eval ${assert} \"${msg}\" \"${result}\"
 }
 
 testSTDERR_runtime()
 {
-  commonSTDERR_runtime \
+  # runtime configure a STDERR FileAppender
+  logger_setLevel INFO
+  logger_addAppender ${APP_STDERR}
+  appender_setType ${APP_STDERR} FileAppender
+  appender_file_setFile ${APP_STDERR} STDERR
+  appender_activateOptions ${APP_STDERR}
+
+  commonSTDERR \
     'assertNotNull' \
     "${APP_STDERR} runtime FileAppender didn't go to STDERR" \
-    "logger_info \'dummy\' 2>&1 1>/dev/null"
-  assertEquals $? ${__SHUNIT_TRUE} || return
+    "logger_info \'dummy\' 2>&1 >/dev/null" \
+  || return
 
-  commonSTDERR_runtime \
+  commonSTDERR \
     'assertNull' \
     "${APP_STDERR} runtime FileAppender went to STDOUT" \
-    "logger_info \'dummy\' 2>/dev/null"
-  assertEquals $? ${__SHUNIT_TRUE} || return
-}
-
-commonSTDERR_config()
-{
-  assert=$1
-  msg=$2
-  cmd=$3
-
-  (
-    # loading log4sh
-    ${DEBUG} echo "loading log4sh" >&2
-    LOG4SH_CONFIGURATION="${APP_STDERR_LOG4SH}" . ./log4sh
-
-    ${DEBUG} echo "sending a message to ${APP_STDERR}"
-    result=`eval ${cmd}`
-    ${DEBUG} echo "assert='${assert}' cmd='${cmd}' result='${result}'" >&2
-    eval ${assert} \"${msg}\" \"${result}\"
-    echo $? >"${assertFile}"
-  )
-  return `cat "${assertFile}"`
+    "logger_info \'dummy\' 2>/dev/null" \
+  || return
 }
 
 testSTDERR_config()
 {
-  commonSTDERR_config \
+  # configure a STDERR FileAppender via config
+  log4sh_doConfiguration "${APP_STDERR_LOG4SH}"
+
+  commonSTDERR \
     'assertNotNull' \
     "${APP_STDERR} config FileAppender didn't go to STDERR" \
-    "logger_info \'dummy\' 2>&1 1>/dev/null"
-  assertEquals $? ${__SHUNIT_TRUE} || return
+    "logger_info \'dummy\' 2>&1 1>/dev/null" \
+  || return
 
-  commonSTDERR_config \
+  commonSTDERR \
     'assertNull' \
     "${APP_STDERR} config FileAppender went to STDOUT" \
-    "logger_info \'dummy\' 2>/dev/null"
-  assertEquals $? ${__SHUNIT_TRUE} || return
+    "logger_info \'dummy\' 2>/dev/null" \
+  || return
 }
 
-commonSimple_runtime()
+commonSimple()
 {
   assert=$1
   msg=$2
   cmd=$3
 
-  (
-    # loading log4sh
-    ${DEBUG} echo "loading log4sh" >&2
-    LOG4SH_CONFIGURATION='none' . ./log4sh
-
-    # close the default console appender
-    appender_close stdout
-
-    # setup the default logging level to INFO
-    logger_setLevel INFO
-
-    # add a file appender at the DEBUG level with the default layout
-    logger_addAppender ${APP_SIMPLE}
-    appender_setLevel ${APP_SIMPLE} DEBUG
-    appender_setType ${APP_SIMPLE} FileAppender
-    appender_file_setFile ${APP_SIMPLE} ${APP_SIMPLE_FILE}
-
-    ${DEBUG} echo "sending a message to ${APP_SIMPLE}"
-    result=`eval ${cmd}`
-    ${DEBUG} echo "assert='${assert}' cmd='${cmd}' result='${result}'" >&2
-    eval ${assert} \"${msg}\" \"${result}\"
-    echo $? >"${assertFile}"
-  )
-  return `cat "${assertFile}"`
+  ${DEBUG} "sending a message to ${APP_SIMPLE}"
+  result=`eval ${cmd}`
+  ${DEBUG} "assert='${assert}' cmd='${cmd}' result='${result}'"
+  eval ${assert} \"${msg}\" \"${result}\"
 }
 
 testSimple_runtime()
 {
-  commonSimple_runtime \
+  # runtime configure a simple ConsoleAppender
+  logger_setLevel INFO
+  logger_addAppender ${APP_SIMPLE}
+  appender_setLevel ${APP_SIMPLE} DEBUG
+  appender_setType ${APP_SIMPLE} FileAppender
+  appender_file_setFile ${APP_SIMPLE} "${APP_SIMPLE_FILE}"
+  appender_activateOptions ${APP_SIMPLE}
+
+  commonSimple \
     'assertNull' \
     "${APP_SIMPLE} config FileAppender went to STDOUT or STDERR" \
-    "logger_info \'dummy\' 2>&1"
-  assertEquals $? ${__SHUNIT_TRUE} || return
+    "logger_info \'dummy\' 2>&1" \
+  || return
 
-  commonSimple_runtime \
+  commonSimple \
     'assertNotNull' \
     "${APP_SIMPLE} config FileAppender didn't go to file" \
-    "logger_info \'dummy\'; cat ${APP_SIMPLE_FILE}"
-  assertEquals $? ${__SHUNIT_TRUE} || return
-}
-
-commonSimple_config()
-{
-  assert=$1
-  msg=$2
-  cmd=$3
-
-  (
-    # load log4sh
-    ${DEBUG} echo "loading log4sh" >&2
-    LOG4SH_CONFIGURATION="${APP_SIMPLE_LOG4SH}" . ./log4sh
-
-    ${DEBUG} echo "sending a message to ${APP_SIMPLE}"
-    result=`eval ${cmd}`
-    ${DEBUG} echo "assert='${assert}' cmd='${cmd}' result='${result}'" >&2
-    eval ${assert} \"${msg}\" \"${result}\"
-    echo $? >"${assertFile}"
-  )
-  return `cat "${assertFile}"`
+    "logger_info \'dummy\' 2>&1; cat \"${APP_SIMPLE_FILE}\"" \
+  || return
 }
 
 testSimple_config()
 {
-  commonSimple_config \
+  # configure a simple ConsoleAppender via config
+  log4sh_doConfiguration "${APP_SIMPLE_LOG4SH}"
+
+  commonSimple \
     'assertNull' \
     "${APP_SIMPLE} runtime FileAppender went to STDOUT or STDERR" \
-    "logger_info \'dummy\' 2>&1"
-  assertEquals $? ${__SHUNIT_TRUE} || return
+    "logger_info \'dummy\' 2>&1" \
+  || return
 
-  commonSimple_config \
+  commonSimple \
     'assertNotNull' \
     "${APP_SIMPLE} runtime FileAppender didn't go to file" \
-    "logger_info \'dummy\'; cat ${APP_SIMPLE_FILE}"
-  assertEquals $? ${__SHUNIT_TRUE} || return
+    "logger_info \'dummy\'; cat ${APP_SIMPLE_FILE}" \
+  || return
+}
+
+# test that the filename set in the configuration file is readable
+# programatically
+testAccessors_getFilename()
+{
+  # configure log4sh via config
+  log4sh_doConfiguration "${APP_ACCESSOR_LOG4SH}"
+
+  fileName=`appender_file_getFile ${APP_ACCESSOR}`
+  assertEquals \
+    "${APP_ACCESSOR} file was not /dev/null" \
+    "${fileName}" '/dev/null'
+}
+
+# test that setting the filename of an appender actually changes it
+testAccessors_setgetFilename()
+{
+  # configure log4sh via config
+  log4sh_doConfiguration "${APP_ACCESSOR_LOG4SH}"
+
+  newFileName='/var/tmp/accessors.log'
+
+  # the current filename should be /dev/null (see getFilename test). changing
+  # it to /var/tmp/accessors.log
+  appender_file_setFile ${APP_ACCESSOR} "${newFileName}"
+
+  # now, re-reading the file name to verify
+  fileName=`appender_file_getFile ${APP_ACCESSOR}`
+  assertEquals \
+    "${APP_ACCESSOR} file was not ${newFileName}" \
+    "${fileName}" "${newFileName}"
 }
 
 #------------------------------------------------------------------------------
@@ -189,6 +166,16 @@ testSimple_config()
 oneTimeSetUp()
 {
   assertFile="${__shunit_tmpDir}/assert.dat"
+
+  # load log4sh
+  ${DEBUG} 'loading log4sh'
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+}
+
+setUp()
+{
+  # reset log4sh
+  log4sh_resetConfiguration
 }
 
 tearDown()
@@ -207,8 +194,11 @@ suite()
 
   suite_addTest testSimple_runtime
   suite_addTest testSimple_config
+
+  suite_addTest testAccessors_getFilename
+  suite_addTest testAccessors_setgetFilename
 }
 
 # load and run shUnit
-${DEBUG} echo "loading shUnit" >&2
+${DEBUG} 'loading shUnit'
 . ./shunit

@@ -1,13 +1,13 @@
 #! /bin/sh
 # $Id$
 
-DEBUG=${DEBUG:+' '}
-DEBUG=${DEBUG:-':'}
-${DEBUG} echo 'DEBUG output enabled' >&2
-
 MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
 MY_LOG4SH="${MY_NAME}.log4sh"
+
+debug() { echo "${MY_NAME}:DEBUG $@" >&2; }
+DEBUG=${DEBUG:+debug } DEBUG=${DEBUG:-:}
+${DEBUG} 'debugging enabled'
 
 APP_NAME='R'
 APP_MAX_FILE_SIZE='10KB'
@@ -23,7 +23,7 @@ resultFile=''
 
 assertFileExists()
 {
-  ${DEBUG} echo "assertFileExists($@)"
+  ${DEBUG} "assertFileExists($@)"
   if [ $# -eq 2 ]; then
     assertTrue "$1" "[ -f '$2' ]"
   else
@@ -33,7 +33,7 @@ assertFileExists()
 
 assertFileNotExists()
 {
-  ${DEBUG} echo "assertFileNotExists($@)"
+  ${DEBUG} "assertFileNotExists($@)"
   if [ $# -eq 2 ]; then
     assertTrue "$1" "[ ! -f '$2' ]"
   else
@@ -47,10 +47,6 @@ assertFileNotExists()
 
 loadLog4sh_runtime()
 {
-  # load log4sh
-  ${DEBUG} echo "loading log4sh" >&2
-  LOG4SH_CONFIGURATION='none' . ${MY_PATH}/log4sh
-
   # close the default console appender
   appender_close stdout
 
@@ -64,13 +60,15 @@ loadLog4sh_runtime()
   appender_file_setFile ${APP_NAME} "${appFile}"
   appender_file_setMaxFileSize ${APP_NAME} ${APP_MAX_FILE_SIZE}
   appender_file_setMaxBackupIndex ${APP_NAME} ${APP_MAX_BACKUP_INDEX}
+
+  # activate the appender
+  appender_activateOptions ${APP_NAME}
 }
 
 loadLog4sh_config()
 {
-  # load log4sh
-  ${DEBUG} echo "loading log4sh" >&2
-  LOG4SH_CONFIGURATION=${MY_LOG4SH} . ${MY_PATH}/log4sh
+  # load log4sh configuration
+  log4sh_doConfiguration "${MY_LOG4SH}"
 }
 
 createSizedFile()
@@ -79,7 +77,7 @@ createSizedFile()
   size=$2
 
   # this could be slow...
-  ${DEBUG} echo "creating ${size} byte file..."
+  ${DEBUG} "creating ${size} byte file..."
   if [ ${size} -gt 0 ]; then
     result=`dd if=/dev/zero of="${file}" bs=1 count=${size} 2>&1`
     if [ $? -ne 0 ]; then
@@ -97,16 +95,14 @@ testEmptyFile_config()
 { testEmptyFile config; }
 testEmptyFile()
 {
-  ${DEBUG} echo "testing empty file" >&2
+  ${DEBUG} "testing empty file"
   useLog4sh=$1
 
   createSizedFile ${appFile} 0 \
     || return 1
 
-  (
-    loadLog4sh_${useLog4sh}
-    logger_error 'dummy'
-  )
+  loadLog4sh_${useLog4sh}
+  logger_error 'dummy'
 
   # as we started with a empty file, writing a single logging message should
   # not have caused an overrun, nor a rotation
@@ -121,16 +117,14 @@ testOneByteUnderSize_config()
 { testOneByteUnderSize config; }
 testOneByteUnderSize()
 {
-  ${DEBUG} echo "testing one byte under sized file" >&2
+  ${DEBUG} "testing one byte under sized file"
   useLog4sh=$1
 
   createSizedFile ${appFile} `expr ${APP_MAX_FILE_SIZE_REAL} - 1` \
     || return 1
 
-  (
-    loadLog4sh_${useLog4sh}
-    logger_error 'dummy'
-  )
+  loadLog4sh_${useLog4sh}
+  logger_error 'dummy'
 
   # this time, the file was just under the limit for doing a rotation, so
   # again, no rotation should have occurred
@@ -145,16 +139,14 @@ testExactlyRightSize_config()
 { testExactlyRightSize config; }
 testExactlyRightSize()
 {
-  ${DEBUG} echo "testing exactly right sized file" >&2
+  ${DEBUG} "testing exactly right sized file"
   useLog4sh=$1
 
   createSizedFile ${appFile} ${APP_MAX_FILE_SIZE_REAL} \
     || return 1
 
-  (
-    loadLog4sh_${useLog4sh}
-    logger_error 'dummy'
-  )
+  loadLog4sh_${useLog4sh}
+  logger_error 'dummy'
 
   # this time, the file was exactly the right size for doing a rotation. a
   # rotation should have occurred
@@ -169,16 +161,14 @@ testOneByteOverSize_config()
 { testOneByteOverSize config; }
 testOneByteOverSize()
 {
-  ${DEBUG} echo "testing one byte oversize file" >&2
+  ${DEBUG} "testing one byte oversize file"
   useLog4sh=$1
 
   createSizedFile ${appFile} `expr ${APP_MAX_FILE_SIZE_REAL} + 1` \
     || return 1
 
-  (
-    loadLog4sh_${useLog4sh}
-    logger_error 'dummy'
-  )
+  loadLog4sh_${useLog4sh}
+  logger_error 'dummy'
 
   # this time, the file was just above the threshold for rotation. a rotation
   # should have occurred
@@ -193,16 +183,14 @@ testOrderOfMagnitudeLarger_config()
 { testOrderOfMagnitudeLarger config; }
 testOrderOfMagnitudeLarger()
 {
-  ${DEBUG} echo "testing one byte oversize file" >&2
+  ${DEBUG} "testing one byte oversize file"
   useLog4sh=$1
 
   createSizedFile ${appFile} `expr ${APP_MAX_FILE_SIZE_REAL} \* 10` \
     || return 1
 
-  (
-    loadLog4sh_${useLog4sh}
-    logger_error 'dummy'
-  )
+  loadLog4sh_${useLog4sh}
+  logger_error 'dummy'
 
   # this time, the file was way above the threshold for rotation. a rotation
   # should have occurred
@@ -234,6 +222,16 @@ oneTimeSetUp()
 {
   appFile="${__shunit_tmpDir}/rfa.log"
   resultFile="${__shunit_tmpDir}/result.dat"
+
+  # load log4sh
+  ${DEBUG} 'loading log4sh'
+  LOG4SH_CONFIGURATION='none' . ${MY_PATH}/log4sh
+}
+
+setUp()
+{
+  # reset log4sh
+  log4sh_resetConfiguration
 }
 
 tearDown()
@@ -265,5 +263,5 @@ suite()
 }
 
 # load and run shUnit
-${DEBUG} echo "loading shUnit" >&2
+${DEBUG} "loading shUnit"
 . ./shunit

@@ -1,9 +1,6 @@
 # $Id$
-
-# set root logger to ERROR, and give it two appenders; stderr and R
 log4sh.rootLogger = INFO, mySTDOUT
 
-# add a file appender at the default level that logs to STDOUT
 log4sh.appender.mySTDOUT = ConsoleAppender
 log4sh.appender.mySTDOUT.layout = PatternLayout
 log4sh.appender.mySTDOUT.layout.ConversionPattern = %m%n
