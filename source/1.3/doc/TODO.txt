@@ -1,5 +1,7 @@
 # $Id$
 
+- implement SECONDS for non-bash shells
+
 - look into traps. exit codes seem to be lost
 
 - enable passing the configuration filename on the source line instead of

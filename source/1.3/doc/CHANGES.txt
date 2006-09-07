@@ -1,7 +1,30 @@
 Changes with 1.3.6
 
+[kwd] did some major code reorganization to group common code groups together
+
+[kwd] renamed the _log4sh_level2tag() and _log4sh_tag2level() functions to
+_level_toLevel() and _level_toInt() correspondingly. they were very badly
+named, and were a reminant of the very early log4sh code base.
+
+[kwd] reworked the internal log4sh debugging. had problems debugging why ksh
+wasn't working properly, and decided that the log4sh debugging needed to be
+improved to help me find the problems easier.
+
+[kwd] again, forgot to test with ksh (argh!). have added testing of several
+shells to the run-test-suite script to be sure I don't forget them again.
+
 [kwd] fixed a bug when trying to restore old trap signal handlers. had a bad
 regex and was missing some "'" chars
+
+[kwd] fixed the problems with ksh where having a function redefine itself and
+then reload itself at runtime was causing infinite loops
+
+[kwd] renamed the logger_readProperties() function to logger_doConfiguration()
+to closer match log4j
+
+[kwd] added an appender_activateOptions() function that should be called after
+any changes to an appenders configuration are changed. this is something that
+is present in log4j 1.2, and will be required in log4j 1.3.
 
 
 Changes with 1.3.5
