@@ -252,12 +252,12 @@ _shunit_testPassed()
 
 _shunit_testFailed()
 {
-  _su__msg=''
   [ $# -eq 1 ] && _su__msg=$1
 
   __shunit_testsFailed=`expr ${__shunit_testsFailed} + 1`
   __shunit_testsTotal=`expr ${__shunit_testsTotal} + 1`
 
+  [ -z "${_su__msg:-}" ] && _su__msg='failed'
   echo "${__SHUNIT_ASSERT_MSG_PREFIX} ${_su__msg}"
 }
 
