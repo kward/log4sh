@@ -8,6 +8,8 @@ This release is meant to fix the problems with the last release. log4sh has been
 
 NEW FEATURES
 
+A log4sh_doConfigure() function was added. (Actually, the log4shReadProperties() function was renamed). This function can be used to read a configuration file at runtime. It does *not* reset the current configuration, so one must first call the log4sh_resetConfiguration() function to do that.
+
 A log4sh_resetConfiguration() function was added. This function will completely reset the configuration of log4sh to an clean state. No appenders are defined, and logging statements will have absolutely no effect.
 
 A appender_activateOptoins() function was added. This was done to closer duplicate the functionality of log4j. This function can be optionally called to activate an appender after any changes have been made to it programmatically. This function call will be required in a future release of log4sh.
