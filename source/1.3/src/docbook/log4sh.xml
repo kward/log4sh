@@ -37,7 +37,7 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
 
 <book id="log4sh" lang="en-US"><title>log4sh</title>
   <bookinfo>
-    <title>log4sh</title>
+    <title>log4sh version 1.3.6</title>
     <authorgroup>
       <author>
         <firstname>Kate</firstname><surname>Ward</surname>
