@@ -1,6 +1,8 @@
 ﻿RELEASE NOTES FOR 1.3.6
 
-The previous release was somewhat of a brown-bag release. Running log4sh through the unit tests provided (something that was completely new for the 1.3.5 release) indicated that it worked great under Linux with Bash and under Solaris with the standard Bourne shell. Unfortunately, it was not tested under ksh for either Linux or Solaris. After testing with ksh was done, it was discovered that many of the new internal changes did not work whatsoever with ksh, and were often times causing segfaults, something quite uncommon with a shell script.
+NOTE: To improve the readability of this document, it can be run through the 'fmt' command and then piped through 'less' or printed (e.g. “fmt -w 80 RELEASE_NOTES.txt |less”).
+
+The previous release was somewhat of a brown-bag release. Running log4sh through the unit tests provided (something that was completely new for the 1.3.5 release) indicated that it worked great under Linux with Bash and under Solaris with the standard Bourne shell. Unfortunately, it was not tested under ksh for either Linux or Solaris. After testing with ksh was done, it was discovered that many of the new internal changes did not work whatsoever with ksh, and were often times causing segmentation faults, something quite uncommon with a shell script.
 
 This release is meant to fix the problems with the last release. log4sh has been fixed to work with the unit tests, and the unit tests themselves have been cleaned up and the sub-shells removed as log4sh now supports having its configuration reset programmatically.
 
