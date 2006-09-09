@@ -19,7 +19,7 @@ regex and was missing some "'" chars
 [kwd] fixed the problems with ksh where having a function redefine itself and
 then reload itself at runtime was causing infinite loops
 
-[kwd] renamed the logger_readProperties() function to logger_doConfiguration()
+[kwd] renamed the logger_readProperties() function to logger_doConfigure()
 to closer match log4j
 
 [kwd] added an appender_activateOptions() function that should be called after
