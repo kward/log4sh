@@ -59,7 +59,7 @@ testSTDERR_runtime()
 testSTDERR_config()
 {
   # configure a STDERR FileAppender via config
-  log4sh_doConfiguration "${APP_STDERR_LOG4SH}"
+  log4sh_doConfigure "${APP_STDERR_LOG4SH}"
 
   commonSTDERR \
     'assertNotNull' \
@@ -112,7 +112,7 @@ testSimple_runtime()
 testSimple_config()
 {
   # configure a simple ConsoleAppender via config
-  log4sh_doConfiguration "${APP_SIMPLE_LOG4SH}"
+  log4sh_doConfigure "${APP_SIMPLE_LOG4SH}"
 
   commonSimple \
     'assertNull' \
@@ -132,7 +132,7 @@ testSimple_config()
 testAccessors_getFilename()
 {
   # configure log4sh via config
-  log4sh_doConfiguration "${APP_ACCESSOR_LOG4SH}"
+  log4sh_doConfigure "${APP_ACCESSOR_LOG4SH}"
 
   fileName=`appender_file_getFile ${APP_ACCESSOR}`
   assertEquals \
@@ -144,7 +144,7 @@ testAccessors_getFilename()
 testAccessors_setgetFilename()
 {
   # configure log4sh via config
-  log4sh_doConfiguration "${APP_ACCESSOR_LOG4SH}"
+  log4sh_doConfigure "${APP_ACCESSOR_LOG4SH}"
 
   newFileName='/var/tmp/accessors.log'
 

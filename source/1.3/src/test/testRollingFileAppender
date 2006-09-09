@@ -47,12 +47,6 @@ assertFileNotExists()
 
 loadLog4sh_runtime()
 {
-  # close the default console appender
-  appender_close stdout
-
-  # leave the default logging level at ERROR
-  #logger_setLevel ERROR
-
   # add a rolling file appender at the INFO level
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} RollingFileAppender
@@ -68,7 +62,7 @@ loadLog4sh_runtime()
 loadLog4sh_config()
 {
   # load log4sh configuration
-  log4sh_doConfiguration "${MY_LOG4SH}"
+  log4sh_doConfigure "${MY_LOG4SH}"
 }
 
 createSizedFile()
