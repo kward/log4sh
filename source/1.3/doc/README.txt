@@ -50,7 +50,9 @@ Steps:
 UPDATE VERSION
 
 Edit the log4sh source code, and change the version number in the comment, as
-well as in the __LOG4SH_VERSION variable
+well as in the __LOG4SH_VERSION variable. Next, edit the src/docbook/log4sh.xml
+file, edit the version in the <title> element, and make sure there is a
+revision section for this release.
 
 FINISH THE CHANGELOG
 
