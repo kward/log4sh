@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id$ -->
-<!-- vim:softtabstop=2 shiftwidth=2 -->
+<!--
+$Id$
+vim:softtabstop=2 shiftwidth=2
+-->
+
 <!-- =========================================================================
  ! Configuration
 -->
+
 <chapter id="configuration"><title id="configuration.title">Configuration</title>
 
   <section id="properties_file"><title id="properties_file.title">Properties File</title>
-    <para>Log4sh can be configured with a properties file that is separate from the actual script where the logging takes place.  By default, log4sh looks for its properties file called <filename>log4sh.properties</filename> in the current directory.  If the file is located elsewhere or with a different name, log4sh can be configured by setting the <varname>LOG4SH_CONFIGURATION</varname> environment variable (eg. <varname>LOG4SH_CONFIGURATION="/etc/log4sh.conf"</varname>).</para>
+    <para>Log4sh can be configured with a properties file that is separate from the actual script where the logging takes place.  By default, log4sh looks for its properties file called <filename>log4sh.properties</filename> in the current directory.  If the file is located elsewhere or with a different name, log4sh can be configured by setting the <varname>LOG4SH_CONFIGURATION</varname> environment variable (eg. <code>LOG4SH_CONFIGURATION="/etc/log4sh.conf"</code>).</para>
   
     <para>A <filename>log4sh.properties</filename> file that is completly empty is sufficient to configure log4sh.  There will be absolutely no output however (which might just be what is desired).  Usually though, some output is desired, so there is at least a recommended minimum configuration file.  An explaination of the file follows the example.</para>
   
@@ -279,7 +283,7 @@
   	    <row>
   	      <entry align="center">r</entry>
   	      <entry>Used to output the number of seconds elapsed since the start of the script until the creation of the logging event.</entry>
-  	      <entry>partial (<command>bash</command>, <command>ksh</command>)</entry>
+  	      <entry>yes</entry>
   	    </row>
   
   	    <row>
