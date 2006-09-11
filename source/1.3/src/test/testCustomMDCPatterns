@@ -77,7 +77,7 @@ testCustomTimeMDC()
 
 testCustomUserHostMDC()
 {
-  pattern='%X{LOGNAME}@%X{HOSTNAME}'
+  pattern='%X{USER}@%X{HOSTNAME}'
   regex='[A-Za-z0-9]*@[-.A-Za-z0-9]*'
 
   # set variables (if needed)

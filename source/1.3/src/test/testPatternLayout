@@ -175,8 +175,8 @@ testMDCPattern()
 {
   msg="MDC '\${pattern}' pattern failed: '\${expected}' != '\${actual}'"
 
-  pattern='%X{LOGNAME}'
-  expected=${LOGNAME}
+  pattern='%X{USER}'
+  expected=${USER}
   commonPatternAssert "${pattern}" "${expected}" "${msg}" || return
 
   # the %X pattern should not parse unless it has an environment variable name
