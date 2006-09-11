@@ -606,7 +606,12 @@ _log4sh_pushStack()
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Activate an appender</para>
+#   <para>
+#     Activate an appender's configuration. This should be called after
+#     reconfiguring an appender via code. It needs only to be called once
+#     before any logging statements are called. This calling of this function
+#     will be required in log4sh 1.4.x.
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_activateAppender myAppender</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1063,8 +1068,10 @@ appender_getType()
 #       <paramdef>integer <parameter>index</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis> Gets the Type of an Appender at the
-#     given array index</para>
+#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
+#   <para>
+#     Gets the Type of an Appender at the given array index
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>type=`appender_getAppenderType 3`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1128,8 +1135,10 @@ appender_setType()
 #       <paramdef>string <parameter>type</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis> Sets the Type of an Appender (e.g.
-#     FileAppender)</para>
+#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
+#   <para>
+#     Sets the Type of an Appender (e.g. FileAppender)
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_setAppenderType myAppender FileAppender</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1497,8 +1506,11 @@ appender_file_setFile()
 #       <paramdef>string <parameter>filename</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis> Set the filename for a FileAppender
-#     (e.g. "STDERR" or "/var/log/log4sh.log")</para>
+#   <para><emphasis role="strong">Deprecated as of 1.3.2</emphasis></para>
+#   <para>
+#     Set the filename for a FileAppender (e.g. "STDERR" or
+#     "/var/log/log4sh.log")
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_setAppenderFile myAppender STDERR</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1694,8 +1706,10 @@ appender_smtp_setTo()
 #       <paramdef>string <parameter>email</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis>Set the to address for the given
-#     appender</para>
+#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
+#   <para>
+#     Set the to address for the given appender
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_smtp_setTo myAppender user@example.com</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1868,37 +1882,14 @@ _appender_syslog_getFacilityByIndex()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>appender_syslog_getFacilityByIndex</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis> Get the syslog facility of the
-#     specified appender by index</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>facility=`appender_syslog_getFacilityByIndex 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_syslog_getFacilityByIndex()
-{
-  _appender_syslog_getFacilityByIndex "$@"
-}
-
-#/**
-# <s:function group="SyslogAppender" modifier="public">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
 #       <funcdef><function>appender_getSyslogFacility</function></funcdef>
 #       <paramdef>integer <parameter>index</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis> Get the syslog facility of the
-#     specified appender by index</para>
+#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
+#   <para>
+#     Get the syslog facility of the specified appender by index
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>facility=`appender_getSyslogFacility 3`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1934,31 +1925,6 @@ appender_syslog_getFacility()
   _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   _log4sh_getArrayElement "$__log4shAppender_syslog_facilities" $_index
   unset _index
-}
-
-#/**
-# <s:function group="SyslogAppender" modifier="public">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_syslog_getFacility</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis> Get the syslog facility for the
-#     given appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>facility=`appender_syslog_getFacilityByName myAppender`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_syslog_getFacilityByName()
-{
-  appender_syslog_getFacility "$@"
 }
 
 #/**
@@ -2024,8 +1990,10 @@ appender_syslog_setFacility()
 #       <paramdef>string <parameter>facility</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated)</emphasis> Set the syslog facility for the
-#     given appender</para>
+#   <para><emphasis role="strong">Deprecated as of 1.3.2</emphasis></para>
+#   <para>
+#     Set the syslog facility for the given appender
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_setSyslogFacility myAppender local4`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -2259,7 +2227,8 @@ logger_addAppender()
 #       <paramdef>string <parameter>pattern</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated as of 1.3.6)</emphasis>
+#   <para><emphasis role="strong">Deprecated as of 1.3.6</emphasis></para>
+#   <para>
 #     Add and initialize a new appender with a specific PatternLayout
 #   </para>
 #   <funcsynopsis>
@@ -2927,7 +2896,8 @@ log4sh_doConfigure()
 #       <paramdef>string <parameter>configFileName</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(deprecated as of 1.3.6)</emphasis>
+#   <para><emphasis role="strong">Deprecated as of 1.3.6</emphasis></para>
+#   <para>
 #     See <code>log4sh_doConfigure</code>.
 #   </para>
 #   <funcsynopsis>
