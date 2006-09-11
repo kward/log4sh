@@ -483,7 +483,7 @@ _log4sh_findArrayElement()
 #*/
 _log4sh_getArrayElement()
 {
-  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}() (called from ${BASH_LINENO})"
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
   _lgae__array=$1
   _lgae__index=$2
   ${__LOG4SH_TRACE} "_lgae__array='${_lgae__array}' _lgae__index='${_lgae__index}'"
@@ -903,7 +903,7 @@ appender_setLevel()
 #*/
 _appender_getLevelByIndex()
 {
-  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}() (called from ${BASH_LINENO})"
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
   _log4sh_getArrayElement "${__log4shAppenderLevels}" $1
 }
 
@@ -1246,7 +1246,7 @@ _appender_cache()
   cat >"${_ac__inc}" <<EOF
 ${__LOG4SH_APPENDER_FUNC_PREFIX}${_ac__appender}_activateOptions()
 {
-  [ -n "\${FUNCNAME:-}" ] && \${__LOG4SH_TRACE} "\${FUNCNAME}() (called from \${BASH_LINENO})"
+  [ -n "\${FUNCNAME:-}" ] && \${__LOG4SH_TRACE} "\${FUNCNAME}()\${BASH_LINENO:+'(called from \${BASH_LINENO})'}"
   _appender_activate ${_ac__appender}
 }
 
@@ -1283,7 +1283,7 @@ EOF
 #*/
 _appender_activate()
 {
-  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}() (called from ${BASH_LINENO})"
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
   ${__LOG4SH_TRACE} "_appender_activate($#)"
   _ag__appender=$1
   ${__LOG4SH_TRACE} "_ag__appender='${_ag__appender}'"
@@ -1301,7 +1301,7 @@ _appender_activate()
   cat <<EOF
 ${__LOG4SH_APPENDER_FUNC_PREFIX}${_ag__appender}_append()
 {
-  [ -n "\${FUNCNAME:-}" ] && \${__LOG4SH_TRACE} "\${FUNCNAME}() (called from \${BASH_LINENO})"
+  [ -n "\${FUNCNAME:-}" ] && \${__LOG4SH_TRACE} "\${FUNCNAME}()\${BASH_LINENO:+'(called from \${BASH_LINENO})'}"
   _la_level=\$1
   _la_message=\$2
 EOF
@@ -2887,7 +2887,7 @@ _log4sh_propRootLogger()
 #*/
 log4sh_doConfigure()
 {
-  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}() (called from ${BASH_LINENO})"
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
   _lrp_file=$1
 
   # strip the config prefix and dump output to a temporary file
