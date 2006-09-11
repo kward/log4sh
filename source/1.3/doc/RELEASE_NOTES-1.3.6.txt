@@ -43,3 +43,5 @@ BUG FIXES
 The trap restoring code did not work properly as a regex was poorly written. Any traps set before log4sh is sourced should now properly be called.
 
 The 1.3.5 release did not work at all with ksh. This has been fixed.
+
+$Revision$
