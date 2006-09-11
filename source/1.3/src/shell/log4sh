@@ -3184,7 +3184,7 @@ _log4sh_cleanup()
   # these are the only signals that log4sh traps.  no need to list them all
   case "${_trap}" in
     EXIT|${__LOG4SH_TRAP_EXIT}) _signal=0 ;;
-    TERM) _signal=15 ;;
+    SIGINT) _signal=2 ;;
   esac
 
   # do we possibly need to restore a previous trap?
@@ -3250,8 +3250,9 @@ __log4sh_trapsFile="${__log4sh_tmpDir}/traps"
 trap >"${__log4sh_trapsFile}"
 
 # configure traps
-trap '_log4sh_cleanup EXIT' EXIT
-trap '_log4sh_cleanup TERM' TERM
+${__LOG4SH_INFO} 'setting traps'
+trap '_log4sh_cleanup EXIT' 0
+trap '_log4sh_cleanup SIGINT' 2
 
 # prepare the environment for configuration
 log4sh_resetConfiguration
