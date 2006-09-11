@@ -28,6 +28,8 @@ The _log4sh_mktempDir() function was cleaned up a tiny bit to make it easier to 
 
 The _log4sh_level2tag() and _log4sh_tag2level() functions were renamed to _logger_level_toInt() and _logger_level_toLevel() respectively to better match the log4j method names.
 
+The appender_syslog_getFacilityByIndex() and appender_syslog_getFacilityByName() functions were removed as they should never have been present.
+
 Many of the functions were rearranged to bring common functions closer together in the code base.
 
 DEPRECATED FEATURES
