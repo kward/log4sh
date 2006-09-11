@@ -193,7 +193,7 @@ _log4sh_log()
 #*/
 _log4sh_trace()
 {
-  _log4sh_log "${__LOG4SH_LEVEL_TRACE_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]})} - $@";
+  _log4sh_log "${__LOG4SH_LEVEL_TRACE_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]}) }- $@";
  }
 
 #/**
@@ -219,7 +219,7 @@ _log4sh_trace()
 #*/
 _log4sh_debug()
 {
-  _log4sh_log "${__LOG4SH_LEVEL_DEBUG_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]})} - $@";
+  _log4sh_log "${__LOG4SH_LEVEL_DEBUG_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]}) }- $@";
 }
 
 #/**
@@ -245,7 +245,7 @@ _log4sh_debug()
 #*/
 _log4sh_info()
 {
-  _log4sh_log "${__LOG4SH_LEVEL_INFO_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]})} - $@";
+  _log4sh_log "${__LOG4SH_LEVEL_INFO_STR}" "${BASH_LINENO:+(${BASH_LINENO[0]}) }- $@";
 }
 
 #/**
