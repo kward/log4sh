@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id$ -->
 <!--
 example ways to process this xslt:
 $ java -cp xalan-2.6.0.jar \
