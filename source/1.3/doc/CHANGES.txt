@@ -28,7 +28,7 @@ is present in log4j 1.2, and will be required in log4j 1.3.
 
 [kwd] removed the appender_syslog_getFacilityByIndex() and appender_syslog_getFacilityByName() functions
 
-[kwd] added code to fully implement the '%s' conversion character under all
+[kwd] added code to fully implement the '%r' conversion character under all
 shells.
 
 [kwd] improved all unit tests so they will work under the standard Solaris
