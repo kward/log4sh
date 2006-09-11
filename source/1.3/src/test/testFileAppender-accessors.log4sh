@@ -5,4 +5,4 @@ log4sh.rootLogger = INFO, accessors
 
 # add a file appender
 log4sh.appender.accessors = FileAppender
-log4sh.appender.accessors.File = /dev/null
+log4sh.appender.accessors.File = ${APP_ACCESSORS_FILE}

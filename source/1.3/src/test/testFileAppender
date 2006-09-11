@@ -9,8 +9,9 @@ DEBUG=${DEBUG:+'debug '}
 [ -z "${DEBUG}" ] && DEBUG=':'
 ${DEBUG} 'debugging enabled'
 
-APP_ACCESSOR='accessors'
-APP_ACCESSOR_LOG4SH="${MY_NAME}-${APP_ACCESSOR}.log4sh"
+APP_ACCESSORS='accessors'
+APP_ACCESSORS_FILE='myAccessors.out'
+APP_ACCESSORS_LOG4SH="${MY_NAME}-${APP_ACCESSORS}.log4sh"
 
 APP_SIMPLE='mySimple'
 APP_SIMPLE_FILE='mySimple.out'
@@ -133,30 +134,30 @@ testSimple_config()
 testAccessors_getFilename()
 {
   # configure log4sh via config
-  log4sh_doConfigure "${APP_ACCESSOR_LOG4SH}"
+  log4sh_doConfigure "${APP_ACCESSORS_LOG4SH}"
 
-  fileName=`appender_file_getFile ${APP_ACCESSOR}`
+  fileName=`appender_file_getFile ${APP_ACCESSORS}`
   assertEquals \
-    "${APP_ACCESSOR} file was not /dev/null" \
-    "${fileName}" '/dev/null'
+    "${APP_ACCESSORS} file '${fileName}' was not '${APP_ACCESSORS_FILE}'" \
+    "${fileName}" "${APP_ACCESSORS_FILE}"
 }
 
 # test that setting the filename of an appender actually changes it
 testAccessors_setgetFilename()
 {
   # configure log4sh via config
-  log4sh_doConfigure "${APP_ACCESSOR_LOG4SH}"
+  log4sh_doConfigure "${APP_ACCESSORS_LOG4SH}"
 
   newFileName='/var/tmp/accessors.log'
 
-  # the current filename should be /dev/null (see getFilename test). changing
-  # it to /var/tmp/accessors.log
-  appender_file_setFile ${APP_ACCESSOR} "${newFileName}"
+  # the current filename should be what is stored in ${APP_ACCESSORS_FILE}.
+  # changing it to /var/tmp/accessors.log
+  appender_file_setFile ${APP_ACCESSORS} "${newFileName}"
 
   # now, re-reading the file name to verify
-  fileName=`appender_file_getFile ${APP_ACCESSOR}`
+  fileName=`appender_file_getFile ${APP_ACCESSORS}`
   assertEquals \
-    "${APP_ACCESSOR} file was not ${newFileName}" \
+    "${APP_ACCESSORS} file was not ${newFileName}" \
     "${fileName}" "${newFileName}"
 }
 
