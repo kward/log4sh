@@ -91,6 +91,7 @@ __LOG4SH_IFS_ARRAY="
 "
 __LOG4SH_IFS_DEFAULT=' '
 
+__LOG4SH_SECONDS=`eval "expr \`date '+%H \* 3600 + %M \* 60 + %S'\`"`
 __LOG4SH_TRAP_EXIT='log4sh-EXIT'
 
 # configure log4sh debugging. set the LOG4SH_INFO environment variable to any
@@ -99,14 +100,14 @@ __LOG4SH_TRAP_EXIT='log4sh-EXIT'
 # printed. to send the debug output to a file, set the LOG4SH_DEBUG_FILE with
 # the filename you want debug output to be written to.
 
-__LOG4SH_TRACE=${LOG4SH_TRACE:+_log4sh_trace }
-__LOG4SH_TRACE=${__LOG4SH_TRACE:-:}
+__LOG4SH_TRACE=${LOG4SH_TRACE:+'_log4sh_trace '}
+__LOG4SH_TRACE=${__LOG4SH_TRACE:-':'}
 [ -n "${LOG4SH_TRACE:-}" ] && LOG4SH_DEBUG=1
-__LOG4SH_DEBUG=${LOG4SH_DEBUG:+_log4sh_debug }
-__LOG4SH_DEBUG=${__LOG4SH_DEBUG:-:}
+__LOG4SH_DEBUG=${LOG4SH_DEBUG:+'_log4sh_debug '}
+__LOG4SH_DEBUG=${__LOG4SH_DEBUG:-':'}
 [ -n "${LOG4SH_DEBUG:-}" ] && LOG4SH_INFO=1
-__LOG4SH_INFO=${LOG4SH_INFO:+_log4sh_info }
-__LOG4SH_INFO=${__LOG4SH_INFO:-:}
+__LOG4SH_INFO=${LOG4SH_INFO:+'_log4sh_info '}
+__LOG4SH_INFO=${__LOG4SH_INFO:-':'}
 
 # set the constants to readonly
 for _log4sh_const in `set |grep "^__LOG4SH_" |cut -d= -f1`; do
@@ -122,12 +123,12 @@ __log4sh_filename=`basename $0`
 __log4sh_tmpDir=''
 __log4sh_trapsFile=''
 
-__log4shThreadName=${__LOG4SH_THREAD_DEFAULT}
-__log4shThreadStack=${__LOG4SH_THREAD_DEFAULT}
+__log4sh_threadName=${__LOG4SH_THREAD_DEFAULT}
+__log4sh_threadStack=${__LOG4SH_THREAD_DEFAULT}
 
-# missing bourne variables
-
-[ -z "${SECONDS:-}" ] && SECONDS=''
+__log4sh_seconds=0
+__log4sh_secondsLast=0
+__log4sh_secondsWrap=0
 
 #=============================================================================
 # Log4sh
@@ -338,6 +339,45 @@ _log4sh_fatal()
 #/**
 # <s:function group="Log4sh" modifier="private">
 # <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_evalSeconds</function></funcdef>
+#       <void />
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     Set the <code>__log4sh_seconds</code> variable to the number of seconds
+#     elapsed since the start of the script.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>tmpDir=`_log4sh_mktempDir`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_updateSeconds()
+{
+  if [ -n "${SECONDS:-}" ]; then
+    __log4sh_seconds=${SECONDS}
+  else
+    _lgs__date=`date '+%H \* 3600 + %M \* 60 + %S'`
+    _lgs__seconds=`eval "expr ${_lgs__date} + ${__log4sh_secondsWrap} \* 86400"`
+    if [ ${_lgs__seconds} -lt ${__log4sh_secondsLast} ]; then
+      __log4sh_secondsWrap=`expr ${__log4sh_secondsWrap} + 1`
+      _lgs__seconds=`expr ${_lgs_seconds} + 86400`
+    fi
+    __log4sh_seconds=`expr ${_lgs__seconds} - ${__LOG4SH_SECONDS}`
+    __log4sh_secondsLast=${__log4sh_seconds}
+    unset _lgs__date _lgs__seconds
+  fi
+}
+
+#/**
+# <s:function group="Log4sh" modifier="private">
+# <entry align="right">
 #   <code>string</code>
 # </entry>
 # <entry>
@@ -347,8 +387,11 @@ _log4sh_fatal()
 #       <void />
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Creates a secure temporary directory within which temporary files can
-#     be created.  Honors the TMPDIR environment variable if it is set.</para>
+#   <para>
+#     Creates a secure temporary directory within which temporary files can be
+#     created. Honors the <code>TMPDIR</code> environment variable if it is
+#     set.
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>tmpDir=`_log4sh_mktempDir`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1015,8 +1058,8 @@ _appender_parsePattern()
     -e 's/%L//g' \
     -e 's/%n//g' \
     -e "s/%-*[0-9]*p/${_priority}/g" \
-    -e "s/%-*[0-9]*r/${SECONDS}/g" \
-    -e "s/%t/${__log4shThreadName}/g" \
+    -e "s/%-*[0-9]*r/${__log4sh_seconds}/g" \
+    -e "s/%t/${__log4sh_threadName}/g" \
     -e 's/%x//g' \
     -e 's/%X{/$\{/g' \
     -e 's/%%m/%%%m/g' -e 's/%%/%/g' \
@@ -2387,6 +2430,9 @@ log()
 
   _l_levelInt=`logger_level_toInt ${_l_level}`
 
+  # update seconds elapsed
+  _log4sh_updateSeconds
+
   _l_oldIFS=${IFS} IFS=${__LOG4SH_IFS_DEFAULT}
   for _l_appenderIndex in ${__log4shAppenderCounts}; do
     ${__LOG4SH_TRACE} "_l_appenderIndex='${_l_appenderIndex}'"
@@ -2976,7 +3022,7 @@ log4sh_resetConfiguration()
 #*/
 logger_getThreadName()
 {
-  echo ${__log4shThreadName}
+  echo ${__log4sh_threadName}
 }
 
 #/**
@@ -3004,9 +3050,9 @@ logger_setThreadName()
 {
   _thread=$1
 
-  _length=`_log4sh_getArrayLength "$__log4shThreadStack"`
-  __log4shThreadStack=`_log4sh_setArrayElement "$__log4shThreadStack" $_length $_thread`
-  __log4shThreadName=$_thread
+  _length=`_log4sh_getArrayLength "$__log4sh_threadStack"`
+  __log4sh_threadStack=`_log4sh_setArrayElement "$__log4sh_threadStack" $_length $_thread`
+  __log4sh_threadName=$_thread
 
   unset _index _thread
 }
@@ -3034,8 +3080,8 @@ logger_setThreadName()
 #*/
 logger_pushThreadName()
 {
-  __log4shThreadStack=`_log4sh_pushStack "$__log4shThreadStack" $1`
-  __log4shThreadName=$1
+  __log4sh_threadStack=`_log4sh_pushStack "$__log4sh_threadStack" $1`
+  __log4sh_threadName=$1
 }
 
 #/**
@@ -3051,7 +3097,7 @@ logger_pushThreadName()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Removes the topmost thread name from the stack.  The next thread name
-#   on the stack is then placed in the __log4shThreadName variable.  If the
+#   on the stack is then placed in the __log4sh_threadName variable.  If the
 #   stack is empty, or has only one element left, then a warning is given that
 #   no more thread names can be popped from the stack.</para>
 #   <funcsynopsis>
@@ -3062,10 +3108,10 @@ logger_pushThreadName()
 #*/
 logger_popThreadName()
 {
-  _length=`_log4sh_getArrayLength "$__log4shThreadStack"`
+  _length=`_log4sh_getArrayLength "$__log4sh_threadStack"`
   if [ $_length -gt 1 ]; then
-    __log4shThreadStack=`_log4sh_popStack "$__log4shThreadStack"`
-    __log4shThreadName=`_log4sh_peekStack "$__log4shThreadStack"`
+    __log4sh_threadStack=`_log4sh_popStack "$__log4sh_threadStack"`
+    __log4sh_threadName=`_log4sh_peekStack "$__log4sh_threadStack"`
   else
     echo 'log4sh:WARN no more thread names available on thread name stack.' >&2
   fi
