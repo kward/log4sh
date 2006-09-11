@@ -5,7 +5,8 @@ MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
 
 debug() { echo "${MY_NAME}:DEBUG $@" >&2; }
-DEBUG=${DEBUG:+debug } DEBUG=${DEBUG:-:}
+DEBUG=${DEBUG:+'debug '}
+[ -z "${DEBUG}" ] && DEBUG=':'
 ${DEBUG} 'debugging enabled'
 
 APP_ACCESSOR='accessors'
