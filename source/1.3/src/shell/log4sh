@@ -1535,7 +1535,8 @@ appender_setAppenderFile()
 #       <paramdef>integer <parameter>index</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(stub function)</emphasis>
+#   <para><emphasis role="strong">Not yet implemented</emphasis></para>
+#   <para>
 #     Set the maximum backup index for a DailyRollingFileAppender or
 #     RollingFileAppender.
 #   </para>
@@ -1566,14 +1567,13 @@ appender_file_setMaxBackupIndex()
 #       <paramdef>string <parameter>size</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(stub function)</emphasis>
+#   <para><emphasis role="strong">Not yet implemented</emphasis></para>
+#   <para>
 #     Set the maximum backup file size for a DailyRollingFileAppender or
 #     RollingFileAppender.
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>
-#       appender_file_setMaxBackupIndex myAppender 100KiB
-#     </funcsynopsisinfo>
+#     <funcsynopsisinfo>appender_file_setMaxBackupIndex myAppender 100KiB</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2258,6 +2258,7 @@ logger_addAppenderWithPattern()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef><function>logger_getFilename</function></funcdef>
+#       <void />
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>
@@ -2499,12 +2500,11 @@ logger_info()
 #       <paramdef>string[] <parameter>message</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>This is a helper function for logging a message at the WARN
-#     priority</para>
+#   <para>
+#     This is a helper function for logging a message at the WARN priority
+#   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>
-#       logger_warn "This is a warn message"`
-#     </funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_warn "This is a warn message"`</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2526,12 +2526,11 @@ logger_warn()
 #       <paramdef>string[] <parameter>message</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>This is a helper function for logging a message at the ERROR
-#     priority</para>
+#   <para>
+#     This is a helper function for logging a message at the ERROR priority
+#   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>
-#       logger_error "This is a error message"`
-#     </funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_error "This is a error message"`</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2920,6 +2919,7 @@ log4sh_readProperties()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef><function>log4sh_resetConfiguration</function></funcdef>
+#       <void />
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>
@@ -3084,6 +3084,7 @@ logger_popThreadName()
 #   <funcsynopsis>
 #     <funcprototype>
 #       <funcdef><function>log4sh_cleanup</function></funcdef>
+#       <void />
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>This is a cleanup function to remove the temporary directory used by
