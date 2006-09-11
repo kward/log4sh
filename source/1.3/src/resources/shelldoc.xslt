@@ -34,14 +34,14 @@ $ xsltproc shelldoc.xslt log4sh.xml |xmllint -noblanks -
         <tgroup cols="2"><tbody>
         <xsl:for-each select="key('groups', @group)">
           <xsl:sort select="entry/funcsynopsis/funcprototype/funcdef/function" />
-	  <xsl:choose>
-	    <xsl:when test="@modifier = 'public'">
+          <xsl:choose>
+            <xsl:when test="@modifier = 'public'">
               <row valign="top">
-	        <xsl:copy-of select="entry" />
-	        <!--<xsl:apply-templates select="entry" />-->
-	      </row>
-	    </xsl:when>
-	  </xsl:choose>
+                <xsl:copy-of select="entry" />
+                <!--<xsl:apply-templates select="entry" />-->
+              </row>
+            </xsl:when>
+          </xsl:choose>
         </xsl:for-each>
         </tbody></tgroup>
       </table>
