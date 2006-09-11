@@ -263,3 +263,6 @@ command.  currently limited to the localhost
 just fine, except for when the data contained space characters.  this new
 method handles spaces as well (which are needed for the SMTP appender
 subjects).
+
+
+$Revision$
