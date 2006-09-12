@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id$ -->
-<!-- vim:softtabstop=2 shiftwidth=2 -->
+<!--
+$Id$
+vim:softtabstop=2 shiftwidth=2
+ -->
+
 <!-- =========================================================================
 Introduction
 -->
+
 <chapter label="1" id="intro">
   <title>Introduction</title>
   <para>Log4sh has been developed under the Bourne Again Shell (<command>bash</command>) on Linux, but great care has been taken to make sure it works under the default Bourne Shell of Solaris (<command>sh</command>) as this happens to be the primary platform used by myself.</para>
