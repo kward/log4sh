@@ -107,7 +107,7 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
 
     <!-- Provide a good abstract; a couple of sentences is sufficient -->
     <abstract>
-      <para>log4sh is a logging framework for shell scripts that works similar to the other wonderful <ulink url="http://logging.apache.org/">logging products</ulink> available from the <ulink url="http://www.apache.org/">Apache Software Foundataion</ulink> (eg. log4j, log4perl). Although not as powerful as the others, it can make the task of adding advanced logging to shell scripts easier.  It has much more power than just using simple "echo" commands throughout.  In addition, it can be configured from a properties file so that scripts in a production environment do not need to be altered to change the amount of logging they produce.</para>
+      <para>log4sh is a logging framework for shell scripts that works similar to the other wonderful <ulink url="http://logging.apache.org/">logging products</ulink> available from the <ulink url="http://www.apache.org/">Apache Software Foundation</ulink> (eg. log4j, log4perl). Although not as powerful as the others, it can make the task of adding advanced logging to shell scripts easier.  It has much more power than just using simple "echo" commands throughout.  In addition, it can be configured from a properties file so that scripts in a production environment do not need to be altered to change the amount of logging they produce.</para>
     </abstract>
   </bookinfo>
 
