@@ -3,12 +3,12 @@
 
 myName=`basename $0`
 
+SHELLS='/bin/sh /bin/bash /bin/ksh'
+
+[ $# -ne 0 ] && shells=$@ || shells=${SHELLS}
+
 first=1
-for shell in \
-  /bin/bash \
-  /bin/ksh \
-  /bin/sh
-do
+for shell in ${shells}; do
   # check for existance of shell
   if [ ! -x ${shell} ]; then
     echo "${myName}:WARN unable to run tests with the ${shell} shell"
