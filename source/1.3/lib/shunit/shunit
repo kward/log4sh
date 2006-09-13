@@ -164,6 +164,30 @@ suite_addTest()
 # shUnit functions
 #
 
+_shunit_cleanup()
+{
+  name=$1
+
+  case ${name} in
+    EXIT) signal=0 ;;
+    INT) signal=2 ;;
+    TERM) signal=15 ;;
+  esac
+
+  # do our work
+  rm -fr "${__shunit_tmpDir}"
+
+  # exit for all non-EXIT signals
+  if [ ${name} != 'EXIT' ]; then
+    echo "trapped and now handling the ${name} signal"
+    # disable EXIT trap
+    trap 0
+    # add 127 to signal and exit
+    signal=`expr ${signal} + 127`
+    exit ${signal}
+  fi
+}
+
 _shunit_execSuite()
 {
   echo '#'
@@ -265,8 +289,15 @@ _shunit_testFailed()
 # main
 #
 
-# create phantom functions to work around issues with Cygwin
+# creat temporary storage locatoin
 __shunit_tmpDir=`_shunit_mktempDir`
+
+# setup traps to clean up after ourselves
+trap '_shunit_cleanup EXIT' 0
+trap '_shunit_cleanup INT' 2
+trap '_shunit_cleanup TERM' 15
+
+# create phantom functions to work around issues with Cygwin
 _shunit_mktempFunc
 PATH="${__shunit_tmpDir}:${PATH}"
 
@@ -285,9 +316,6 @@ oneTimeTearDown
 
 # generate report
 _shunit_generateReport
-
-# remove temporary directory
-rm -fr "${__shunit_tmpDir}"
 
 # restore the previous set of shell flags
 for _shunit_shellFlag in ${__SHUNIT_SHELL_FLAGS}; do
