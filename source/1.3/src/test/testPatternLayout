@@ -135,21 +135,21 @@ testPriorityPattern()
   appender_setLevel ${APP_NAME} ${currPriority}
 }
 
-testRunTimePattern()
+testRunningTimePattern()
 {
   pattern='%r'
-  regex='[0-9]*'
+  regex='^[0-9]*(\.[0-9]*){0,1}$'
 
   appender_setPattern ${APP_NAME} "${pattern}"
   result=`logger_info 'dummy'`
-  matched=`echo ${result} |sed "s/${regex}//"`
+  matched=`echo "${result}" |egrep "${regex}"`
   ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
 
   assertNotNull \
-    "run time pattern '${pattern}' failed: empty result '${result}'" \
+    "running time pattern '${pattern}' failed: empty result '${result}'" \
     "${result}" || return
-  assertNull \
-    "run time pattern '${pattern}' failed: result '${result}' did not match the regex '${regex}'" \
+  assertNotNull \
+    "running time pattern '${pattern}' failed: result '${result}' did not match the regex '${regex}'" \
     "${matched}" || return
 }
 
@@ -237,12 +237,16 @@ suite()
   suite_addTest testLineSeparatorPattern
   suite_addTest testMessagePattern
   suite_addTest testPriorityPattern
-  suite_addTest testRunTimePattern
+  suite_addTest testRunningTimePattern
   suite_addTest testThreadNamePattern
   suite_addTest testNDCPattern
   suite_addTest testMDCPattern
   suite_addTest testPercentPattern
 }
+
+# need working egrep. the one for Solaris is in /usr/xpg4/bin, so we will add
+# that to the path
+PATH="/usr/xpg4/bin:${PATH}"
 
 # load and run shUnit
 ${DEBUG} echo "loading shUnit" >&2
