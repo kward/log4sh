@@ -26,6 +26,8 @@ A appender_file_setMaxBackupIndex() stub function was added.
 
 CHANGES AND ENHANCEMENTS
 
+As of this release, all source code is now stored under Subversion rather than CVS.
+
 Continued cleanup of the code. As with the previous releases, even more variables are accessed using the ${varname} format rather than just $varname. More internal variables are being renamed to prevent variable name clashes. Variables cannot be declared local under Bourne shell which results in all variables local to a function being inherently global in scope. Variable clashes ensue.
 
 The internal log4sh debugging has been reworked. If one of the following environment variables is set at the time log4sh is sourced, log4sh will be put into the appropriate debugging mode. The variables are LOG4SH_TRACE, LOG4SH_DEBUG, and LOG4SH_INFO. Any non-empty string value will enable the appropriate debugging level. Internally, putting log4sh into debugging mode now handles the output centrally (which can easily be changed) so that log4sh debugging statements are shorter and cleaner.
