@@ -35,15 +35,15 @@ Pretty self explainatory.
 
 To get the versions of the various shells, do the following:
 Cygwin
- bash - bash --version
- pdksh - look in the downloaded Cygwin directory
+  bash - bash --version
+  pdksh - look in the downloaded Cygwin directory
 Linux
- bash - bash --version
- ksh - ksh --version
+  bash - bash --version
+  ksh - ksh --version
 Solaris 10
- sh - not possible
- bash - bash --version
- ksh - strings /usr/bin/ksh |grep Version
+  sh - not possible
+  bash - bash --version
+  ksh - strings /usr/bin/ksh |grep Version
 
 UPDATE VERSION
 
