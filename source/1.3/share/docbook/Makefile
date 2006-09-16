@@ -6,7 +6,7 @@
 CWD=`pwd`
 DIST=$(CWD)/../dist
 XML=docbook-xml-4.4.zip
-XSLT=docbook-xsl-1.68.1.tar.bz2
+XSLT=docbook-xsl-1.71.0.tar.bz2
 
 all: extract-xml extract-xslt
 
@@ -17,10 +17,10 @@ extract-xml:
 	fi
 
 extract-xslt:
-	if test ! -d docbook-xsl/1.68.1; then \
+	if test ! -d docbook-xsl/1.71.0; then \
 	  mkdir -p docbook-xsl; \
 	  bzip2 -dc $(DIST)/$(XSLT) |tar xf -; \
-	  mv docbook-xsl-1.68.1 docbook-xsl/1.68.1; \
+	  mv docbook-xsl-1.71.0 docbook-xsl/1.71.0; \
 	fi
 
 clean:

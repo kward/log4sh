@@ -3,7 +3,7 @@
 <xsl:stylesheet version="1.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<xsl:import href="../../../docbook-xsl/1.68.1/html/docbook.xsl"/>
+<xsl:import href="../../../docbook-xsl/1.71.0/html/docbook.xsl"/>
 <xsl:import href="tldp-common.xsl"/>
 
 <!-- This set of customizations is used to generate the entire XML
