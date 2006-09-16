@@ -37,6 +37,7 @@ Basic Introduction to CS and SourceForge.net Project CVS Services
 For these steps, it is assumed we are working with release 1.3.0.
 
 Steps:
+* write release notes
 * update version
 * finish changelog
 * check all the code in
@@ -46,6 +47,22 @@ Steps:
 * md5sum the tarball
 * update website
 * post to SourceForge and Freshmeat
+
+WRITE RELEASE NOTES
+
+Pretty self explainatory.
+
+To get the versions of the various shells, do the following:
+Cygwin
+ bash - bash --version
+ pdksh - look in the downloaded Cygwin directory
+Linux
+ bash - bash --version
+ ksh - ksh --version
+Solaris 10
+ sh - not possible
+ bash - bash --version
+ ksh - strings /usr/bin/ksh |grep Version
 
 UPDATE VERSION
 
