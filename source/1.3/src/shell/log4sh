@@ -92,7 +92,16 @@ __LOG4SH_IFS_ARRAY="
 __LOG4SH_IFS_DEFAULT=' '
 
 __LOG4SH_SECONDS=`eval "expr \`date '+%H \* 3600 + %M \* 60 + %S'\`"`
-__LOG4SH_TRAP_EXIT='log4sh-EXIT'
+
+# find workarounds for various commands
+(
+  # determine if the set builtin needs to be evaluated. if the string is parsed
+  # into two separate strings (common in ksh), then set needs to be evaled.
+  str='x{1,2}'
+  set -- ${str}
+  test ! "$1" = 'x1' -a ! "${2:-}" = 'x2'
+)
+__LOG4SH_WA_SET_NEEDS_EVAL=$?
 
 # configure log4sh debugging. set the LOG4SH_INFO environment variable to any
 # non-empty value to enable info output, LOG4SH_DEBUG enable debugging, or
@@ -339,45 +348,6 @@ _log4sh_fatal()
 #/**
 # <s:function group="Log4sh" modifier="private">
 # <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>_log4sh_evalSeconds</function></funcdef>
-#       <void />
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>
-#     Set the <code>__log4sh_seconds</code> variable to the number of seconds
-#     elapsed since the start of the script.
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>tmpDir=`_log4sh_mktempDir`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-_log4sh_updateSeconds()
-{
-  if [ -n "${SECONDS:-}" ]; then
-    __log4sh_seconds=${SECONDS}
-  else
-    _lgs__date=`date '+%H \* 3600 + %M \* 60 + %S'`
-    _lgs__seconds=`eval "expr ${_lgs__date} + ${__log4sh_secondsWrap} \* 86400"`
-    if [ ${_lgs__seconds} -lt ${__log4sh_secondsLast} ]; then
-      __log4sh_secondsWrap=`expr ${__log4sh_secondsWrap} + 1`
-      _lgs__seconds=`expr ${_lgs_seconds} + 86400`
-    fi
-    __log4sh_seconds=`expr ${_lgs__seconds} - ${__LOG4SH_SECONDS}`
-    __log4sh_secondsLast=${__log4sh_seconds}
-    unset _lgs__date _lgs__seconds
-  fi
-}
-
-#/**
-# <s:function group="Log4sh" modifier="private">
-# <entry align="right">
 #   <code>string</code>
 # </entry>
 # <entry>
@@ -424,6 +394,45 @@ _log4sh_mktempDir()
   ${__LOG4SH_DEBUG} "created temporary directory (${_tmpDir})"
   echo ${_tmpDir}
   unset _date _random _tmpDir _tmpPrefix
+}
+
+#/**
+# <s:function group="Log4sh" modifier="private">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>_log4sh_evalSeconds</function></funcdef>
+#       <void />
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     Set the <code>__log4sh_seconds</code> variable to the number of seconds
+#     elapsed since the start of the script.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>tmpDir=`_log4sh_mktempDir`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_updateSeconds()
+{
+  if [ -n "${SECONDS:-}" ]; then
+    __log4sh_seconds=${SECONDS}
+  else
+    _lgs__date=`date '+%H \* 3600 + %M \* 60 + %S'`
+    _lgs__seconds=`eval "expr ${_lgs__date} + ${__log4sh_secondsWrap} \* 86400"`
+    if [ ${_lgs__seconds} -lt ${__log4sh_secondsLast} ]; then
+      __log4sh_secondsWrap=`expr ${__log4sh_secondsWrap} + 1`
+      _lgs__seconds=`expr ${_lgs_seconds} + 86400`
+    fi
+    __log4sh_seconds=`expr ${_lgs__seconds} - ${__LOG4SH_SECONDS}`
+    __log4sh_secondsLast=${__log4sh_seconds}
+    unset _lgs__date _lgs__seconds
+  fi
 }
 
 #-----------------------------------------------------------------------------
@@ -489,12 +498,16 @@ _log4sh_getArrayElement()
   ${__LOG4SH_TRACE} "_lgae__array='${_lgae__array}' _lgae__index='${_lgae__index}'"
 
   _lgae__oldIFS=${IFS} IFS=${__LOG4SH_IFS_ARRAY}
-  set -- junk ${_lgae__array}
+  if [ ${__LOG4SH_WA_SET_NEEDS_EVAL} -eq 0 ]; then
+    set -- junk ${_lgae__array}
+  else
+    eval "set -- junk \"${_lgae__array}\""
+  fi
   IFS=${_lgae__oldIFS}
   ${__LOG4SH_TRACE} "1='${1:-}' 2='${2:-}' 3='${3:-}' ..."
 
   shift ${_lgae__index}
-  echo $1
+  echo "$1"
 
   unset _lgae__array _lgae__index _lgae__oldIFS
 }
@@ -715,10 +728,12 @@ appender_close()
 #*/
 appender_exists()
 {
-  _index=`_log4sh_findArrayElement "${__log4shAppenders}" $1`
-  [ "${_index}" -gt 0 ] && _return=${__LOG4SH_TRUE} || _return=${__LOG4SH_FALSE}
-  unset _index
-  return ${_return}
+  _ae_index=`_log4sh_findArrayElement "${__log4shAppenders}" $1`
+  [ "${_ae_index}" -gt 0 ] \
+    && _ae_return=${__LOG4SH_TRUE} \
+    || _ae_return=${__LOG4SH_FALSE}
+  unset _ae_index
+  return ${_ae_return}
 }
 
 #/**
@@ -742,9 +757,9 @@ appender_exists()
 #*/
 appender_getLayout()
 {
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppenderLayouts" $_index
-  unset _index
+  _agl_index=`_log4sh_findArrayElement "${__log4shAppenders}" $1`
+  _log4sh_getArrayElement "${__log4shAppenderLayouts}" ${_agl_index}
+  unset _agl_index
 }
 
 #/**
@@ -3145,7 +3160,7 @@ logger_popThreadName()
 #*/
 log4sh_cleanup()
 {
-  _log4sh_cleanup ${__LOG4SH_TRAP_EXIT}
+  _log4sh_cleanup 'EXIT'
 }
 
 #/**
@@ -3174,35 +3189,35 @@ log4sh_cleanup()
 #*/
 _log4sh_cleanup()
 {
-  _trap=$1
+  _lc__trap=$1
+  ${__LOG4SH_INFO} "_log4sh_cleanup(): the ${_lc__trap} signal was caught"
 
-  ${__LOG4SH_INFO} "_log4sh_cleanup(): the ${_trap} signal was caught"
+  _lc__restoreTrap=${__LOG4SH_FALSE}
+  _lc__oldTrap=''
 
-  _restoreTrap=${__LOG4SH_FALSE}
-  _oldTrap=''
-
-  # these are the only signals that log4sh traps.  no need to list them all
-  case "${_trap}" in
-    EXIT|${__LOG4SH_TRAP_EXIT}) _signal=0 ;;
-    SIGINT) _signal=2 ;;
+  # match trap to signal value
+  case "${_lc__trap}" in
+    EXIT) _lc__signal=0 ;;
+    INT) _lc__signal=2 ;;
+    TERM) _lc__signal=15 ;;
   esac
 
   # do we possibly need to restore a previous trap?
-  if [ -f "${__log4sh_trapsFile}" -a -s "${__log4sh_trapsFile}" ]; then
+  if [ -r "${__log4sh_trapsFile}" -a -s "${__log4sh_trapsFile}" ]; then
     # yes.  figure out what we need to do
     if [ `grep "^trap -- " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # newer trap command
       ${__LOG4SH_DEBUG} 'newer POSIX trap command'
-      _restoreTrap=${__LOG4SH_TRUE}
-      _oldTrap=`grep "${_trap}$" "${__log4sh_trapsFile}" |\
+      _lc__restoreTrap=${__LOG4SH_TRUE}
+      _lc__oldTrap=`egrep "(${_lc__trap}|${_lc__signal})$" "${__log4sh_trapsFile}" |\
         sed "s/^trap -- '\(.*\)' [A-Z]*$/\1/"`
     elif [ `grep "[0-9]*: " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # older trap command
       ${__LOG4SH_DEBUG} 'older style trap command'
-      _restoreTrap=${__LOG4SH_TRUE}
-      _oldTrap=`grep "^${_signal}: " "${__log4sh_trapsFile}" |\
+      _lc__restoreTrap=${__LOG4SH_TRUE}
+      _lc__oldTrap=`grep "^${_lc__signal}: " "${__log4sh_trapsFile}" |\
         sed 's/^[0-9]*: //'`
     else
       # unrecognized trap output
@@ -3214,27 +3229,23 @@ _log4sh_cleanup()
   rm -fr "${__log4sh_tmpDir}"
 
   # execute the old trap
-  if [ ${_restoreTrap} -eq ${__LOG4SH_TRUE} -a -n "${_oldTrap}" ]; then
-    eval "${_oldTrap}"
+  if [ ${_lc__restoreTrap} -eq ${__LOG4SH_TRUE} -a -n "${_lc__oldTrap}" ]; then
+    ${__LOG4SH_INFO} 'restoring previous trap of same type'
+    eval "${_lc__oldTrap}"
   fi
 
-  # exit cleanly
-  case ${_trap} in
-    EXIT|${__LOG4SH_TRAP_EXIT})
-      _return=${_signal}
-      ;;
-    *)
-      _return=`expr 128 + ${_signal}`
-      # disable the EXIT trap
-      trap EXIT
-      ;;
-  esac
+  # exit for all non-EXIT signals
+  if [ "${_lc__trap}" != 'EXIT' ]; then
+    # disable the EXIT trap
+    trap 0
 
-  # exit if the trap was not the special log4sh-EXIT trap
-  [ "${_trap}" = "${__LOG4SH_TRAP_EXIT}" ] || exit ${_return}
+    # add 127 to signal value and exit
+    _lc__signal=`expr ${_lc__signal} + 127`
+    exit ${_lc__signal}
+  fi
 
-  unset _oldTrap _signal _restoreTrap _trap
-  return ${_return}
+  unset _lc__oldTrap _lc__signal _lc__restoreTrap _lc__trap
+  return
 }
 
 
@@ -3252,7 +3263,8 @@ trap >"${__log4sh_trapsFile}"
 # configure traps
 ${__LOG4SH_INFO} 'setting traps'
 trap '_log4sh_cleanup EXIT' 0
-trap '_log4sh_cleanup SIGINT' 2
+trap '_log4sh_cleanup INT' 2
+trap '_log4sh_cleanup TERM' 15
 
 # prepare the environment for configuration
 log4sh_resetConfiguration
