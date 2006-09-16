@@ -56,6 +56,18 @@ FINISH THE CHANGELOG
 
 Make sure that any remaning changes get put into the CHANGES file.
 
+BUILD THE DOCUMENTATION
+
+We want to have an up-to-date version of the documentation in the release, so
+we'd better build it.
+
+$ pwd
+.../log4sh/source/1.3
+$ make docs
+...
+$ cp -p build/log4sh.html doc
+$ svn ci -m "" doc/log4sh.html
+
 CHECK IN ALL THE CODE
 
 This step is pretty self-explainatory
@@ -67,13 +79,14 @@ $ pwd
 $ ls
 1.2  1.3
 $ svn cp -m "Release 1.3.6" \
-1.3 https://svn.sourceforge.net/svnroot/log4sh/tags/1.3.6
+1.3 https://svn.sourceforge.net/svnroot/log4sh/tags/source/1.3.6
 
 EXPORT THE RELEASE
 
 $ pwd
 .../log4sh/builds
-$ svn export https://svn.sourceforge.net/svnroot/log4sh/tags/1.3.6
+$ svn export \
+https://svn.sourceforge.net/svnroot/log4sh/tags/source/1.3.6 log4sh-1.3.6
 
 CREATE TARBALL
 
@@ -87,6 +100,16 @@ $ md5sum log4sh-1.3.6.tgz >log4sh-1.3.6.tgz.md5
 UPDATE WEBSITE
 
 Again, pretty self-explainatory.
+
+Once that is done, make sure to tag the website so we can go back in time if
+needed.
+
+$ pwd
+.../log4sh
+$ ls
+source  website
+$ svn cp -m "Release 1.3.6" \
+website https://svn.sourceforge.net/svnroot/log4sh/tags/website/20060916
 
 POST TO SOURCEFORGE AND FRESHMEAT
 
