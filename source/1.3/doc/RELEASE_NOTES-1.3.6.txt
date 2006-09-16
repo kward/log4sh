@@ -16,8 +16,11 @@ its configuration reset programmatically.
 
 TESTED PLATFORMS
 
-Cygwin – bash 3.1.17(6); pdksh 5.2.4 Linux – bash 3.00.16(1), 3.1.17(1);
-ksh 1993-12-28 Solaris 10 U2 – /bin/sh; bash 3.00.16(1); ksh M-11/16/88i
+Cygwin – bash 3.1.17(6); pdksh 5.2.4
+
+Linux – bash 3.00.16(1), 3.1.17(1); ksh 1993-12-28
+
+Solaris 10 U2 – /bin/sh; bash 3.00.16(1); ksh M-11/16/88i
 
 NEW FEATURES
 
