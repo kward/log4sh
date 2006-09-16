@@ -1,14 +1,14 @@
-#! /bin/sh 
+#! /bin/sh
 # $Id$
 
-myName=`basename $0`
-myPath=`dirname $0`
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
 
 DEBUG=${DEBUG:+' '}
 DEBUG=${DEBUG:-':'}
 ${DEBUG} echo 'DEBUG output enabled' >&2
 
-TEST_DATA="$0.data"
+TEST_DATA="${MY_NAME}.data"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -38,7 +38,7 @@ oneTimeSetUp()
 {
   # source log4sh
   ${DEBUG} echo "loading log4sh" >&2
-  LOG4SH_CONFIGURATION="$0.log4sh" . ./log4sh
+  LOG4SH_CONFIGURATION="${MY_NAME}.log4sh" . ./log4sh
 }
 
 #------------------------------------------------------------------------------
