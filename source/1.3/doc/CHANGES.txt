@@ -35,8 +35,7 @@ supported shells.
 [kwd] improved all unit tests so they will work under the standard Solaris
 shell [/bin/sh]
 
-[kwd] reworked the trap handler so it works under all supported shells (except
-maybe Cygwin... my Cygwin install is broke at the moment)
+[kwd] reworked the trap handler so it works under all supported shells
 
 [kwd] added workaround for the set builtin as its default behavior is different
 between Bourne based shells and ksh.
