@@ -2,39 +2,20 @@
 # SourceForge
 #
 
-This project is stored on SourceForge as http://sf.net/projects/log4sh.  CVS
-can be accessed using the following information.
+This project is stored on SourceForge as http://sf.net/projects/log4sh. The
+source code can be accessed using the following information.
 
-* Anonymous CVS access
-$ cvs -d :pserver:anonymous@log4sh.cvs.sourceforge.net:/cvsroot/log4sh login
-$ cvs -d :pserver:anonymous@log4sh.cvs.sourceforge.net:/cvsroot/log4sh co -P <modulename>
+* Subversion
+$ svn co https://svn.sourceforge.net/svnroot/log4sh log4sh
 
-* Developer CVS access
-$ cvs -d :ext:<developer>@log4sh.cvs.sourceforge.net:/cvsroot/log4sh co -P <modulename>
-
-CVS may also be browsed via a web browser at
-http://cvs.sourceforge.net/viewcvs.py/log4sh/.
-
-
-CVS is organized as follows
-
-/cvsroot/log4sh
- + CVSROOT
- + source
-   + 1.2
-   + 1.3
-
-
-Other related documentation and links:
-
-Basic Introduction to CS and SourceForge.net Project CVS Services
-  http://sourceforge.net/docman/display_doc.php?docid=14033&group_id=1
+Subversion may also be browsed via a web browser at
+http://svn.sourceforge.net/log4sh
 
 #------------------------------------------------------------------------------
 # Making a release
 #
 
-For these steps, it is assumed we are working with release 1.3.0.
+For these steps, it is assumed we are working with release 1.3.6.
 
 Steps:
 * write release notes
@@ -82,23 +63,26 @@ This step is pretty self-explainatory
 TAG THE RELEASE
 
 $ pwd
-.../log4sh/1.3
-$ cvs tag rel-1-3-0
+.../log4sh/source
+$ ls
+1.2  1.3
+$ svn cp -m "Release 1.3.6" \
+1.3 https://svn.sourceforge.net/svnroot/log4sh/tags/1.3.6
 
 EXPORT THE RELEASE
 
 $ pwd
 .../log4sh/builds
-$ cvs -d :ext:sfsetse@log4sh.cvs.sourceforge.net:/cvsroot/log4sh export -r rel-1-3-0 -d log4sh-1.3.0 1.3
+$ svn export https://svn.sourceforge.net/svnroot/log4sh/tags/1.3.6
 
 CREATE TARBALL
 
-$ tar cfz ../releases/log4sh-1.3.0.tgz log4sh-1.3.0
+$ tar cfz ../releases/log4sh-1.3.6.tgz log4sh-1.3.6
 
 MD5SUM THE TARBALL
 
 $ cd ../releases
-$ md5sum log4sh-1.3.0.tgz >log4sh-1.3.0.tgz.md5
+$ md5sum log4sh-1.3.6.tgz >log4sh-1.3.6.tgz.md5
 
 UPDATE WEBSITE
 
