@@ -41,8 +41,8 @@ loadLog4sh()
 
 configLog4sh()
 {
-  # close the default console appender
-  appender_close stdout
+  # reset the log4sh configuration
+  log4sh_resetConfiguration
 
   # setup the default logging level to INFO
   logger_setLevel INFO
@@ -51,12 +51,14 @@ configLog4sh()
   logger_addAppender mySTDERR
   appender_setType mySTDERR FileAppender
   appender_file_setFile mySTDERR STDERR
+  appender_activateOptions mySTDERR
 
   # add a file appender at the DEBUG level with the default layout
   logger_addAppender mySimple
   appender_setLevel mySimple DEBUG
   appender_setType mySimple FileAppender
   appender_file_setFile mySimple log4sh-simple.log
+  appender_activateOptions mySimple
 
   # add file appender at the default level with a Pattern layout
   logger_addAppender myPattern
@@ -64,11 +66,13 @@ configLog4sh()
   appender_file_setFile myPattern log4sh-pattern.log
   appender_setLayout myPattern PatternLayout
   appender_setPattern myPattern '%d [%p] (%F) - %m%n'
+  appender_activateOptions myPattern
 
   # add a syslog appender at the default level with a facility of local4
   logger_addAppenderWithPattern mySyslog '[%p] (%F) - %m%n'
   appender_setType mySyslog SyslogAppender
   appender_syslog_setFacility mySyslog local4
+  appender_activateOptions mySyslog
 }
 
 #-----------------------------------------------------------------------------
