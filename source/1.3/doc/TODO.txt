@@ -1,7 +1,5 @@
 # $Id$
 
-- implement SECONDS for non-bash shells
-
 - look into traps. exit codes seem to be lost
 
 - enable passing the configuration filename on the source line instead of
@@ -25,8 +23,6 @@ file is not renamed until the first message is logged some time after midnight.
 - validate that the return_test shell test works under cygwin and solaris. if
   so, remove the "unset" stuff before returns as they aren't needed
 
-- replace usage of __log4sh_tmpDir with a call to _log4sh_getTempDir
-
 - make logger level's case insensitive??
 
 - support netcat for telnet
@@ -39,8 +35,6 @@ SyslogAppender
   SyslogHost
 
 - add more error checking on the appender_*set* functions.  see smtp_setSubject
-
-- add get*ByName functions
 
 - try a `wc -l` in the _log4sh_getArrayLength function
 
@@ -77,25 +71,3 @@ False
 
 - research fanout - writing to multiple locations
 http://linuxgazette.net/122/TWDT.html#smith
-
-#------------------------------------------------------------------------------
-# completed todos
-#
-
-- look into something like 'trap ". $HOME/.atexit" 0' for use when log4sh
-closes to remove temporary files/dirs
-
-TmpBase=${TMPDIR:=/tmp}/myscript.$$
-mkdir "$TmpBase" || exit 1	# create directory
-chmod 700 "$TmpBase" || exit 1	# restrict access
-
-# Remove all temporary files after program termination
-# or at receiption of a signal:
-trap 'rm -rf "$TmpBase" >/dev/null 2>&1' 0
-trap "exit 2" 1 2 3 15
-
-# The following files will be remove automatically:
-input=$TmpBase/input
-output=$TmpBase/output
-#...
-
