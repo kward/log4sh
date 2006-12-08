@@ -170,7 +170,8 @@ __log4sh_secondsWrap=0
 #*/
 _log4sh_log()
 {
-  _ll__level=$1 shift
+  _ll__level=$1
+  shift
   if [ -z "${LOG4SH_DEBUG_FILE:-}" ]; then
     echo "log4sh:${_ll__level} $@" >&2
   else
