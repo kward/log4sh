@@ -73,5 +73,3 @@ False
 
 - research fanout - writing to multiple locations
 http://linuxgazette.net/122/TWDT.html#smith
-
-- validate that an appender named 'log' works
