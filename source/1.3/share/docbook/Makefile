@@ -11,16 +11,16 @@ XSLT=docbook-xsl-1.71.1.tar.bz2
 all: extract-xml extract-xslt
 
 extract-xml:
-	if test ! -d xml/4.4; then \
-	  mkdir -p xml/4.4; \
-	  unzip -qq $(DIST)/$(XML) -d xml/4.4; \
+	if test ! -d xml/4.5; then \
+	  mkdir -p xml/4.5; \
+	  unzip -qq $(DIST)/$(XML) -d xml/4.5; \
 	fi
 
 extract-xslt:
-	if test ! -d docbook-xsl/1.71.0; then \
+	if test ! -d docbook-xsl/1.71.1; then \
 	  mkdir -p docbook-xsl; \
 	  bzip2 -dc $(DIST)/$(XSLT) |tar xf -; \
-	  mv docbook-xsl-1.71.0 docbook-xsl/1.71.0; \
+	  mv docbook-xsl-1.71.1 docbook-xsl/1.71.1; \
 	fi
 
 clean:
