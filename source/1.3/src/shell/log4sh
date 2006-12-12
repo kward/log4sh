@@ -2008,8 +2008,8 @@ appender_syslog_getFacility()
 #*/
 appender_syslog_setFacility()
 {
-  assf_appender=$1
-  assf_facility=$2
+  assf_appender=${1:-}
+  assf_facility=${2:-}
 
   if [ $# -ne 2 ]; then
     _log4sh_error 'appender_syslog_setFacility(): missing attributes'
