@@ -5,15 +5,15 @@
 
 CWD=`pwd`
 DIST=$(CWD)/../dist
-XML=docbook-xml-4.5.zip
+XML=docbook-xml-4.4.zip
 XSLT=docbook-xsl-1.71.1.tar.bz2
 
 all: extract-xml extract-xslt
 
 extract-xml:
-	if test ! -d xml/4.5; then \
-	  mkdir -p xml/4.5; \
-	  unzip -qq $(DIST)/$(XML) -d xml/4.5; \
+	if test ! -d xml/4.4; then \
+	  mkdir -p xml/4.4; \
+	  unzip -qq $(DIST)/$(XML) -d xml/4.4; \
 	fi
 
 extract-xslt:
