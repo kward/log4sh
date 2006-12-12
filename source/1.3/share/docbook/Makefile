@@ -5,8 +5,8 @@
 
 CWD=`pwd`
 DIST=$(CWD)/../dist
-XML=docbook-xml-4.4.zip
-XSLT=docbook-xsl-1.71.0.tar.bz2
+XML=docbook-xml-4.5.zip
+XSLT=docbook-xsl-1.71.1.tar.bz2
 
 all: extract-xml extract-xslt
 
