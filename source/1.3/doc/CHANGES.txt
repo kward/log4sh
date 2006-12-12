@@ -4,6 +4,17 @@ Changes with 1.3.7
 
 [kwd] bug# 1611574; fixed problem causing 'unbound variable' errors
 
+[kwd] shUnit: fixed problem where some of the unit test functions were
+reportingerrors like '/bin/sh: Can't open setUp'
+
+[kwd] the default /bin/sh shell on my notebook is now dash (I'm running Ubuntu
+Edgy currently), so adding that to the list of supported shells.
+
+[kwd] fixed error checking for appender_syslog_setFacility() function. the
+shell canceled things before the error checking could detect why.
+
+[kwd] bug# 1614338; fixed issue with the SyslogAppender not logging properly
+
 
 Changes with 1.3.6
 
