@@ -1,0 +1,157 @@
+#! /bin/sh
+# $Id: testAsciiCharset 303 2006-09-16 21:27:27Z sfsetse $
+# vim:sts=2
+#
+# This unit test tests the general logging functionality of Syslog. It sends
+# all logging to only a single facility to prevent spamming of system logs
+# (something that happens to be a side effect of running this test). This test
+# expects that syslog has been configured to write its output to the
+# /var/log/log4sh.log logfile so that this file can be parsed.
+#
+# Sample syslog.conf entry. Note, one should *not* add a '-' char before the
+# filename to enable buffering (available only with certain Syslog variants).
+#
+# local4.* /var/log/log4sh.log
+#
+# Possible issues:
+# * race conditions
+# * different Syslog variants produce different output
+#
+
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
+
+DEBUG=${DEBUG:+' '}
+DEBUG=${DEBUG:-':'}
+${DEBUG} echo 'DEBUG output enabled' >&2
+
+APP_NAME='mySyslog'
+APP_SYSLOG_FACILITY='local4'
+
+BACKOFF_TIMES='1 2 4'
+TAIL_SAMPLE_SIZE=25
+TEST_DATA='priorityMatrix.data'
+TEST_LOGFILE='/var/log/log4sh.log'
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+testSyslogLogfilePresent()
+{
+  # check for logfile presence
+  assertTrue \
+    "unable to read from the test syslog output file (${TEST_LOGFILE})." \
+    "[ -r \"${TEST_LOGFILE}\" ]"
+}
+
+#
+# XXX put test in to see if last random number generated is same as this one.
+# if so, redo the generation with a backoff.
+#
+getRandom()
+{
+  if [ -n "${RANDOM:-}" ]; then
+    # $RANDOM works
+    _random=${RANDOM}${RANDOM}${RANDOM}$$
+  else
+    # $RANDOM doesn't work
+    #sleep 1  # enough time must pass to guarantee different randomness
+    _date=`date '+%H%M%S'`
+    _random=`expr ${_date} \* $$`
+  fi
+  ${DEBUG} echo "DEBUG: _random=${_random}" >&2
+  echo ${_random}
+  unset _random
+}
+
+testPriorityMatrix()
+{
+  PRIORITY_NAMES='TRACE DEBUG INFO WARN ERROR FATAL'
+  PRIORITY_POS='1 2 3 4 5 6'
+  PRIORITY_DATA="priorityMatrix.data"
+
+  # configure log4sh (appender_activateOptions called later)
+  logger_addAppender ${APP_NAME}
+  appender_setType ${APP_NAME} SyslogAppender
+  appender_syslog_setFacility ${APP_NAME} ${APP_SYSLOG_FACILITY}
+
+  # save stdin, and redirect it from a file
+  exec 9<&0 <"${PRIORITY_DATA}"
+  while read priority outputs; do
+    # ignore comment lines or blank lines
+    echo "${priority}" |egrep -v '^(#|$)' >/dev/null || continue
+
+    echo "  testing appender priority '${priority}'"
+    appender_setLevel ${APP_NAME} ${priority}
+    appender_activateOptions ${APP_NAME}
+
+    # the number of outputs must match the number of priority names and
+    # positions for this to work
+    for pos in ${PRIORITY_POS}; do
+      testPriority=`echo ${PRIORITY_NAMES} |cut -d' ' -f${pos}`
+      shouldOutput=`echo ${outputs} |cut -d' ' -f${pos}`
+
+      ${DEBUG} echo "DEBUG: generating '${testPriority}' message" >&2
+      random=`getRandom`
+      log ${testPriority} "${MY_NAME} test message - ${random}"
+
+      # do a timed backoff to wait for the result -- syslog might take a bit
+      for backoff in ${BACKOFF_TIMES}; do
+	# skip the actual test if there is no logfile to tail at
+        [ -r "${TEST_LOGFILE}" ] || continue
+
+        [ ${backoff} -eq 2 ] \
+          && echo "    waiting for possible '${testPriority}' message..."
+        sleep ${backoff}
+        result=`tail -n ${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |grep ${random}`
+        [ -n "${result}" ] && break
+      done
+      ${DEBUG} echo "DEBUG: result=${result}" >&2
+
+      if [ ${shouldOutput} -eq 1 ]; then
+        assertTrue \
+          "'${priority}' priority appender did not emit a '${testPriority}' message" \
+          "[ -n \"${result}\" ]"
+      else
+        assertFalse \
+          "'${priority}' priority appender emitted a '${testPriority}' message" \
+          "[ -n \"${result}\" ]"
+      fi
+    done
+  done
+  # restore stdin
+  exec 0<&9 9<&-
+}
+
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  # source log4sh
+  ${DEBUG} echo "loading log4sh" >&2
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+}
+
+setUp()
+{
+  # reset log4sh
+  log4sh_resetConfiguration
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+suite()
+{
+  suite_addTest testSyslogLogfilePresent
+  suite_addTest testPriorityMatrix
+}
+
+# load and run shUnit
+${DEBUG} echo "loading shUnit" >&2
+. ./shunit
