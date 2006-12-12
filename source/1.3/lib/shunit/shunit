@@ -1,7 +1,7 @@
 # $Id$
 # vim:syntax=sh:sts=2
 #
-# shUnit 1.0.0
+# shUnit 1.0.2
 # Shell Unit Test Framework
 #
 # written by Kate Ward <kate.ward@forestent.com>
@@ -263,8 +263,11 @@ _shunit_mktempFunc()
 {
   for _su__func in oneTimeSetUp oneTimeTearDown setUp tearDown suite; do
     _su__file="${__shunit_tmpDir}/${_su__func}"
-    echo ':' >"${_su__file}"
-    chmod +x ${_su__file}
+    cat <<EOF >"${_su__file}"
+#! /bin/sh
+exit 0
+EOF
+    chmod +x "${_su__file}"
   done
 }
 
