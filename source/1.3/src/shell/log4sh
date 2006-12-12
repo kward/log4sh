@@ -1409,7 +1409,7 @@ EOF
     ${__LOG4SH_LEVEL_FATAL_STR}) __tag='emerg' ;;
     ${__LOG4SH_LEVEL_TRACE_STR}) __tag='debug' ;;
   esac
-  ( exec logger -p "\${__facility}.\${__tag}" -t "${__log4sh_filename}[$$]" "\${_la_layout}" 2>/dev/null )
+  ( exec logger -p "\${__facility}.\${__tag}" -t "${__log4sh_filename}[$$]" "\${__layout}" 2>/dev/null )
   unset __facility __tag
 EOF
       ;;
