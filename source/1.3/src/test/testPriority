@@ -1,5 +1,6 @@
 #! /bin/sh
 # $Id$
+# vim:sts=2
 
 MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
@@ -9,16 +10,17 @@ DEBUG=${DEBUG:-':'}
 ${DEBUG} echo 'DEBUG output enabled' >&2
 
 APP_NAME='stdout'
-PRIORITY_NAMES='TRACE DEBUG INFO WARN ERROR FATAL'
-PRIORITY_POS='1 2 3 4 5 6'
-TEST_DATA="${MY_NAME}.data"
+TEST_DATA="priorityMatrix.data"
 
 #------------------------------------------------------------------------------
 # suite tests
 #
 
-testPriority()
+testPriorityMatrix()
 {
+  PRIORITY_NAMES='TRACE DEBUG INFO WARN ERROR FATAL'
+  PRIORITY_POS='1 2 3 4 5 6'
+
   # save stdin, and redirect it from a file
   exec 9<&0 <"${TEST_DATA}"
   while read priority outputs; do
@@ -71,7 +73,7 @@ oneTimeSetUp()
 
 suite()
 {
-  suite_addTest testPriority
+  suite_addTest testPriorityMatrix
 }
 
 # load and run shUnit
