@@ -28,6 +28,11 @@ duplication in the unit tests themselves.
 [kwd] fixed bug where the SMTP subject was not being set properly. (Credits to
 Mickaël Canévet for pointing this out)
 
+[kwd] added initial ability to specify paths for command alternates. currently,
+only nc (netcat) is supported to enable remote syslog logging.
+
+[kwd] remote syslog logging now works. set using appender_syslog_setHost().
+
 -- Changes with shUnit 1.0.2
 
 [kwd] fixed problem where some of the unit test functions were reportingerrors

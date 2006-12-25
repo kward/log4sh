@@ -140,6 +140,8 @@ JUnit
   http://www.junit.org
 log4j
   http://logging.apache.org
+Introduction to the Syslog Protocol
+  http://www.monitorware.com/Common/en/Articles/syslog-described.php
 The BSD syslog Protocol
   http://www.ietf.org/rfc/rfc3164.txt
 
