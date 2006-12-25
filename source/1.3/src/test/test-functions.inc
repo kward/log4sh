@@ -1,4 +1,5 @@
 # $Id$
+# vim:syntax=sh:sts=2
 
 # configure debugging. set the DEBUG environment variable to any
 # non-empty value to enable debug output, or TRACE to enable trace
@@ -30,9 +31,9 @@ tf_generateRandom()
     if [ -n "${RANDOM:-}" ]; then
       # $RANDOM works
       tfgr_random=${RANDOM}${RANDOM}${RANDOM}$$
+    elif [ -r '/dev/urandom' ]; then
+      tfgr_random=`od -vAn -N4 -tu4 </dev/urandom`
     else
-      # $RANDOM doesn't work
-      #sleep 1  # enough time must pass to guarantee different randomness
       tfgr_date=`date '+%H%M%S'`
       tfgr_random=`expr ${tfgr_date} \* $$`
       unset tfgr_date
@@ -49,7 +50,7 @@ tf_generateRandom()
 # blank line.
 tf_getDataSect()
 {
-  tf_sgrep "[$1]" "$2" |sed '1d'
+  tf_sgrep "\\[$1\\]" "$2" |sed '1d'
 }
 
 # this function greps a section from a file. a section is defined as a group of
