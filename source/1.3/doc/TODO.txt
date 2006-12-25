@@ -1,5 +1,8 @@
 # $Id$
 
+- check whether the deprecated syslog facility names (security) or level names
+(error, panic, warn) must not be used
+
 - implement line number conversion character (where possible)
 
 - look into traps. exit codes seem to be lost
