@@ -29,22 +29,24 @@ $ xsltproc shelldoc.xslt log4sh.xml |xmllint -noblanks -
     <xsl:for-each select="//s:function[generate-id(.)=generate-id(key('groups', @group)[1])]">
       <xsl:sort select="@group" />
 
-      <section><title><xsl:value-of select="@group"/></title>
-      <table><title><xsl:value-of select="@group"/></title>
-        <tgroup cols="2"><tbody>
-        <xsl:for-each select="key('groups', @group)">
-          <xsl:sort select="entry/funcsynopsis/funcprototype/funcdef/function" />
-          <xsl:choose>
-            <xsl:when test="@modifier = 'public'">
-              <row valign="top">
-                <xsl:copy-of select="entry" />
-                <!--<xsl:apply-templates select="entry" />-->
-              </row>
-            </xsl:when>
-          </xsl:choose>
-        </xsl:for-each>
-        </tbody></tgroup>
-      </table>
+      <section>
+        <title><xsl:value-of select="@group"/></title>
+        <table>
+	  <title><xsl:value-of select="@group"/></title>
+          <tgroup cols="2"><tbody>
+          <xsl:for-each select="key('groups', @group)">
+            <xsl:sort select="entry/funcsynopsis/funcprototype/funcdef/function" />
+            <xsl:choose>
+              <xsl:when test="@modifier = 'public'">
+                <row valign="top">
+                  <xsl:copy-of select="entry" />
+                  <!--<xsl:apply-templates select="entry" />-->
+                </row>
+              </xsl:when>
+            </xsl:choose>
+          </xsl:for-each>
+          </tbody></tgroup>
+        </table>
       </section>
     </xsl:for-each>
     </chapter>
