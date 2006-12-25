@@ -60,6 +60,8 @@ assertEquals()
     _shunit_testFailed "${_su_message}"
     return ${__SHUNIT_FALSE}
   fi
+
+  unset _su_message _su_expected _su_actual
 }
 
 assertNull()
@@ -79,6 +81,8 @@ assertNull()
     _shunit_testFailed "${_su_message}"
     return ${__SHUNIT_FALSE}
   fi
+
+  unset _su_message _su_value _su_value2
 }
 
 assertNotNull()
@@ -98,16 +102,18 @@ assertNotNull()
     _shunit_testFailed "${_su_message}"
     return ${__SHUNIT_FALSE}
   fi
+
+  unset _su_message _su_value _su_value2
 }
 
 assertSame()
 {
-  :
+  failNotEquals "$@"
 }
 
 assertNotSame()
 {
-  :
+  assertEquals "$@"
 }
 
 assertTrue()
@@ -127,6 +133,8 @@ assertTrue()
     _shunit_testFailed "${_su_message}"
     return ${__SHUNIT_FALSE}
   fi
+
+  unset _su_message _su_condition
 }
 
 assertFalse()
@@ -146,11 +154,44 @@ assertFalse()
     _shunit_testFailed "${_su_message}"
     return ${__SHUNIT_FALSE}
   fi
+
+  unset _su_message _su_condition
 }
 
 fail()
 {
-  :
+  _shunit_testFailed
+}
+
+failNotEquals()
+{
+  _su_message=''
+  if [ $# -eq 3 ]; then
+    _su_message=$1
+    shift
+  fi
+  _su_expected=$1
+  _su_actual=$2
+
+  if [ "${_su_expected}" != "${_su_actual}" ]; then
+    _shunit_testPassed
+    return ${__SHUNIT_TRUE}
+  else
+    _shunit_testFailed "${_su_message}"
+    return ${__SHUNIT_FALSE}
+  fi
+
+  unset _su_message _su_expected _su_actual
+}
+
+failNotSame()
+{
+  assertEquals "$@"
+}
+
+failSame()
+{
+  failNotEquals "$@"
 }
 
 suite_addTest()
@@ -158,6 +199,8 @@ suite_addTest()
   _su_func=$1
 
   __shunit_suite="${__shunit_suite:+${__shunit_suite} }${_su_func}"
+
+  unset _su_func
 }
 
 #------------------------------------------------------------------------------
@@ -204,13 +247,17 @@ _shunit_execSuite()
     # execute the per-test tear-down function
     tearDown
   done
+
+  unset _su_func
 }
 
 _shunit_functionExists()
 {
   _su__func=$1
   type ${_su__func} 2>/dev/null |grep "is a function$" >/dev/null
-  return $?
+  _su__return=$?
+  unset _su__func
+  return ${_su__return}
 }
 
 _shunit_generateReport()
@@ -231,6 +278,8 @@ tests failed: ${__shunit_testsFailed}
 tests total:  ${__shunit_testsTotal}
 success rate: ${_su__success}%
 EOF
+
+  unset _su__success
 }
 
 _shunit_mktempDir()
@@ -269,6 +318,8 @@ exit 0
 EOF
     chmod +x "${_su__file}"
   done
+
+  unset _su__file
 }
 
 _shunit_testPassed()
@@ -285,7 +336,8 @@ _shunit_testFailed()
   __shunit_testsTotal=`expr ${__shunit_testsTotal} + 1`
 
   [ -z "${_su__msg:-}" ] && _su__msg='failed'
-  echo "${__SHUNIT_ASSERT_MSG_PREFIX} ${_su__msg}"
+  echo "${__SHUNIT_ASSERT_MSG_PREFIX} ${_su__msg}" >&2
+  unset _su__msg
 }
 
 #------------------------------------------------------------------------------
