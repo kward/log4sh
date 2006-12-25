@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+$Id$
+vim: softtabstop=2 shiftwidth=2
+-->
+
+<!-- =========================================================================
+Advanced Usage Guide
+-->
+<chapter id="advancedusage"><title>Advanced Usage</title>
+  <para>This chapter is dedicated to some more advanced usage of log4sh. It is meant to demonstrate some functionality that might not normally be understood.</para>
+
+  <section id="advancedusage-remotesyslog"><title>Remote Syslog Logging</title>
+    <para>Logging to a remote syslog host is incredibly easy with log4sh, but it is not functionality that is normally exposed to a shell user. The <command>logger</command> command, which is used for local syslog logging, unfortunately does not support logging to a remote syslog host. As such, a couple of choices are available to enable logging to remote hosts.</para>
+
+    <para>Choice #1 -- reconfigure the <command>syslogd</command> daemon</para>
+
+    <para>One can alter the configuration of the local syslog daemon, and request that certain types of logging information be sent to remote hosts. This choice requires no extra software to be installed on the machine, but it does require a reconfiguration of the system-wide syslog daemon. As the syslog daemon is different between operating systems, and even between OS releases, no attempt will be made to describe how to do this in this document. Read the respective <command>man</command> page for your particular system to learn what is required.</para>
+
+    <para>Choice #2 -- install <command>nc</command> (netcat) command -- <emphasis>recommended</emphasis></para>
+
+    <para>The <command>nc</command> (netcat) command has the ability to generate the UDP packet to port 514 that is required for remote syslog logging. If you have this command installed, you can tell log4sh that this <emphasis>alternative</emphasis> command exists, and then you will be able to use the <function>appender_syslog_setHost()</function> function as you would expect.</para>
+
+    <para>The examples below show what a minimum properties file or a minimum script should look like that do remote syslog logging.</para>
+
+    <example id="alternative-nc-config"><title>Sample log4sh properties file demonstrating remote syslog logging</title>
+      <programlisting><![CDATA[
+#
+# log4sh example: remote syslog logging
+#
+
+# Set the 'nc' alternative command to enable remote syslog logging
+log4sh.alternative.nc = /bin/nc
+
+ Set root logger level to INFO and its only appender to mySyslog
+log4sh.rootLogger=INFO, mySyslog
+
+# mySyslog is set to be a SyslogAppender.
+log4sh.appender.mySyslog = SyslogAppender
+log4sh.appender.mySyslog.SyslogHost = somehost
+]]></programlisting>
+    </example>
+
+    <example id="alternative-nc-runtime"><title>Sample shell script demonstrating remote syslog logging</title>
+      <programlisting><![CDATA[
+#! /bin/sh
+#
+# log4sh example: remote syslog logging
+#
+
+# load log4sh (disabling properties file warning) and clear the default
+# configuration
+LOG4SH_CONFIGURATION='none' . ./log4sh
+log4sh_resetConfiguration
+
+# set alternative 'nc' command
+log4sh_setAlternative nc /bin/nc
+
+# add and configure a SyslogAppender that logs to a remote host
+logger_addAppender mySyslog
+appender_setType mySyslog SyslogAppender
+appender_syslog_setFacility mySyslog local4
+appender_syslog_setHost mySyslog somehost
+appender_activateOptions mySyslog
+
+# say Hello to the world
+logger_info 'Hello, world'
+]]></programlisting>
+    </example>
+  </section>
+</chapter>
