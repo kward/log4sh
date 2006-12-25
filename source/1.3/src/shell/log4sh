@@ -57,6 +57,8 @@ __LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE=10485760
 __LOG4SH_TYPE_SMTP='SMTPAppender'
 __LOG4SH_TYPE_SYSLOG='SyslogAppender'
 __LOG4SH_TYPE_SYSLOG_FACILITIES=' auth authpriv cron daemon ftp kern lpr mail news syslog user uucp local0 local1 local2 local3 local4 local5 local6 local7 '
+# append list of deprecated facility names
+__LOG4SH_TYPE_SYSLOG_FACILITIES="${__LOG4SH_TYPE_SYSLOG_FACILITIES} security "
 __LOG4SH_TYPE_SYSLOG_FACILITY='user'
 
 __LOG4SH_LAYOUT_HTML='HTMLLayout'
@@ -104,11 +106,10 @@ __LOG4SH_SECONDS=`eval "expr \`date '+%H \* 3600 + %M \* 60 + %S'\`"`
 __LOG4SH_WA_SET_NEEDS_EVAL=$?
 
 # configure log4sh debugging. set the LOG4SH_INFO environment variable to any
-# non-empty value to enable info output, LOG4SH_DEBUG enable debugging, or
-# LOG4SH_TRACE to enable tracing. log4sh ERROR and above messages are always
-# printed. to send the debug output to a file, set the LOG4SH_DEBUG_FILE with
-# the filename you want debug output to be written to.
-
+# non-empty value to enable info output, LOG4SH_DEBUG enable debug output, or
+# LOG4SH_TRACE to enable trace output. log4sh ERROR and above messages are
+# always printed. to send the debug output to a file, set the LOG4SH_DEBUG_FILE
+# with the filename you want debug output to be written to.
 __LOG4SH_TRACE=${LOG4SH_TRACE:+'_log4sh_trace '}
 __LOG4SH_TRACE=${__LOG4SH_TRACE:-':'}
 [ -n "${LOG4SH_TRACE:-}" ] && LOG4SH_DEBUG=1
@@ -376,7 +377,7 @@ _log4sh_mktempDir()
   # try the standard mktemp function
   ( exec mktemp -dqt ${_tmpPrefix}.XXXXXX 2>/dev/null ) && return
 
-  # the standard mktemp didn't work.  doing our own.
+  # the standard mktemp didn't work. doing our own.
   if [ -n "${RANDOM:-}" ]; then
     # $RANDOM works
     _random=${RANDOM}${RANDOM}${RANDOM}$$
@@ -511,6 +512,7 @@ _log4sh_getArrayElement()
   echo "$1"
 
   unset _lgae__array _lgae__index _lgae__oldIFS
+  return ${__LOG4SH_TRUE}
 }
 
 #/**
@@ -603,7 +605,7 @@ _log4sh_peekStack()
 #       <paramdef>string[] <parameter>array</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Remove the top-most element from a stack.  This command takes a
+#   <para>Remove the top-most element from a stack. This command takes a
 #   normal log4sh string array as input, but treats it as though it were a
 #   stack.</para>
 #   <funcsynopsis>
@@ -633,7 +635,7 @@ _log4sh_popStack()
 #       <paramdef>string <parameter>element</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Add a new element to the top of a stack.  This command takes a normal
+#   <para>Add a new element to the top of a stack. This command takes a normal
 #   log4sh string array as input, but treats it as though it were a
 #   stack.</para>
 #   <funcsynopsis>
@@ -694,7 +696,7 @@ appender_activateOptions()
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Disable any further logging via an appender.  Once closed, the
+#   <para>Disable any further logging via an appender. Once closed, the
 #   appender can be reopened by setting it to any logging Level (e.g.
 #   INFO).</para>
 #   <funcsynopsis>
@@ -1164,12 +1166,11 @@ appender_getAppenderType()
 #*/
 appender_setType()
 {
-  ast_appender="$1"
-  ast_type="$2"
+  ast_appender=$1
+  ast_type=$2
 
   # XXX need to verify types
 
-  # XXX need to do any cleanup when changing a previously defined appender??
   _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${ast_appender}`
   __log4shAppenderTypes=`_log4sh_setArrayElement \
     "${__log4shAppenderTypes}" ${_index} "${ast_type}"`
@@ -1273,7 +1274,7 @@ EOF
   . "${_ac__inc}"
 
   # call the activateOptions function
-  # XXX will be removed in log4sh-1.4.x
+  # XXX will be removed in log4sh-1.5.x
   appender_activateOptions ${_ac__appender}
 }
 
@@ -1396,7 +1397,7 @@ EOF
       cat <<EOF
   __smtpTo='`_appender_smtp_getToByIndex ${__index}`'
   __smtpSubject='`_appender_smtp_getSubjectByIndex ${__index}`'
-  echo \"${__layout}\" |mail -s \"\${__smtpSubject}\" \${__smtpTo}
+  echo \"\${__layout}\" |mail -s \"\${__smtpSubject}\" \${__smtpTo}
   unset __smtpTo __smtpSubject
 EOF
       ;;
@@ -1406,10 +1407,15 @@ EOF
   __facility='`_appender_syslog_getFacilityByIndex ${__index}`'
   __tag="\${_la_level}"
   case "\${__tag}" in
-    ${__LOG4SH_LEVEL_FATAL_STR}) __tag='emerg' ;;
+    ${__LOG4SH_LEVEL_FATAL_STR}) __tag='panic' ;;  # deprecated -- now emerg
+    ${__LOG4SH_LEVEL_ERROR_STR}) __tag='error' ;;  # deprecated -- now err
+    ${__LOG4SH_LEVEL_WARN_STR}) __tag='warn' ;;    # deprecated -- now warning
+    ${__LOG4SH_LEVEL_INFO_STR}) __tag='info' ;;
+    ${__LOG4SH_LEVEL_DEBUG_STR}) __tag='debug' ;;
     ${__LOG4SH_LEVEL_TRACE_STR}) __tag='debug' ;;
   esac
-  ( exec logger -p "\${__facility}.\${__tag}" -t "${__log4sh_filename}[$$]" "\${__layout}" 2>/dev/null )
+  ( exec logger -p "\${__facility}.\${__tag}" -t "${__log4sh_filename}[$$]" \
+      "\${__layout}" 2>/dev/null )
   unset __facility __tag
 EOF
       ;;
@@ -1852,25 +1858,30 @@ appender_smtp_getSubject()
 #*/
 appender_smtp_setSubject()
 {
-  asss_appender=$1
-  asss_subject=$2
+  asss_appender=${1:-}
+  asss_subject=${2:-}
 
-  # set the Subject
-  _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asss_appender}`
-  if [ ${_index} -gt 0 ]; then
-    __log4shAppender_smtp_subjects=`_log4sh_setArrayElement \
-      "${__log4shAppender_smtp_subjects}" ${_index} "${asss_subject}"`
-    _return=${__LOG4SH_TRUE}
-  else
-    _log4sh_error "could not set Subject for appender (${asss_appender})"
-    _return=${__LOG4SH_FALSE}
+  if [ $# -ne 2 ]; then
+    _log4sh_error 'appender_smtp_setSubject(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
   fi
 
-  # resource the appender
+  # set the Subject
+  asss_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asss_appender}`
+  if [ ${asss_index} -gt 0 ]; then
+    __log4shAppender_smtp_subjects=`_log4sh_setArrayElement \
+      "${__log4shAppender_smtp_subjects}" ${asss_index} "${asss_subject}"`
+    __log4sh_return=${__LOG4SH_TRUE}
+  else
+    _log4sh_error "could not set Subject for appender (${asss_appender})"
+    __log4sh_return=${__LOG4SH_FALSE}
+  fi
+
+  # re-source the appender
   _appender_cache ${asss_appender}
 
-  unset asss_appender asss_subject _index
-  return ${_return}
+  unset asss_appender asss_subject asss_index
+  return ${__log4sh_return}
 }
 
 #/**
@@ -1981,9 +1992,17 @@ appender_getSyslogFacility()
 #*/
 appender_syslog_getFacility()
 {
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppender_syslog_facilities" $_index
-  unset _index
+  asgf_appender=${1:-}
+
+  if [ $# -ne 1 ]; then
+    _log4sh_error 'appender_syslog_getFacility(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+
+  asgf_index=`_log4sh_findArrayElement "$__log4shAppenders" ${asgf_appender}`
+  _log4sh_getArrayElement "${__log4shAppender_syslog_facilities}" ${asgf_index}
+
+  unset asgf_appender asgf_index
 }
 
 #/**
@@ -2012,28 +2031,29 @@ appender_syslog_setFacility()
   assf_facility=${2:-}
 
   if [ $# -ne 2 ]; then
-    _log4sh_error 'appender_syslog_setFacility(): missing attributes'
+    _log4sh_error 'appender_syslog_setFacility(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
   fi
 
   # check for valid facility
-  echo ${__LOG4SH_TYPE_SYSLOG_FACILITIES} |grep " ${assf_facility} " >/dev/null
+  echo "${__LOG4SH_TYPE_SYSLOG_FACILITIES}" |grep " ${assf_facility} " >/dev/null
   if [ $? -ne 0 ]; then
     # the facility is not valid
-    _log4sh_error "[${assf_facility}] is an unknown syslog facility.  Defaulting to [USER]."
+    _log4sh_error "[${assf_facility}] is an unknown syslog facility. Defaulting to [user]."
     assf_facility='user'
   fi
 
   # set appender facility
   assf_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${assf_appender}`
-  # TODO: put check for valid _index here
+  # TODO: put check for valid index here
   __log4shAppender_syslog_facilities=`_log4sh_setArrayElement \
     "${__log4shAppender_syslog_facilities}" ${assf_index} "${assf_facility}"`
 
-  # resource the appender
+  # re-source the appender
   _appender_cache ${assf_appender}
 
   unset assf_appender assf_facility assf_index
+  return ${__LOG4SH_TRUE}
 }
 
 #/**
@@ -2085,10 +2105,29 @@ appender_setSyslogFacility()
 # </entry>
 # </s:function>
 #*/
-# XXX This function needs to be implemented
 appender_syslog_getHost()
 {
-  return $__LOG4SH_TRUE
+  asgh_appender=${1:-}
+
+  if [ $# -ne 1 ]; then
+    _log4sh_error 'appender_syslog_getHost(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+
+  asgh_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asgh_appender}`
+  # TODO: put check for valid index here
+  asgh_host=`_log4sh_getArrayElement \
+      "${__log4shAppender_syslog_hosts}" ${asgh_index}`
+  __log4sh_return=$?
+
+  if [ "${asgh_host}" != "${__LOG4SH_NULL}" ]; then
+    echo "${asgh_host}"
+  else
+    echo ''
+  fi
+
+  unset asgh_appender asgh_index
+  return ${__log4sh_return}
 }
 
 #/**
@@ -2108,14 +2147,31 @@ appender_syslog_getHost()
 #     Set the syslog host for the given appender
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>appender_syslog_setHost myAppender localhost`</funcsynopsisinfo>
+#     <funcsynopsisinfo>appender_syslog_setHost myAppender localhost`</funcsynopsisinfom
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-# XXX This function needs to be implemented
 appender_syslog_setHost()
 {
+  assh_appender=${1:-}
+  assh_host=${2:-}
+
+  if [ $# -ne 2 ]; then
+    _log4sh_error 'appender_syslog_setHost(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+  echo 'log4sh:WARN setting the syslog host currently does not work' >&2
+
+  assh_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${assh_appender}`
+  # TODO: put check for valid index here
+  __log4shAppender_syslog_hosts=`_log4sh_setArrayElement \
+      "${__log4shAppender_syslog_hosts}" ${assh_index} "${assh_host}"`
+
+  # re-source the appender
+  _appender_cache ${assh_appender}
+
+  unset assh_appender assh_host assh_index
   return ${__LOG4SH_TRUE}
 }
 
@@ -2239,34 +2295,36 @@ logger_addAppender()
 {
   laa_appender=$1
 
-  # XXX should we be using setter functions here?? for performance, no.
+  # FAQ should we be using setter functions here?? for performance, no.
   __log4shAppenders=`_log4sh_pushStack "${__log4shAppenders}" $1`
   __log4shAppenderCount=`expr ${__log4shAppenderCount} + 1`
   __log4shAppenderCounts="${__log4shAppenderCounts} ${__log4shAppenderCount}"
   __log4shAppenderLayouts=`_log4sh_pushStack \
-    "$__log4shAppenderLayouts" "${__LOG4SH_LAYOUT_SIMPLE}"`
+      "$__log4shAppenderLayouts" "${__LOG4SH_LAYOUT_SIMPLE}"`
   __log4shAppenderLevels=`_log4sh_pushStack \
-    "${__log4shAppenderLevels}" "${__LOG4SH_NULL}"`
+      "${__log4shAppenderLevels}" "${__LOG4SH_NULL}"`
   __log4shAppenderPatterns=`_log4sh_pushStack \
-    "${__log4shAppenderPatterns}" "${__LOG4SH_PATTERN_DEFAULT}"`
+      "${__log4shAppenderPatterns}" "${__LOG4SH_PATTERN_DEFAULT}"`
   __log4shAppenderTypes=`_log4sh_pushStack \
-    "${__log4shAppenderTypes}" ${__LOG4SH_TYPE_CONSOLE}`
+      "${__log4shAppenderTypes}" ${__LOG4SH_TYPE_CONSOLE}`
   __log4shAppender_file_files=`_log4sh_pushStack \
-    "${__log4shAppender_file_files}" ${__LOG4SH_NULL}`
+      "${__log4shAppender_file_files}" ${__LOG4SH_NULL}`
   __log4shAppender_rollingFile_maxBackupIndexes=`_log4sh_pushStack \
-    "${__log4shAppender_rollingFile_maxBackupIndexes}" \
-    ${__LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX}`
+      "${__log4shAppender_rollingFile_maxBackupIndexes}" \
+      ${__LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX}`
   __log4shAppender_rollingFile_maxFileSizes=`_log4sh_pushStack \
-    "${__log4shAppender_rollingFile_maxFileSizes}" \
-    ${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}`
+      "${__log4shAppender_rollingFile_maxFileSizes}" \
+      ${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}`
   __log4shAppender_smtp_tos=`_log4sh_pushStack \
-    "${__log4shAppender_smtp_tos}" ${__LOG4SH_NULL}`
+      "${__log4shAppender_smtp_tos}" ${__LOG4SH_NULL}`
   __log4shAppender_smtp_subjects=`_log4sh_pushStack \
-    "${__log4shAppender_smtp_subjects}" ${__LOG4SH_NULL}`
+      "${__log4shAppender_smtp_subjects}" ${__LOG4SH_NULL}`
   __log4shAppender_syslog_facilities=`_log4sh_pushStack \
-    "${__log4shAppender_syslog_facilities}" ${__LOG4SH_TYPE_SYSLOG_FACILITY}`
+      "${__log4shAppender_syslog_facilities}" ${__LOG4SH_TYPE_SYSLOG_FACILITY}`
+  __log4shAppender_syslog_hosts=`_log4sh_pushStack \
+      "${__log4shAppender_syslog_hosts}" "${__LOG4SH_NULL}"`
 
-  _appender_cache "${laa_appender}"
+  _appender_cache ${laa_appender}
 
   unset laa_appender
 
@@ -2644,7 +2702,7 @@ logger_fatal()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Takes a string (eg. "log4sh.appender.stderr.File") and returns the
-#   prefix of it (everything before the first '.' char).  Normally used in
+#   prefix of it (everything before the first '.' char). Normally used in
 #   parsing the log4sh configuration file.</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>prefix=`_log4sh_getPropPrefix $property"`</funcsynopsisinfo>
@@ -2673,7 +2731,7 @@ _log4sh_getPropPrefix()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Strips the prefix off a property configuration command and returns
-#   the string.  E.g. "log4sh.appender.stderr.File" becomes
+#   the string. E.g. "log4sh.appender.stderr.File" becomes
 #   "appender.stderr.File".</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>newProperty=`_log4sh_stripPropPrefix $property`</funcsynopsisinfo>
@@ -2809,7 +2867,7 @@ _log4sh_propAppender()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>(future) Configures log4sh with a <code>logger</code> configuration
-#   statement.  Sample output: "logger: property value".</para>
+#   statement. Sample output: "logger: property value".</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>result=`_log4sh_propLogger $property $value`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -2842,11 +2900,11 @@ _log4sh_propLogger()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Configures log4sh with a <code>rootLogger</code> configuration
-#   statement.  It expects a comma separated string similar to the following:</para>
+#   statement. It expects a comma separated string similar to the following:</para>
 #   <para><code>log4sh.rootLogger=ERROR, stderr, R</code></para>
 #   <para>The first option is the default logging level to set for all
 #   of the following appenders that will be created, and all following options
-#   are the names of appenders to create.  The appender names must be
+#   are the names of appenders to create. The appender names must be
 #   unique.</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>_log4sh_propRootLogger $value</funcsynopsisinfo>
@@ -3009,6 +3067,7 @@ log4sh_resetConfiguration()
   __log4shAppender_smtp_tos=''
   __log4shAppender_smtp_subjects=''
   __log4shAppender_syslog_facilities=''
+  __log4shAppender_syslog_hosts=''
 
   logger_setLevel ERROR
 }
@@ -3053,7 +3112,7 @@ logger_getThreadName()
 #       <paramdef>string <parameter>threadName</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Sets the thread name (e.g. the name of the script).  This thread name
+#   <para>Sets the thread name (e.g. the name of the script). This thread name
 #   can be used with the '%t' conversion character within a
 #   PatternLayout.</para>
 #   <funcsynopsis>
@@ -3086,7 +3145,7 @@ logger_setThreadName()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>Sets the thread name (eg. the name of the script) and pushes the old
-#   on to a stack for later use.  This thread name can be used with the '%t'
+#   on to a stack for later use. This thread name can be used with the '%t'
 #   conversion character within a PatternLayout.</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>logger_pushThreadName "myThread"</funcsynopsisinfo>
@@ -3112,8 +3171,8 @@ logger_pushThreadName()
 #       <void />
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Removes the topmost thread name from the stack.  The next thread name
-#   on the stack is then placed in the __log4sh_threadName variable.  If the
+#   <para>Removes the topmost thread name from the stack. The next thread name
+#   on the stack is then placed in the __log4sh_threadName variable. If the
 #   stack is empty, or has only one element left, then a warning is given that
 #   no more thread names can be popped from the stack.</para>
 #   <funcsynopsis>
@@ -3150,7 +3209,7 @@ logger_popThreadName()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>This is a cleanup function to remove the temporary directory used by
-#   log4sh.  It is provided for scripts who want to do log4sh cleanup work
+#   log4sh. It is provided for scripts who want to do log4sh cleanup work
 #   themselves rather than using the automated cleanup of log4sh that is
 #   invoked upon a normal exit of the script.</para>
 #   <funcsynopsis>
@@ -3177,7 +3236,7 @@ log4sh_cleanup()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>This is a cleanup function to remove the temporary directory used by
-#   log4sh.  It should only be called by log4sh itself when it is taking
+#   log4sh. It should only be called by log4sh itself when it is taking
 #   control of traps.</para>
 #   <para>If there was a previously defined trap for the given signal, log4sh
 #   will attempt to call the original trap handler as well so as not to break
@@ -3205,7 +3264,7 @@ _log4sh_cleanup()
 
   # do we possibly need to restore a previous trap?
   if [ -r "${__log4sh_trapsFile}" -a -s "${__log4sh_trapsFile}" ]; then
-    # yes.  figure out what we need to do
+    # yes. figure out what we need to do
     if [ `grep "^trap -- " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # newer trap command
