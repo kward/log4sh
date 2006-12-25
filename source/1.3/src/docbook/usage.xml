@@ -26,7 +26,8 @@ Usage Guide
   <section id="usage-source"><title>Source log4sh</title>
     <para>To source the code into your script (also known as including), one uses the sourcing ability of shell to source one script into another.  See the following quick example for how easy this is done.</para>
 
-    <example><title>Sourcing external shell code into current program</title>
+    <example id="ex:sourcing_log4sh">
+      <title>Sourcing external shell code into current program</title>
       <programlisting><![CDATA[
 #! /bin/sh
 
@@ -37,7 +38,8 @@ Usage Guide
 
     <para>Here is some sample code that looks for log4sh in the same directory as the script is located, as well as the current directory. If log4sh could not be found, it exits with an error. If log4sh is found, it is loaded, along with the <filename>log4sh.properties</filename> file in the current directory (see the following example). It then logs a message at the &info; level to <filename>STDOUT</filename>.</para>
 
-    <example><title>Hello, world (using properties file)</title>
+    <example id="ex:hello_world_via_properties_file">
+      <title>Hello, world (using properties file)</title>
       <programlisting><![CDATA[
 #! /bin/sh
 #
@@ -63,13 +65,14 @@ logger_info "Hello, world"
 
     <para>Here is the <filename>log4sh.properties</filename> file for the previous example. Save it in the same directory you are running the above script from.</para>
 
-    <example><title>Hello, world; properties file</title>
+    <example id="ex:hello_world_properties_file">
+      <title>Hello, world; properties file</title>
       <programlisting><![CDATA[
 #
 # log4sh example: Hello, world properties file
 #
 
-# Set root logger level to DEBUG and its only appender to A1
+# Set root logger level to INFO and its only appender to A1
 log4sh.rootLogger=INFO, A1
 
 # A1 is set to be a ConsoleAppender.
@@ -96,24 +99,28 @@ log4sh.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
 
     <para>To configure log4sh in code, simply call the appropriate functions in your code. The following code sample loads log4sh from the current directory, configures it for <filename>STDERR</filename> output, and the logs a message at the &info; level.</para>
 
-    <example><title>Hello, world (configured in code)</title>
+    <example id="ex:hello_world_code">
+      <title>Hello, world (configured in code)</title>
       <programlisting><![CDATA[
 #! /bin/sh
 #
 # log4sh example: Hello, world
 #
 
-# source log4sh (disabling properties file warning)
+# load log4sh (disabling properties file warning) and clear the default
+# configuration
 LOG4SH_CONFIGURATION='none' . ./log4sh
+log4sh_resetConfiguration
 
-# set the global logging level
+# set the global logging level to INFO
 logger_setLevel INFO
 
-# close the default STDOUT appender, and add a new STDERR appender
-appender_close stdout
+# add and configure a FileAppender that outputs to STDERR, and activate the
+# configuration
 logger_addAppender stderr
 appender_setType stderr FileAppender
 appender_file_setFile stderr STDERR
+appender_activateOptions stderr
 
 # say Hello to the world
 logger_info 'Hello, world'
@@ -126,7 +133,8 @@ logger_info 'Hello, world'
 
     <para>The samples above show the standard way of logging a message via log4sh. That standard method is by calling the appropriate function, and passing the message as a parameter.</para>
 
-    <example><title>Standard method of logging a message</title>
+    <example id="ex:logger_info">
+      <title>Standard method of logging a message</title>
       <programlisting>logger_info 'message to log'</programlisting>
     </example>
 
