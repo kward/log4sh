@@ -17,17 +17,20 @@ Introduction
       <listitem><para>Cygwin</para></listitem>
       <listitem><para>FreeBSD</para></listitem>
       <listitem><para>Linux</para></listitem>
-      <listitem><para>Solaris 8, 9, 10</para></listitem>
+      <listitem><para>Solaris 8+</para></listitem>
     </itemizedlist>
   </blockquote></para>
 
   <para><blockquote><title>Tested Shells</title>
     <itemizedlist>
+      <listitem><para>BSD Shell (<command>dash</command>)</para></listitem>
       <listitem><para>Bourne Shell (<command>sh</command>)</para></listitem>
       <listitem><para>Bourne Again Shell (<command>bash</command>)</para></listitem>
       <listitem><para>Korn Shell (<command>ksh</command>, <command>pdksh</command>)</para></listitem>
     </itemizedlist>
   </blockquote></para>
+
+  <para>See the appropriate Release Notes (<filename>doc/RELEASE_NOTES-X.X.X.txt</filename>) for this release for the actual versions tested.</para>
 
   <!-- Give credit where credit is due...very important -->
   <section id="credits"><title>Credits / Contributors</title>
