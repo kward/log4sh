@@ -21,6 +21,7 @@ extract-xslt:
 	  mkdir -p docbook-xsl; \
 	  bzip2 -dc $(DIST)/$(XSLT) |tar xf -; \
 	  mv docbook-xsl-1.71.1 docbook-xsl/1.71.1; \
+	  ln -s 1.71.1 docbook-xsl/current; \
 	fi
 
 clean:

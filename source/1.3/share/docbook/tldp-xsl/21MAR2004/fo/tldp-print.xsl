@@ -3,7 +3,7 @@
 <xsl:stylesheet version="1.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<xsl:import href="../../../docbook-xsl/1.71.1/fo/docbook.xsl"/>
+<xsl:import href="../../../docbook-xsl/current/fo/docbook.xsl"/>
 
 <!-- Number all sections in the style of 'CH.S1.S2 Section Title' where
      CH is the chapter number,  S1 is the section number and S2 is the
