@@ -132,5 +132,16 @@ $ make test-prep
 $ cd test
 $ ./run-test-suite
 
+#------------------------------------------------------------------------------
+# Related documentation
+#
+
+JUnit
+  http://www.junit.org
+log4j
+  http://logging.apache.org
+The BSD syslog Protocol
+  http://www.ietf.org/rfc/rfc3164.txt
+
 
 $Revision$
