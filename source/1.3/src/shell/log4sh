@@ -56,9 +56,7 @@ __LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX=1
 __LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE=10485760
 __LOG4SH_TYPE_SMTP='SMTPAppender'
 __LOG4SH_TYPE_SYSLOG='SyslogAppender'
-__LOG4SH_TYPE_SYSLOG_FACILITIES=' auth authpriv cron daemon ftp kern lpr mail news syslog user uucp local0 local1 local2 local3 local4 local5 local6 local7 '
-# append list of deprecated facility names
-__LOG4SH_TYPE_SYSLOG_FACILITIES="${__LOG4SH_TYPE_SYSLOG_FACILITIES} security "
+__LOG4SH_TYPE_SYSLOG_FACILITY_NAMES=' kern user mail daemon auth security syslog lpr news uucp cron authpriv ftp local0 local1 local2 local3 local4 local5 local6 local7 '
 __LOG4SH_TYPE_SYSLOG_FACILITY='user'
 
 __LOG4SH_LAYOUT_HTML='HTMLLayout'
@@ -85,6 +83,7 @@ __LOG4SH_LEVEL_CLOSED_STR='CLOSED'
 __LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
 __LOG4SH_THREAD_DEFAULT='main'
 
+__LOG4SH_ALTERNATIVES=' nc '
 __LOG4SH_CONFIGURATION="${LOG4SH_CONFIGURATION:-log4sh.properties}"
 __LOG4SH_CONFIG_PREFIX="${LOG4SH_CONFIG_PREFIX:-log4sh}"
 
@@ -406,7 +405,7 @@ _log4sh_mktempDir()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>_log4sh_evalSeconds</function></funcdef>
+#       <funcdef><function>_log4sh_updateSeconds</function></funcdef>
 #       <void />
 #     </funcprototype>
 #   </funcsynopsis>
@@ -415,7 +414,7 @@ _log4sh_mktempDir()
 #     elapsed since the start of the script.
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>tmpDir=`_log4sh_mktempDir`</funcsynopsisinfo>
+#     <funcsynopsisinfo>_log4sh_updateSeconds`</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -435,6 +434,65 @@ _log4sh_updateSeconds()
     __log4sh_secondsLast=${__log4sh_seconds}
     unset _lgs__date _lgs__seconds
   fi
+}
+
+#/**
+# <s:function group="Log4sh" modifier="public">
+# <entry align="right">
+#   <emphasis>void</emphasis>/boolean
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>log4sh_setAlternative</function></funcdef>
+#       <paramdef>string <parameter>command</parameter></paramdef>
+#       <paramdef>string <parameter>path</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     Specifies an alternative path for a command.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>log4sh_setAlternative nc /bin/nc</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+log4sh_setAlternative()
+{
+  if [ $# -ne 2 ]; then
+    _log4sh_error 'log4sh_setAlternative(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+
+  lsa_cmdName=${1:-}
+  lsa_cmdPath=${2:-}
+  __log4sh_return=${__LOG4SH_TRUE}
+
+  # check for valid alternative
+  echo "${__LOG4SH_ALTERNATIVES}" |grep " ${lsa_cmdName} " >/dev/null
+  if [ $? -ne 0 ]; then
+    # the alternative is not valid
+    _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
+    __log4sh_return=${__LOG4SH_FALSE}
+  fi
+
+  # check that the alternative command exists and is executable
+  if [ \
+      ${__log4sh_return} -eq ${__LOG4SH_TRUE} \
+      -a ! -x "${lsa_cmdPath}" \
+  ]; then
+    # the alternative command is not executable
+    _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
+    __log4sh_return=${__LOG4SH_FALSE}
+  fi
+
+  # set the alternative
+  [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ] \
+      && eval __log4sh_alternative_${lsa_cmdName}="\${lsa_cmdPath}"
+
+  unset lsa_cmdName lsa_cmdPath
+  return ${__log4sh_return}
 }
 
 #-----------------------------------------------------------------------------
@@ -1302,21 +1360,21 @@ _appender_activate()
 {
   [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
   ${__LOG4SH_TRACE} "_appender_activate($#)"
-  _ag__appender=$1
-  ${__LOG4SH_TRACE} "_ag__appender='${_ag__appender}'"
+  _aa_appender=$1
+  ${__LOG4SH_TRACE} "_aa_appender='${_aa_appender}'"
 
-  __index=`_log4sh_findArrayElement "${__log4shAppenders}" ${_ag__appender}`
-  __inc="${__log4sh_tmpDir}/${_ag__appender}${__LOG4SH_APPENDER_INCLUDE_EXT}"
+  _aa_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${_aa_appender}`
+  _aa_inc="${__log4sh_tmpDir}/${_aa_appender}${__LOG4SH_APPENDER_INCLUDE_EXT}"
 
   ### generate function for inclusion
   # TODO can we modularize this in the future?
 
   # send STDOUT to our include file
-  exec 4>&1 >${__inc}
+  exec 4>&1 >${_aa_inc}
 
   # header
   cat <<EOF
-${__LOG4SH_APPENDER_FUNC_PREFIX}${_ag__appender}_append()
+${__LOG4SH_APPENDER_FUNC_PREFIX}${_aa_appender}_append()
 {
   [ -n "\${FUNCNAME:-}" ] && \${__LOG4SH_TRACE} "\${FUNCNAME}()\${BASH_LINENO:+'(called from \${BASH_LINENO})'}"
   _la_level=\$1
@@ -1324,111 +1382,176 @@ ${__LOG4SH_APPENDER_FUNC_PREFIX}${_ag__appender}_append()
 EOF
 
   # determine the 'layout'
-  __layout=`_appender_getLayoutByIndex ${__index}`
-  ${__LOG4SH_TRACE} "__layout='${__layout}'"
-  case ${__layout} in
+  _aa_layout=`_appender_getLayoutByIndex ${_aa_index}`
+  ${__LOG4SH_TRACE} "_aa_layout='${_aa_layout}'"
+  case ${_aa_layout} in
     ${__LOG4SH_LAYOUT_SIMPLE}|\
     ${__LOG4SH_LAYOUT_HTML})
       ${__LOG4SH_DEBUG} 'using simple/html layout'
-      echo "  __layout=\"\${_la_level} - \${_la_message}\""
+      echo "  _la_layout=\"\${_la_level} - \${_la_message}\""
       ;;
 
     ${__LOG4SH_LAYOUT_PATTERN})
       ${__LOG4SH_DEBUG} 'using pattern layout'
-      __pattern=`_appender_getPatternByIndex ${__index}`
-      echo "  __layout=\`_appender_parsePattern '${__pattern}' \${_la_level} \"\${_la_message}\"\`"
+      _aa_pattern=`_appender_getPatternByIndex ${_aa_index}`
+      echo "  _la_layout=\`_appender_parsePattern '${_aa_pattern}' \${_la_level} \"\${_la_message}\"\`"
       ;;
   esac
 
   # what appender 'type' do we have? TODO check not missing
-  __type=`_appender_getTypeByIndex ${__index}`
-  ${__LOG4SH_TRACE} "__type='${__type}'"
-  case ${__type} in
+  _aa_type=`_appender_getTypeByIndex ${_aa_index}`
+  ${__LOG4SH_TRACE} "_aa_type='${_aa_type}'"
+  case ${_aa_type} in
     ${__LOG4SH_TYPE_CONSOLE})
-      echo "  echo \"\${__layout}\""
+      echo "  echo \"\${_la_layout}\""
       ;;
 
     ${__LOG4SH_TYPE_FILE}|\
     ${__LOG4SH_TYPE_ROLLING_FILE}|\
     ${__LOG4SH_TYPE_DAILY_ROLLING_FILE})
-      __file=`_appender_file_getFileByIndex ${__index}`
-      ${__LOG4SH_TRACE} "__file='${__file}'"
-      if [ "${__file}" = 'STDERR' ]; then
-        echo "  echo \"\${__layout}\" >&2"
-      elif [ "${__file}" != "${__LOG4SH_NULL}" ]; then
+      _aa_file=`_appender_file_getFileByIndex ${_aa_index}`
+      ${__LOG4SH_TRACE} "_aa_file='${_aa_file}'"
+      if [ "${_aa_file}" = 'STDERR' ]; then
+        echo "  echo \"\${_la_layout}\" >&2"
+      elif [ "${_aa_file}" != "${__LOG4SH_NULL}" ]; then
         # do rotation
-	case ${__type} in
-	  ${__LOG4SH_TYPE_ROLLING_FILE})
-	    # check whether the max file size has been exceeded
-	    cat <<EOF
-  __rotSize=${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}
-  __size=\`ls -s '${__file}' |awk '{print \$1}'\`
-  if [ \${__size} -gt \${__rotSize} ]; then
+        case ${_aa_type} in
+          ${__LOG4SH_TYPE_ROLLING_FILE})
+            # check whether the max file size has been exceeded
+            cat <<EOF
+  _la_rotSize=${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}
+  _la_size=\`ls -s '${_aa_file}' |awk '{print \$1}'\`
+  if [ \${_la_size} -gt \${_la_rotSize} ]; then
     # rotate the appender file(s)
-    __rotIndex=${__LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX}
-    __rotFile="${__file}.\${__rotIndex}"
-    [ -f "\${__rotFile}" ] && rm -f "\${__rotFile}"
-    while [ \${__rotIndex} -gt 0 ]; do
-      __rotIndexLast=\${__rotIndex}
-      __rotFileLast="\${__rotFile}"
-      __rotIndex=\`expr \${__rotIndex} - 1\`
-      __rotFile="${__file}.\${__rotIndex}"
-      [ -f "\${__rotFile}" ] && mv -f "\${__rotFile}" "\${__rotFileLast}"
+    _la_rotIndex=${__LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX}
+    _la_rotFile="${_aa_file}.\${_la_rotIndex}"
+    [ -f "\${_la_rotFile}" ] && rm -f "\${_la_rotFile}"
+    while [ \${_la_rotIndex} -gt 0 ]; do
+      _la_rotFileLast="\${_la_rotFile}"
+      _la_rotIndex=\`expr \${_la_rotIndex} - 1\`
+      _la_rotFile="${_aa_file}.\${_la_rotIndex}"
+      [ -f "\${_la_rotFile}" ] && mv -f "\${_la_rotFile}" "\${_la_rotFileLast}"
     done
-    unset __rotFile __rotFileLast __rotIndex __rotIndexLast
+    unset _la_rotFile _la_rotFileLast _la_rotIndex
   fi
-  unset __size
+  unset _la_rotSize _la_size
 EOF
 	    ;;
 	  ${__LOG4SH_TYPE_DAILY_ROLLING_FILE})
 	    ;;
 	esac
-	echo "  echo \"\${__layout}\" >>'${__file}'"
+	echo "  echo \"\${_la_layout}\" >>'${_aa_file}'"
       else
 	# the file "${__LOG4SH_NULL}" is closed?? Why did we get here, and why
 	# did I care when I wrote this bit of code?
         :
       fi
 
-      unset __file
+      unset _aa_file
       ;;
 
     ${__LOG4SH_TYPE_SMTP})
       cat <<EOF
-  __smtpTo='`_appender_smtp_getToByIndex ${__index}`'
-  __smtpSubject='`_appender_smtp_getSubjectByIndex ${__index}`'
-  echo \"\${__layout}\" |mail -s \"\${__smtpSubject}\" \${__smtpTo}
-  unset __smtpTo __smtpSubject
+  _la_smtpTo='`_appender_smtp_getToByIndex ${_aa_index}`'
+  _la_smtpSubject='`_appender_smtp_getSubjectByIndex ${_aa_index}`'
+  echo \"\${_la_layout}\" |mail -s \"\${_la_smtpSubject}\" \${_la_smtpTo}
+  unset _la_smtpTo _la_smtpSubject
 EOF
       ;;
 
     ${__LOG4SH_TYPE_SYSLOG})
       cat <<EOF
-  __facility='`_appender_syslog_getFacilityByIndex ${__index}`'
-  __tag="\${_la_level}"
-  case "\${__tag}" in
-    ${__LOG4SH_LEVEL_FATAL_STR}) __tag='panic' ;;  # deprecated -- now emerg
-    ${__LOG4SH_LEVEL_ERROR_STR}) __tag='error' ;;  # deprecated -- now err
-    ${__LOG4SH_LEVEL_WARN_STR}) __tag='warn' ;;    # deprecated -- now warning
-    ${__LOG4SH_LEVEL_INFO_STR}) __tag='info' ;;
-    ${__LOG4SH_LEVEL_DEBUG_STR}) __tag='debug' ;;
-    ${__LOG4SH_LEVEL_TRACE_STR}) __tag='debug' ;;
+  case "\${_la_level}" in
+    ${__LOG4SH_LEVEL_FATAL_STR}) _la_tag='alert' ;;
+    ${__LOG4SH_LEVEL_ERROR_STR}) _la_tag='error' ;;  # deprecated! now 'err'
+    ${__LOG4SH_LEVEL_WARN_STR}) _la_tag='warn' ;;    # deprecated! now 'warning'
+    ${__LOG4SH_LEVEL_INFO_STR}) _la_tag='info' ;;
+    ${__LOG4SH_LEVEL_DEBUG_STR}) _la_tag='debug' ;;
+    ${__LOG4SH_LEVEL_TRACE_STR}) _la_tag='debug' ;;  # no 'trace' equivalent
   esac
-  ( exec logger -p "\${__facility}.\${__tag}" -t "${__log4sh_filename}[$$]" \
-      "\${__layout}" 2>/dev/null )
-  unset __facility __tag
 EOF
+
+      _aa_facilityName=`appender_syslog_getFacility ${_aa_appender}`
+      _aa_syslogHost=`appender_syslog_getHost ${_aa_appender}`
+      _aa_hostname=`hostname |sed 's/^\([^.]*\)\..*/\1/'`
+
+      # are we logging to a remote host?
+      if [ "${_aa_syslogHost}" = "${__LOG4SH_NULL}" ]; then
+        # no -- use logger
+        cat <<EOF
+  ( exec logger -p "${_aa_facilityName}.\${_la_tag}" \
+      -t "${__log4sh_filename}[$$]" "\${_la_layout}" 2>/dev/null )
+  unset _la_tag
+EOF
+      else
+        # yes -- use netcat
+        if [ -n "${__log4sh_alternative_nc:-}" ]; then
+          case ${_aa_facilityName} in
+            kern) _aa_facilityCode=0 ;;            # 0<<3
+            user) _aa_facilityCode=8 ;;            # 1<<3
+            mail) _aa_facilityCode=16 ;;           # 2<<3
+            daemon) _aa_facilityCode=24 ;;         # 3<<3
+            auth|security) _aa_facilityCode=32 ;;  # 4<<3
+            syslog) _aa_facilityCode=40 ;;         # 5<<3
+            lpr) _aa_facilityCode=48 ;;            # 6<<3
+            news) _aa_facilityCode=56 ;;           # 7<<3
+            uucp) _aa_facilityCode=64 ;;           # 8<<3
+            cron) _aa_facilityCode=72 ;;           # 9<<3
+            authpriv) _aa_facilityCode=80 ;;       # 10<<3
+            ftp) _aa_facilityCode=88 ;;            # 11<<3
+            local0) _aa_facilityCode=128 ;;        # 16<<3
+            local1) _aa_facilityCode=136 ;;        # 17<<3
+            local2) _aa_facilityCode=144 ;;        # 18<<3
+            local3) _aa_facilityCode=152 ;;        # 19<<3
+            local4) _aa_facilityCode=160 ;;        # 20<<3
+            local5) _aa_facilityCode=168 ;;        # 21<<3
+            local6) _aa_facilityCode=176 ;;        # 22<<3
+            local7) _aa_facilityCode=184 ;;        # 23<<3
+          esac
+
+          cat <<EOF
+  case \${_la_tag} in
+    alert) _la_priority=1 ;;
+    err|error) _la_priority=3 ;;
+    warning|warn) _la_priority=4 ;;
+    info) _la_priority=6 ;;
+    debug) _la_priority=7 ;;
+  esac
+  _la_priority=\`expr ${_aa_facilityCode} + \${_la_priority}\`
+  _la_date=\`date "+%b %d %H:%M:%S"\`
+  _la_hostname='${_aa_hostname}'
+
+  _la_syslogMsg="<\${_la_priority}>\${_la_date} \${_la_hostname} \${_la_layout}"
+
+  # do RFC 3164 cleanups
+  _la_date=\`echo \"\${_la_date}\" |sed 's/ 0\([0-9]\) /  \1 /'\`
+  _la_syslogMsg=\`expr "\${_la_syslogMsg}" : '\(.\{,1024\}\)'\`
+
+  ( echo "\${_la_syslogMsg}" |\
+      exec ${__log4sh_alternative_nc} -w 1 -u ${_aa_syslogHost} 514 )
+  unset _la_tag _la_priority _la_date _la_hostname _la_syslogMsg
+EOF
+          unset _aa_facilityCode _aa_syslogHost _aa_hostname
+        else
+          # no netcat alternative set; doing nothing
+          :
+        fi
+      fi
+      unset _aa_facilityName
       ;;
 
-    *) _log4sh_error "unrecognized appender type (${__type})" ;;
+    *) _log4sh_error "unrecognized appender type (${_aa_type})" ;;
   esac
 
   # footer
-  echo "}"
+  cat <<EOF
+  unset _la_layout
+}
+EOF
 
   # override the activateOptions function as we don't need it anymore
   cat <<EOF
-${__LOG4SH_APPENDER_FUNC_PREFIX}${_ag__appender}_activateOptions() { :; }
+${__LOG4SH_APPENDER_FUNC_PREFIX}${_aa_appender}_activateOptions() { :; }
 EOF
 
   # restore STDOUT
@@ -1436,11 +1559,9 @@ EOF
 
   # source the newly created function
   ${__LOG4SH_DEBUG} 're-sourcing the newly created function'
-  . "${__inc}"
+  . "${_aa_inc}"
 
-  unset _ag__appender
-  unset __inc __tmpl
-  unset __layout __pattern __type
+  unset _aa_appender _aa_inc _aa_layout _aa_pattern _aa_type
 }
 
 #-----------------------------------------------------------------------------
@@ -1858,13 +1979,13 @@ appender_smtp_getSubject()
 #*/
 appender_smtp_setSubject()
 {
-  asss_appender=${1:-}
-  asss_subject=${2:-}
-
   if [ $# -ne 2 ]; then
     _log4sh_error 'appender_smtp_setSubject(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
   fi
+
+  asss_appender=${1:-}
+  asss_subject=${2:-}
 
   # set the Subject
   asss_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asss_appender}`
@@ -1992,12 +2113,12 @@ appender_getSyslogFacility()
 #*/
 appender_syslog_getFacility()
 {
-  asgf_appender=${1:-}
-
   if [ $# -ne 1 ]; then
     _log4sh_error 'appender_syslog_getFacility(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
   fi
+
+  asgf_appender=${1:-}
 
   asgf_index=`_log4sh_findArrayElement "$__log4shAppenders" ${asgf_appender}`
   _log4sh_getArrayElement "${__log4shAppender_syslog_facilities}" ${asgf_index}
@@ -2027,16 +2148,15 @@ appender_syslog_getFacility()
 #*/
 appender_syslog_setFacility()
 {
-  assf_appender=${1:-}
-  assf_facility=${2:-}
-
   if [ $# -ne 2 ]; then
     _log4sh_error 'appender_syslog_setFacility(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
   fi
+  assf_appender=${1:-}
+  assf_facility=${2:-}
 
   # check for valid facility
-  echo "${__LOG4SH_TYPE_SYSLOG_FACILITIES}" |grep " ${assf_facility} " >/dev/null
+  echo "${__LOG4SH_TYPE_SYSLOG_FACILITY_NAMES}" |grep " ${assf_facility} " >/dev/null
   if [ $? -ne 0 ]; then
     # the facility is not valid
     _log4sh_error "[${assf_facility}] is an unknown syslog facility. Defaulting to [user]."
@@ -2096,7 +2216,7 @@ appender_setSyslogFacility()
 #       <paramdef>integer <parameter>index</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(stub function)</emphasis>
+#   <para>
 #     Get the syslog host of the specified appender
 #   </para>
 #   <funcsynopsis>
@@ -2107,12 +2227,12 @@ appender_setSyslogFacility()
 #*/
 appender_syslog_getHost()
 {
-  asgh_appender=${1:-}
-
   if [ $# -ne 1 ]; then
     _log4sh_error 'appender_syslog_getHost(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
   fi
+
+  asgh_appender=${1:-}
 
   asgh_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asgh_appender}`
   # TODO: put check for valid index here
@@ -2143,25 +2263,34 @@ appender_syslog_getHost()
 #       <paramdef>string <parameter>host</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis>(stub function)</emphasis>
-#     Set the syslog host for the given appender
+#   <para>
+#     Set the syslog host for the given appender. Requires that the 'nc'
+#     command alternative has been previously set with the
+#     log4sh_setAlternative() function.
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>appender_syslog_setHost myAppender localhost`</funcsynopsisinfom
+#     <funcsynopsisinfo>appender_syslog_setHost myAppender localhost</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
+#
+# The BSD syslog Protocol
+#   http://www.ietf.org/rfc/rfc3164.txt
+#
+# XXX: don't forget to limit the packet length to 1024b
 appender_syslog_setHost()
 {
-  assh_appender=${1:-}
-  assh_host=${2:-}
-
   if [ $# -ne 2 ]; then
     _log4sh_error 'appender_syslog_setHost(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
   fi
-  echo 'log4sh:WARN setting the syslog host currently does not work' >&2
+
+  assh_appender=${1:-}
+  assh_host=${2:-}
+
+  [ -z "${__log4sh_alternative_nc:-}" ] \
+      && _log4sh_warn 'the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().'
 
   assh_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${assh_appender}`
   # TODO: put check for valid index here
@@ -2982,8 +3111,8 @@ log4sh_doConfigure()
     _lrp_key=`_log4sh_stripPropPrefix ${_lrp_key}`
     _lrp_keyword=`_log4sh_getPropPrefix ${_lrp_key}`
     case ${_lrp_keyword} in
+      alternative) log4sh_setAlternative ${_lrp_key} "${_lrp_value}" ;;
       appender) _log4sh_propAppender ${_lrp_key} "${_lrp_value}" ;;
-      external) ;;
       logger) _log4sh_propLogger ${_lrp_key} "${_lrp_value}" ;;
       rootLogger) _log4sh_propRootLogger "${_lrp_value}" ;;
       *) _log4sh_error "unrecognized properties keyword (${_lrp_keyword})" ;;
