@@ -14,24 +14,27 @@
 # local4.* /var/log/log4sh.log
 #
 # Possible issues:
-# * race conditions
-# * different Syslog variants produce different output
+# * race conditions waiting for logs to be output via syslog. our backoff might
+#   be too short for the syslog message to arrive
+# * different Syslog variants produce different output. we try to get around
+#   this by outputing a unique random number to each logging message so each
+#   message can be tracked individually.
 #
 
 MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
-
-DEBUG=${DEBUG:+' '}
-DEBUG=${DEBUG:-':'}
-${DEBUG} echo 'DEBUG output enabled' >&2
 
 APP_NAME='mySyslog'
 APP_SYSLOG_FACILITY='local4'
 
 BACKOFF_TIMES='1 2 4'
 TAIL_SAMPLE_SIZE=25
-TEST_DATA='priorityMatrix.data'
+TEST_PRIORITY_DATA='priorityMatrix.data'
+TEST_SYSLOG_DATA="${MY_NAME}.data"
 TEST_LOGFILE='/var/log/log4sh.log'
+
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -41,28 +44,8 @@ testSyslogLogfilePresent()
 {
   # check for logfile presence
   assertTrue \
-    "unable to read from the test syslog output file (${TEST_LOGFILE})." \
-    "[ -r \"${TEST_LOGFILE}\" ]"
-}
-
-#
-# XXX put test in to see if last random number generated is same as this one.
-# if so, redo the generation with a backoff.
-#
-getRandom()
-{
-  if [ -n "${RANDOM:-}" ]; then
-    # $RANDOM works
-    _random=${RANDOM}${RANDOM}${RANDOM}$$
-  else
-    # $RANDOM doesn't work
-    #sleep 1  # enough time must pass to guarantee different randomness
-    _date=`date '+%H%M%S'`
-    _random=`expr ${_date} \* $$`
-  fi
-  ${DEBUG} echo "DEBUG: _random=${_random}" >&2
-  echo ${_random}
-  unset _random
+      "unable to read from the test syslog output file (${TEST_LOGFILE})." \
+      "[ -r \"${TEST_LOGFILE}\" ]"
 }
 
 testPriorityMatrix()
@@ -91,39 +74,97 @@ testPriorityMatrix()
     for pos in ${PRIORITY_POS}; do
       testPriority=`echo ${PRIORITY_NAMES} |cut -d' ' -f${pos}`
       shouldOutput=`echo ${outputs} |cut -d' ' -f${pos}`
+      result=''
 
-      ${DEBUG} echo "DEBUG: generating '${testPriority}' message" >&2
-      random=`getRandom`
+      ${_DEBUG} "generating '${testPriority}' message"
+      tf_generateRandom
+      random=${tf_RANDOM}
       log ${testPriority} "${MY_NAME} test message - ${random}"
+
+      # skip the actual test if there is no logfile to tail at
+      if [ ! -r "${TEST_LOGFILE}" ]; then
+        fail
+        continue
+      fi
 
       # do a timed backoff to wait for the result -- syslog might take a bit
       for backoff in ${BACKOFF_TIMES}; do
-	# skip the actual test if there is no logfile to tail at
-        [ -r "${TEST_LOGFILE}" ] || continue
-
         [ ${backoff} -eq 2 ] \
-          && echo "    waiting for possible '${testPriority}' message..."
+            && echo "    waiting for possible '${testPriority}' message..."
         sleep ${backoff}
         result=`tail -n ${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |grep ${random}`
         [ -n "${result}" ] && break
       done
-      ${DEBUG} echo "DEBUG: result=${result}" >&2
+      ${_DEBUG} "result=${result}"
 
       if [ ${shouldOutput} -eq 1 ]; then
-        assertTrue \
-          "'${priority}' priority appender did not emit a '${testPriority}' message" \
-          "[ -n \"${result}\" ]"
+        assertNotNull \
+            "'${priority}' priority appender did not emit a '${testPriority}' message" \
+            "${result}"
       else
-        assertFalse \
-          "'${priority}' priority appender emitted a '${testPriority}' message" \
-          "[ -n \"${result}\" ]"
+        assertNull \
+            "'${priority}' priority appender emitted a '${testPriority}' message" \
+            "${result}"
       fi
     done
   done
+
   # restore stdin
   exec 0<&9 9<&-
 }
 
+testFacilityGetterSetter()
+{
+  # configure log4sh (appender_activateOptions called later)
+  logger_addAppender ${APP_NAME}
+  appender_setType ${APP_NAME} SyslogAppender
+
+  # TODO: test the passing of invalid params
+
+  ${_DEBUG} 'testing the setting and getting of the valid syslog facilities'
+  for facility in `tf_getDataSect facilities "${TEST_SYSLOG_DATA}"`; do
+    appender_syslog_setFacility ${APP_NAME} "${facility}"
+    appender_activateOptions ${APP_NAME}
+    gotFacility=`appender_syslog_getFacility ${APP_NAME}`
+    assertEquals \
+        'the syslog facility does not match the one set' \
+        "${facility}" "${gotFacility}"
+  done
+
+  ${_DEBUG} 'testing an invalid syslog facility'
+  testFacility='invalid'
+  appender_syslog_setFacility ${APP_NAME} "${testFacility}"
+  appender_activateOptions ${APP_NAME}
+  gotFacility=`appender_syslog_getFacility ${APP_NAME}`
+  failNotEquals \
+      'the syslog facility does not match the one set' \
+      "${testFacility}" "${gotFacility}"
+}
+
+testHostGetterSetter()
+{
+  # configure log4sh (appender_activateOptions called later)
+  logger_addAppender ${APP_NAME}
+  appender_setType ${APP_NAME} SyslogAppender
+
+  # TODO: test the passing of invalid params
+
+  ${_DEBUG} 'testing that the default syslog host is empty'
+  gotHost=`appender_syslog_getHost ${APP_NAME}`
+  assertNull \
+      'the default syslog host was not empty' \
+      "${gotHost}"
+
+  ${_DEBUG} 'testing that it is possible to set and get the syslog host'
+  testHost='localhost'
+  # TODO: test for the log4sh:ERROR message
+  appender_syslog_setHost ${APP_NAME} "${testHost}"
+  appender_activateOptions ${APP_NAME}
+  gotHost=`appender_syslog_getHost ${APP_NAME}`
+  assertEquals \
+      'the syslog host does not match the one that was set' \
+      "${testHost}" "${gotHost}"
+}
 
 #------------------------------------------------------------------------------
 # suite functions
@@ -132,7 +173,7 @@ testPriorityMatrix()
 oneTimeSetUp()
 {
   # source log4sh
-  ${DEBUG} echo "loading log4sh" >&2
+  ${_DEBUG} 'loading log4sh'
   LOG4SH_CONFIGURATION='none' . ./log4sh
 }
 
@@ -150,8 +191,10 @@ suite()
 {
   suite_addTest testSyslogLogfilePresent
   suite_addTest testPriorityMatrix
+  suite_addTest testFacilityGetterSetter
+  suite_addTest testHostGetterSetter
 }
 
 # load and run shUnit
-${DEBUG} echo "loading shUnit" >&2
+${_DEBUG} 'loading shUnit'
 . ./shunit
