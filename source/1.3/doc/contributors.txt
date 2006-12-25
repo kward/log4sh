@@ -4,8 +4,9 @@ Aaron Rodden
 Aaron Walker
 Dan Johansson
 Kate Ward
-Mickael Canevet
+Mickaël Canévet
 Omner Calhoun
+Rob Holland
 Steve Etchelecu
 Tim Kordick
 
