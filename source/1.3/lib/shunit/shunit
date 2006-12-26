@@ -223,6 +223,7 @@ _shunit_cleanup()
   # exit for all non-EXIT signals
   if [ ${name} != 'EXIT' ]; then
     echo "trapped and now handling the ${name} signal"
+    _shunit_generateReport
     # disable EXIT trap
     trap 0
     # add 127 to signal and exit
