@@ -2,7 +2,7 @@
 
 This release of log4sh continues to fill out the planned functionality of the
 1.3 series. It adds some more unit tests, as well as fixes some bugs reported
-by users. It also enables remote syslog logging for the first time.
+by users.
 
 
 TESTED PLATFORMS
@@ -31,6 +31,10 @@ Additional unit tests: SyslogAppender
 Logging to remote hosts via syslog now supported. Requires setting 'nc'
 alternative command path as the nc (netcat) command is not present by default
 on most systems.
+
+The RollingFileAppender now works properly. Files are rotated based upon a
+maximum file size, and the number of backup files can be limited with a maximum
+backup index.
 
 
 BUG FIXES

@@ -31,7 +31,10 @@ Mickaël Canévet for pointing this out)
 [kwd] added initial ability to specify paths for command alternates. currently,
 only nc (netcat) is supported to enable remote syslog logging.
 
-[kwd] remote syslog logging now works. set using appender_syslog_setHost().
+[kwd] remote syslog logging now works. enable using log4sh_setAlternative() for
+the 'nc' (netcat) command.
+
+[kwd] the RollingFileAppender now works
 
 -- Changes with shUnit 1.0.2
 
@@ -40,6 +43,9 @@ like '/bin/sh: Can't open setUp'
 
 [kwd] flushed out the remaining assert and fail functions that are present in
 JUnit
+
+[kwd] if an interrupt is received (e.g. Ctrl-C), a unit test report up until
+the point of interrupt is now generated
 
 
 Changes with 1.3.6
