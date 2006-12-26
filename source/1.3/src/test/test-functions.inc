@@ -1,26 +1,31 @@
 # $Id$
 # vim:syntax=sh:sts=2
 
+#
+# constants
+#
+
 # configure debugging. set the DEBUG environment variable to any
 # non-empty value to enable debug output, or TRACE to enable trace
 # output.
-_TRACE=${TRACE:+'_trace '}
-_TRACE=${_TRACE:-':'}
-[ -n "${TRACE:-}" ] && DEBUG=1
-_DEBUG=${DEBUG:+'_debug '}
-_DEBUG=${_DEBUG:-':'}
+TRACE=${TRACE:+'tf_trace '}
+[ -n "${TRACE}" ] && DEBUG=1
+[ -z "${TRACE}" ] && TRACE=':'
+${TRACE} 'trace output enabled'
+
+DEBUG=${DEBUG:+'tf_debug '}
+[ -z "${DEBUG}" ] && DEBUG=':'
+${DEBUG} 'debug output enabled'
+
+#
+# variables
+#
 
 tf_RANDOM=0
 
-_trace()
-{
-  echo "TRACE $@" >&2
-}
-
-_debug()
-{
-  echo "DEBUG $@" >&2
-}
+# debugging functions
+tf_trace() { echo "${MY_NAME}:TRACE $@" >&2; }
+tf_debug() { echo "${MY_NAME}:DEBUG $@" >&2; }
 
 # generate a random number
 tf_generateRandom()
