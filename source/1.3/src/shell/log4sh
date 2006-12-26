@@ -1418,32 +1418,40 @@ EOF
         case ${_aa_type} in
           ${__LOG4SH_TYPE_ROLLING_FILE})
             # check whether the max file size has been exceeded
+            _aa_rotIndex=`appender_file_getMaxBackupIndex ${_aa_appender}`
+            _aa_rotSize=`appender_file_getMaxFileSize ${_aa_appender}`
             cat <<EOF
-  _la_rotSize=${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}
-  _la_size=\`ls -s '${_aa_file}' |awk '{print \$1}'\`
-  if [ \${_la_size} -gt \${_la_rotSize} ]; then
-    # rotate the appender file(s)
-    _la_rotIndex=${__LOG4SH_TYPE_ROLLING_FILE_MAX_BACKUP_INDEX}
-    _la_rotFile="${_aa_file}.\${_la_rotIndex}"
-    [ -f "\${_la_rotFile}" ] && rm -f "\${_la_rotFile}"
-    while [ \${_la_rotIndex} -gt 0 ]; do
-      _la_rotFileLast="\${_la_rotFile}"
-      _la_rotIndex=\`expr \${_la_rotIndex} - 1\`
+  _la_rotSize=${_aa_rotSize}
+  _la_size=\`wc -c '${_aa_file}' |awk '{print \$1}'\`
+  if [ \${_la_size} -ge \${_la_rotSize} ]; then
+    if [ ${_aa_rotIndex} -gt 0 ]; then
+      # rotate the appender file(s)
+      _la_rotIndex=`expr ${_aa_rotIndex} - 1`
       _la_rotFile="${_aa_file}.\${_la_rotIndex}"
-      [ -f "\${_la_rotFile}" ] && mv -f "\${_la_rotFile}" "\${_la_rotFileLast}"
-    done
+      [ -f "\${_la_rotFile}" ] && rm -f "\${_la_rotFile}"
+      while [ \${_la_rotIndex} -gt 0 ]; do
+        _la_rotFileLast="\${_la_rotFile}"
+        _la_rotIndex=\`expr \${_la_rotIndex} - 1\`
+        _la_rotFile="${_aa_file}.\${_la_rotIndex}"
+        [ -f "\${_la_rotFile}" ] && mv -f "\${_la_rotFile}" "\${_la_rotFileLast}"
+      done
+      mv -f '${_aa_file}' "\${_la_rotFile}"
+    else
+      # keep no backups; truncate the file
+      cp /dev/null "${_aa_file}"
+    fi
     unset _la_rotFile _la_rotFileLast _la_rotIndex
   fi
   unset _la_rotSize _la_size
 EOF
-	    ;;
-	  ${__LOG4SH_TYPE_DAILY_ROLLING_FILE})
-	    ;;
-	esac
-	echo "  echo \"\${_la_layout}\" >>'${_aa_file}'"
+            ;;
+          ${__LOG4SH_TYPE_DAILY_ROLLING_FILE})
+            ;;
+        esac
+        echo "  echo \"\${_la_layout}\" >>'${_aa_file}'"
       else
-	# the file "${__LOG4SH_NULL}" is closed?? Why did we get here, and why
-	# did I care when I wrote this bit of code?
+        # the file "${__LOG4SH_NULL}" is closed?? Why did we get here, and why
+        # did I care when I wrote this bit of code?
         :
       fi
 
@@ -1476,7 +1484,7 @@ EOF
       _aa_hostname=`hostname |sed 's/^\([^.]*\)\..*/\1/'`
 
       # are we logging to a remote host?
-      if [ "${_aa_syslogHost}" = "${__LOG4SH_NULL}" ]; then
+      if [ -z "${_aa_syslogHost}" ]; then
         # no -- use logger
         cat <<EOF
   ( exec logger -p "${_aa_facilityName}.\${_la_tag}" \
@@ -1711,6 +1719,48 @@ appender_setAppenderFile()
 #/**
 # <s:function group="FileAppender" modifier="public">
 # <entry align="right">
+#   <code>integer</code>/boolean
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_file_getMaxBackupIndex</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     Get the maximum backup index for a DailyRollingFileAppender or
+#     RollingFileAppender.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>appender_file_getMaxBackupIndex myAppender</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_file_getMaxBackupIndex()
+{
+  if [ $# -ne 1 ]; then
+    _log4sh_error 'appender_file_getMaxBackupIndex(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+
+  afgmbi_appender=${1:-}
+
+  afgmbi_index=`_log4sh_findArrayElement \
+      "${__log4shAppenders}" ${afgmbi_appender}`
+  # TODO: put check for valid index here
+  _log4sh_getArrayElement \
+      "${__log4shAppender_rollingFile_maxBackupIndexes}" ${afgmbi_index}
+  __log4sh_return=$?
+
+  unset afgmbi_appender afgmbi_index
+  return ${__log4sh_return}
+}
+
+#/**
+# <s:function group="FileAppender" modifier="public">
+# <entry align="right">
 #   <emphasis>void</emphasis>
 # </entry>
 # <entry>
@@ -1727,23 +1777,84 @@ appender_setAppenderFile()
 #     RollingFileAppender.
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>
-#       appender_file_setMaxBackupIndex myAppender 3
-#     </funcsynopsisinfo>
+#     <funcsynopsisinfo>appender_file_setMaxBackupIndex myAppender 3</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-# XXX this function needs to be implemented
 appender_file_setMaxBackupIndex()
 {
-  :
+  if [ $# -ne 2 ]; then
+    _log4sh_error "appender_file_setMaxBackupIndex(): invalid number of parameters ($#)"
+    return ${__LOG4SH_FALSE}
+  fi
+
+  afsmbi_appender=${1:-}
+  afsmbi_maxIndex=${2:-}
+
+  # TODO: put check for valid input
+
+  afsmbi_index=`_log4sh_findArrayElement \
+      "${__log4shAppenders}" ${afsmbi_appender}`
+  # TODO: put check for valid index here
+  __log4shAppender_rollingFile_maxBackupIndexes=`_log4sh_setArrayElement \
+      "${__log4shAppender_rollingFile_maxBackupIndexes}" ${afsmbi_index} \
+      "${afsmbi_maxIndex}"`
+  __log4sh_return=$?
+
+  # re-source the appender
+  _appender_cache ${afsmbi_appender}
+
+  unset afsmbi_appender afsmbi_maxIndex afsmbi_index
+  return ${__log4sh_return}
 }
 
 #/**
 # <s:function group="FileAppender" modifier="public">
 # <entry align="right">
-#   <emphasis>void</emphasis>
+#   <code>integer</code>/boolean
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
+#       <funcdef><function>appender_file_getMaxFileSize</function></funcdef>
+#       <paramdef>string <parameter>appender</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     Get the maximum backup file size for a DailyRollingFileAppender or
+#     RollingFileAppender.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>maxSize=`appender_file_getMaxBackupSize myAppender`</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+appender_file_getMaxFileSize()
+{
+  if [ $# -ne 1 ]; then
+    _log4sh_error "appender_file_getMaxFileSize(): invalid number of parameters ($#)"
+    return ${__LOG4SH_FALSE}
+  fi
+
+  afgmfs_appender=${1:-}
+
+  afgmfs_index=`_log4sh_findArrayElement \
+      "${__log4shAppenders}" ${afgmfs_appender}`
+  # TODO: put check for valid index here
+  _log4sh_getArrayElement \
+      "${__log4shAppender_rollingFile_maxFileSizes}" ${afgmfs_index}
+  __log4sh_return=$?
+
+  unset afgmfs_appender afgmfs_index
+  return ${__log4sh_return}
+}
+
+#/**
+# <s:function group="FileAppender" modifier="public">
+# <entry align="right">
+#   <emphasis>void</emphasis>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -1753,41 +1864,73 @@ appender_file_setMaxBackupIndex()
 #       <paramdef>string <parameter>size</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis role="strong">Not yet implemented</emphasis></para>
 #   <para>
 #     Set the maximum backup file size for a DailyRollingFileAppender or
 #     RollingFileAppender.
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>appender_file_setMaxBackupIndex myAppender 100KiB</funcsynopsisinfo>
+#     <funcsynopsisinfo>appender_file_setMaxBackupSize myAppender '100 KiB'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
 #*/
-# XXX this function needs to be implemented
 appender_file_setMaxFileSize()
 {
-  return ${__LOG4SH_FALSE}
+  if [ $# -ne 2 ]; then
+    _log4sh_error "appender_file_setMaxFileSize(): invalid number of parameters ($#)"
+    return ${__LOG4SH_FALSE}
+  fi
+
+  afsmfs_appender=${1:-}
+  afsmfs_size=${2:-}
+  __log4sh_return=${__LOG4SH_TRUE}
 
   # split the file size into parts
-  _l4s_size=`expr ${APP_MAX_FILE_SIZE} : '\([0-9]*\)'`
-  _l4s_unit=`expr ${APP_MAX_FILE_SIZE} : '[0-9]* *\([A-Za-z]\{2,3\}\)'`
+  afsmfs_value=`expr ${afsmfs_size} : '\([0-9]*\)'`
+  afsmfs_unit=`expr ${afsmfs_size} : '[0-9]* *\([A-Za-z]\{2,3\}\)'`
 
-  # determine multiplier and file size
-  case "${_l4s_unit}" in
-    B) _l4s_mul=1 ;;
-    KB|KiB) _l4s_mul=1024 ;;
-    MB|MiB) _l4s_mul=1048576 ;;
-    GB|GiB) _l4s_mul=1073741824 ;;
-    TB|TiB) _l4s_mul=1099511627776 ;;
+  # determine multiplier
+  case "${afsmfs_unit}" in
+    B) afsmfs_mul=1 ;;
+    KB|KiB) afsmfs_mul=1024 ;;
+    MB|MiB) afsmfs_mul=1048576 ;;
+    GB|GiB) afsmfs_mul=1073741824 ;;
+    TB|TiB) afsmfs_mul=1099511627776 ;;
+    '')
+      _log4sh_warn 'missing file size unit; assuming bytes'
+      afsmfs_mul=1
+      ;;
     *)
-      _log4sh_error "unrecognized file size unit '${_l4s_unit}'"
-      return ${__LOG4SH_FALSE}
+      _log4sh_error "unrecognized file size unit '${afsmfs_unit}'"
+      __log4sh_return=${__LOG4SH_FALSE}
       ;;
   esac
-  _l4s_maxFileSize=`expr ${_l4s_size} \* ${_l4s_mul}`
 
-  unset _l4s_size _l4s_unit _l4s_mul _l4s_maxFileSize
+  # calculate maximum file size
+  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+    afsmfs_maxFileSize=`(expr ${afsmfs_value} \* ${afsmfs_mul} 2>&1)`
+    if [ $? -gt 0 ]; then
+      _log4sh_error "problem calculating maximum file size: '${afsmfs_maxFileSize}'"
+      __log4sh_return=${__LOG4SH_FALSE}
+    fi
+  fi
+
+  # store the maximum file size
+  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+    afsmfs_index=`_log4sh_findArrayElement \
+        "${__log4shAppenders}" ${afsmfs_appender}`
+    # TODO: put check for valid index here
+    __log4shAppender_rollingFile_maxFileSizes=`_log4sh_setArrayElement \
+        "${__log4shAppender_rollingFile_maxFileSizes}" ${afsmfs_index} \
+        "${afsmfs_maxFileSize}"`
+  fi
+
+  # re-source the appender
+  _appender_cache ${afsmfs_appender}
+
+  unset afsmfs_appender afsmfs_size afsmfs_value afsmfs_unit afsmfs_mul \
+      afsmfs_maxFileSize afsmfs_index
+  return ${__log4sh_return}
 }
 
 #-----------------------------------------------------------------------------
@@ -2207,7 +2350,7 @@ appender_setSyslogFacility()
 #/**
 # <s:function group="SyslogAppender" modifier="public">
 # <entry align="right">
-#   <code>string</code>
+#   <code>string</code>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -2253,7 +2396,7 @@ appender_syslog_getHost()
 #/**
 # <s:function group="SyslogAppender" modifier="public">
 # <entry align="right">
-#   <emphasis>void</emphasis>
+#   <emphasis>void</emphasis>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -2952,10 +3095,12 @@ _log4sh_propAppender()
       DatePattern) ;;  # unsupported
       File)
         _lpa_value=`eval echo "${_lpa_value}"`
-        appender_file_setFile $_lpa_appender "$_lpa_value"
+        appender_file_setFile ${_lpa_appender} "${_lpa_value}"
         ;;
-      MaxBackupIndex) appender_file_setMaxBackupIndex ;;
-      MaxFileSize) appender_file_setMaxFileSize ;;
+      MaxBackupIndex)
+        appender_file_setMaxBackupIndex ${_lpa_appender} "${_lpa_value}" ;;
+      MaxFileSize)
+        appender_file_setMaxFileSize ${_lpa_appender} "${_lpa_value}" ;;
 
       # SMTPAppender
       To) appender_smtp_setTo $_lpa_appender "$_lpa_value" ;;
