@@ -10,23 +10,23 @@ Introduction
 
 <chapter label="1" id="intro">
   <title>Introduction</title>
-  <para>Log4sh has been developed under the Bourne Again Shell (<command>bash</command>) on Linux, but great care has been taken to make sure it works under the default Bourne Shell of Solaris (<command>sh</command>) as this happens to be the primary platform used by myself.</para>
+  <para>Log4sh has been developed under the Bourne Again Shell (<command>bash</command>) on Linux, but great care has been taken to make sure it works under the default Bourne Shell of Solaris (<command>sh</command>) as the platform is still widely used.</para>
 
   <para><blockquote><title>Tested Operating Systems</title>
     <itemizedlist>
       <listitem><para>Cygwin</para></listitem>
-      <listitem><para>FreeBSD</para></listitem>
       <listitem><para>Linux</para></listitem>
       <listitem><para>Solaris 8+</para></listitem>
     </itemizedlist>
   </blockquote></para>
 
-  <para><blockquote><title>Tested Shells</title>
+  <para><blockquote><title>Verified Shells</title>
     <itemizedlist>
       <listitem><para>BSD Shell (<command>dash</command>)</para></listitem>
       <listitem><para>Bourne Shell (<command>sh</command>)</para></listitem>
       <listitem><para>Bourne Again Shell (<command>bash</command>)</para></listitem>
-      <listitem><para>Korn Shell (<command>ksh</command>, <command>pdksh</command>)</para></listitem>
+      <listitem><para>Korn Shell (<command>ksh</command>)</para></listitem>
+      <listitem><para>Public Domain Korn Shell (<command>pdksh</command>) -- partial functionality</para></listitem>
     </itemizedlist>
   </blockquote></para>
 
