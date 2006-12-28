@@ -36,6 +36,11 @@ the 'nc' (netcat) command.
 
 [kwd] the RollingFileAppender now works
 
+[kwd] added a log4sh_enableStrictBehavior() function that forces stricter
+compliance with log4j
+
+[kwd] added a testMultipleAppender unit test. found that pdksh doesn't actually work with multiple appenders :-(
+
 -- Changes with shUnit 1.0.2
 
 [kwd] fixed problem where some of the unit test functions were reportingerrors

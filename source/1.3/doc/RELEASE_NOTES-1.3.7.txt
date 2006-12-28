@@ -7,16 +7,37 @@ by users.
 
 TESTED PLATFORMS
 
-Cygwin – bash 3.1.17(6); pdksh 5.2.4
+Cygwin
++ bash 3.1.17(6)
++ pdksh 5.2.4 (works only with a single appender)
 
-Linux – 3.1.17(1); dash 0.5.3; ksh 1993-12-28
+Linux
++ bash 3.1.17(1)
++ dash 0.5.3
++ ksh 1993-12-28
++ pdksh 5.2.14 (works only with a single appender)
++ zsh 4.3.2 (does not work)
 
-Solaris 10 U2 – /bin/sh; bash 3.00.16(1); ksh M-11/16/88i
+OSX
+? bash
+
+Solaris 10 U2
+? /bin/sh
+? bash 3.00.16(1)
+? ksh M-11/16/88i
 
 
 NEW FEATURES
 
 Added dash to the list of supported shells.
+
+Logging to remote hosts via syslog now supported. This requires setting 'nc'
+alternative command to point to nc (netcat) as the command is not present by
+default on most systems.
+
+The RollingFileAppender now works properly. Files are rotated based upon a
+maximum file size, and the number of backup files can be limited with a maximum
+backup index.
 
 
 CHANGES AND ENHANCEMENTS
@@ -26,15 +47,9 @@ start tracking some bugs more officially in the bug tracking of SourceForge.
 The few bugs that were reported for this release have been entered into the
 tracking system for the sake of posterity.
 
-Additional unit tests: SyslogAppender
-
-Logging to remote hosts via syslog now supported. Requires setting 'nc'
-alternative command path as the nc (netcat) command is not present by default
-on most systems.
-
-The RollingFileAppender now works properly. Files are rotated based upon a
-maximum file size, and the number of backup files can be limited with a maximum
-backup index.
+Additional unit tests:
++ testMultipleAppenders
++ testSyslogAppender
 
 
 BUG FIXES
@@ -55,7 +70,9 @@ Bug# 1614338 -- SyslogAppender not logging
 
 DEPRECATED FEATURES
 
-None.
+The logger_pushThreadName() and logger_popThreadName() functions have been
+deprecated. They are not part of the standard log4j, and their usefulness is
+quite limited seeing as shell does not support threads.
 
 
 KNOWN BUGS AND ISSUES
@@ -64,10 +81,12 @@ Passing of the '\' character in an logging message does not work under the
 standard Solaris Bourne shell [/bin/sh], under the dash shell [/bin/dash], or
 under Cygwin with ksh [/bin/ksh].
 
-The RollingFileAppender and DailyRollingFileAppender appenders do not roll
-their files.
+The pdksh shell [/bin/pdksh] does not work with multiple appenders. It works
+just fine with a single appender though.
 
-Trap handling is not yet 100% fool-proof.
+The DailyRollingFileAppender appender do not roll files.
+
+Trap handling is not yet absolutely 100% fool-proof.
 
 Performance is prohibitively slow under Cygwin
 
