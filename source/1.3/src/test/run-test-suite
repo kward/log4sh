@@ -3,11 +3,25 @@
 
 myName=`basename $0`
 
-SHELLS='/bin/sh /bin/bash /bin/ksh'
+SHELLS='/bin/sh /bin/bash /bin/dash /bin/ksh /bin/pdksh'
 
 [ $# -ne 0 ] && shells=$@ || shells=${SHELLS}
 
-first=1
+cat <<EOF
+#------------------------------------------------------------------------------
+# System data
+#
+
+EOF
+
+# output system data
+echo "$ date"
+date
+
+echo "$ uname -a"
+uname -a
+
+echo
 for shell in ${shells}; do
   # check for existance of shell
   if [ ! -x ${shell} ]; then
@@ -15,16 +29,33 @@ for shell in ${shells}; do
     continue
   fi
 
-  # separate test runs with a blank line
-  if [ ${first} -eq 0 ]; then
-    echo
-  else
-    first=0
+  # see if shell is a sym-link
+  if [ -h ${shell} ]; then
+    echo "${myName}:WARN the ${shell} shell is a sym-link; ignoring"
+    continue
   fi
 
-  echo "#------------------------------------------------------------------------------"
-  echo "# Running the test suite with ${shell}"
-  echo "#"
+  cat <<EOF
+
+#------------------------------------------------------------------------------
+# Running the test suite with ${shell}
+#
+EOF
+
+  case `basename ${shell}` in
+    bash) echo; ${shell} --version; ;;
+    dash) ;;
+    ksh)
+      version=`${shell} --version 2>&1`
+      exitVal=$?
+      if [ ${exitVal} -eq 2 ]; then
+        echo
+        echo "${version}"
+      fi
+      ;;
+    pdksh) ;;
+    zsh) ;;
+  esac
 
   for suite in test[A-Z]*; do
     if [ -x ${suite} ]; then
