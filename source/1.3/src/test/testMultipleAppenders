@@ -1,0 +1,86 @@
+#! /bin/sh
+# $Id: testPriority 265 2006-09-07 16:13:13Z sfsetse $
+
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
+
+APP_ONE_NAME="appenderOne"
+APP_ONE_FILE="${MY_NAME}-one.log"
+APP_TWO_NAME="appenderTwo"
+APP_TWO_FILE="${MY_NAME}-two.log"
+
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+testTwoSimilarFileAppenders()
+{
+  # configure log4sh
+  logger_setLevel INFO
+
+  # setup first appender
+  logger_addAppender ${APP_ONE_NAME}
+  appender_setType ${APP_ONE_NAME} FileAppender
+  appender_file_setFile ${APP_ONE_NAME} "${APP_ONE_FILE}"
+  appender_activateOptions ${APP_ONE_NAME}
+
+  # setup second appender
+  logger_addAppender ${APP_TWO_NAME}
+  appender_setType ${APP_TWO_NAME} FileAppender
+  appender_file_setFile ${APP_TWO_NAME} "${APP_TWO_FILE}"
+  appender_activateOptions ${APP_TWO_NAME}
+
+  # log a message
+  tf_generateRandom
+  random=${tf_RANDOM}
+  logger_info "dummy message ${random}"
+
+  # verify first appender
+  matched=`tail "${APP_ONE_FILE}" |grep "${random}"`
+  assertNotNull \
+    'first appender did not properly receive message' \
+    "${matched}"
+
+  # verify second appender
+  matched=`tail "${APP_TWO_FILE}" |grep "${random}"`
+  assertNotNull \
+    'second appender did not properly receive message' \
+    "${matched}"
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  # source log4sh
+  ${DEBUG} 'loading log4sh'
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+}
+
+setUp()
+{
+  log4sh_resetConfiguration
+}
+
+oneTimeTearDown()
+{
+  rm "${APP_ONE_FILE}" "${APP_TWO_FILE}"
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+suite()
+{
+  suite_addTest testTwoSimilarFileAppenders
+}
+
+# load and run shUnit
+${DEBUG} 'loading shUnit'
+. ./shunit
