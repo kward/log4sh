@@ -66,6 +66,8 @@ testFacilityGetterSetter()
   failNotEquals \
       'the syslog facility does not match the one set' \
       "${testFacility}" "${gotFacility}"
+
+  unset facility gotFacility testFacility result
 }
 
 testHostGetterSetter()
@@ -91,6 +93,8 @@ testHostGetterSetter()
   assertEquals \
       'the syslog host does not match the one that was set' \
       "${testHost}" "${gotHost}"
+
+  unset gotHost testHost result
 }
 
 testSyslogLogfilePresent()
