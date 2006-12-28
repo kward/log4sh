@@ -131,6 +131,7 @@ unset _log4sh_const
 __log4sh_filename=`basename $0`
 __log4sh_tmpDir=''
 __log4sh_trapsFile=''
+__log4sh_strictBehavior=${__LOG4SH_FALSE}
 
 __log4sh_threadName=${__LOG4SH_THREAD_DEFAULT}
 __log4sh_threadStack=${__LOG4SH_THREAD_DEFAULT}
@@ -444,6 +445,33 @@ _log4sh_updateSeconds()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
+#       <funcdef><function>log4sh_enableStrictBehavior</function></funcdef>
+#       <void />
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     Enables strict log4j behavior.
+#   </para>
+#   <para><emphasis role="strong">Since:</emphasis> 1.3.7</para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>log4sh_enableStrictBehavior</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+log4sh_enableStrictBehavior()
+{
+  __log4sh_strictBehavior=${__LOG4SH_TRUE}
+}
+
+#/**
+# <s:function group="Log4sh" modifier="public">
+# <entry align="right">
+#   <emphasis>void</emphasis>/boolean
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
 #       <funcdef><function>log4sh_setAlternative</function></funcdef>
 #       <paramdef>string <parameter>command</parameter></paramdef>
 #       <paramdef>string <parameter>path</parameter></paramdef>
@@ -452,6 +480,7 @@ _log4sh_updateSeconds()
 #   <para>
 #     Specifies an alternative path for a command.
 #   </para>
+#   <para><emphasis role="strong">Since:</emphasis> 1.3.7</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>log4sh_setAlternative nc /bin/nc</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1639,8 +1668,10 @@ appender_file_getFile()
 #       <paramdef>string <parameter>filename</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Set the filename for a FileAppender (e.g. "STDERR" or
-#   "/var/log/log4sh.log")</para>
+#   <para>
+#     Set the filename for a FileAppender (e.g. <filename>STDERR</filename> or
+#     <filename>/var/log/log4sh.log</filename>).
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_file_setFile myAppender STDERR</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1729,9 +1760,9 @@ appender_setAppenderFile()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>
-#     Get the maximum backup index for a DailyRollingFileAppender or
-#     RollingFileAppender.
+#     Returns the value of the MaxBackupIndex option.
 #   </para>
+#   <para><emphasis role="strong">Since:</emphasis> 1.3.7</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_file_getMaxBackupIndex myAppender</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1771,11 +1802,15 @@ appender_file_getMaxBackupIndex()
 #       <paramdef>integer <parameter>index</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para><emphasis role="strong">Not yet implemented</emphasis></para>
+#   <para>Set the maximum number of backup files to keep around.</para>
 #   <para>
-#     Set the maximum backup index for a DailyRollingFileAppender or
-#     RollingFileAppender.
+#     The <emphasis role="strong">MaxBackupIndex</emphasis> option determines
+#     how many backup files are kept before the oldest is erased. This option
+#     takes a positive integer value. If set to zero, then there will be no
+#     backup files and the log file will be truncated when it reaches
+#     <option>MaxFileSize</option>.
 #   </para>
+#   <para><emphasis role="strong">Since:</emphasis> 1.3.7</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_file_setMaxBackupIndex myAppender 3</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1822,9 +1857,10 @@ appender_file_setMaxBackupIndex()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>
-#     Get the maximum backup file size for a DailyRollingFileAppender or
-#     RollingFileAppender.
+#     Get the maximum size that the output file is allowed to reach before
+#     being rolled over to backup files.
 #   </para>
+#   <para><emphasis role="strong">Since:</emphasis> 1.3.7</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>maxSize=`appender_file_getMaxBackupSize myAppender`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -1865,11 +1901,19 @@ appender_file_getMaxFileSize()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>
-#     Set the maximum backup file size for a DailyRollingFileAppender or
-#     RollingFileAppender.
+#     Set the maximum size that the output file is allowed to reach before
+#     being rolled over to backup files.
 #   </para>
+#   <para>
+#     In configuration files, the <option>MaxFileSize</option> option takes an
+#     long integer in the range 0 - 2^40. You can specify the value with the
+#     suffixes "KiB", "MiB" or "GiB" so that the integer is interpreted being
+#     expressed respectively in kilobytes, megabytes or gigabytes. For example,
+#     the value "10KiB" will be interpreted as 10240.
+#   </para>
+#   <para><emphasis role="strong">Since:</emphasis> 1.3.7</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>appender_file_setMaxBackupSize myAppender '100 KiB'</funcsynopsisinfo>
+#     <funcsynopsisinfo>appender_file_setMaxBackupSize myAppender 10KiB</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -1890,12 +1934,24 @@ appender_file_setMaxFileSize()
   afsmfs_unit=`expr ${afsmfs_size} : '[0-9]* *\([A-Za-z]\{2,3\}\)'`
 
   # determine multiplier
+  if [ ${__log4sh_strictBehavior} -eq ${__LOG4SH_TRUE} ]; then
+    case "${afsmfs_unit}" in
+      KB) afsmfs_unit='KiB' ;;
+      MB) afsmfs_unit='MiB' ;;
+      GB) afsmfs_unit='GiB' ;;
+      TB) afsmfs_unit='TiB' ;;
+    esac
+  fi
   case "${afsmfs_unit}" in
     B) afsmfs_mul=1 ;;
-    KB|KiB) afsmfs_mul=1024 ;;
-    MB|MiB) afsmfs_mul=1048576 ;;
-    GB|GiB) afsmfs_mul=1073741824 ;;
-    TB|TiB) afsmfs_mul=1099511627776 ;;
+    KB) afsmfs_mul=1000 ;;
+    KiB) afsmfs_mul=1024 ;;
+    MB) afsmfs_mul=1000000 ;;
+    MiB) afsmfs_mul=1048576 ;;
+    GB) afsmfs_mul=1000000000 ;;
+    GiB) afsmfs_mul=1073741824 ;;
+    TB) afsmfs_mul=1000000000000 ;;
+    TiB) afsmfs_mul=1099511627776 ;;
     '')
       _log4sh_warn 'missing file size unit; assuming bytes'
       afsmfs_mul=1
@@ -2247,7 +2303,9 @@ appender_getSyslogFacility()
 #       <paramdef>string <parameter>appender</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Get the syslog facility for the given appender</para>
+#   <para>
+#     Get the syslog facility for the given appender.
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>facility=`appender_syslog_getFacility myAppender`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -2360,8 +2418,9 @@ appender_setSyslogFacility()
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>
-#     Get the syslog host of the specified appender
+#     Get the syslog host of the specified appender.
 #   </para>
+#   <para><emphasis role="strong">Since:</emphasis> 1.3.7</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>host=`appender_syslog_getHost myAppender`</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -2411,6 +2470,7 @@ appender_syslog_getHost()
 #     command alternative has been previously set with the
 #     log4sh_setAlternative() function.
 #   </para>
+#   <para><emphasis role="strong">Since:</emphasis> 1.3.7</para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>appender_syslog_setHost myAppender localhost</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -2421,7 +2481,6 @@ appender_syslog_getHost()
 # The BSD syslog Protocol
 #   http://www.ietf.org/rfc/rfc3164.txt
 #
-# XXX: don't forget to limit the packet length to 1024b
 appender_syslog_setHost()
 {
   if [ $# -ne 2 ]; then
@@ -2599,7 +2658,6 @@ logger_addAppender()
   _appender_cache ${laa_appender}
 
   unset laa_appender
-
   return ${__LOG4SH_TRUE}
 }
 
@@ -2655,7 +2713,7 @@ logger_addAppenderWithPattern()
 #     is used in a PatternLayout.
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>myFilename=`logger_setFilename`</funcsynopsisinfo>
+#     <funcsynopsisinfo>filename=`logger_getFilename`</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2680,7 +2738,7 @@ logger_getFilename()
 #   <para>Set the filename to be shown when the '%F' conversion character is
 #   used in a PatternLayout.</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>logger_setFilename "myScript.sh"</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_setFilename 'myScript.sh'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2763,7 +2821,7 @@ logger_setLevel()
 #   <para>The base logging command that logs a message to all defined
 #     appenders</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>log DEBUG "This is a test message"`</funcsynopsisinfo>
+#     <funcsynopsisinfo>log DEBUG 'This is a test message'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2820,7 +2878,7 @@ log()
 #   <para>This is a helper function for logging a message at the TRACE
 #     priority</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>logger_trace "This is a trace message"`</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_trace 'This is a trace message'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2845,7 +2903,7 @@ logger_trace()
 #   <para>This is a helper function for logging a message at the DEBUG
 #     priority</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>logger_debug "This is a debug message"`</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_debug 'This is a debug message'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2870,7 +2928,7 @@ logger_debug()
 #   <para>This is a helper function for logging a message at the INFO
 #     priority</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>logger_info "This is a info message"`</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_info 'This is a info message'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2896,7 +2954,7 @@ logger_info()
 #     This is a helper function for logging a message at the WARN priority
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>logger_warn "This is a warn message"`</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_warn 'This is a warn message'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2922,7 +2980,7 @@ logger_warn()
 #     This is a helper function for logging a message at the ERROR priority
 #   </para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>logger_error "This is a error message"`</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_error 'This is a error message'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -2947,7 +3005,7 @@ logger_error()
 #   <para>This is a helper function for logging a message at the FATAL
 #     priority</para>
 #   <funcsynopsis>
-#     <funcsynopsisinfo>logger_fatal This is a fatal message`</funcsynopsisinfo>
+#     <funcsynopsisinfo>logger_fatal 'This is a fatal message'</funcsynopsisinfo>
 #   </funcsynopsis>
 # </entry>
 # </s:function>
@@ -3386,9 +3444,11 @@ logger_getThreadName()
 #       <paramdef>string <parameter>threadName</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Sets the thread name (e.g. the name of the script). This thread name
-#   can be used with the '%t' conversion character within a
-#   PatternLayout.</para>
+#   <para>
+#     Sets the thread name (e.g. the name of the script). This thread name can
+#     be used with the '%t' conversion character within a
+#     <option>PatternLayout</option>.
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>logger_setThreadName "myThread"</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -3418,9 +3478,12 @@ logger_setThreadName()
 #       <paramdef>string <parameter>threadName</parameter></paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Sets the thread name (eg. the name of the script) and pushes the old
-#   on to a stack for later use. This thread name can be used with the '%t'
-#   conversion character within a PatternLayout.</para>
+#   <para><emphasis role="strong">Deprecated as of 1.3.7</emphasis></para>
+#   <para>
+#     Sets the thread name (eg. the name of the script) and pushes the old on
+#     to a stack for later use. This thread name can be used with the '%t'
+#     conversion character within a <option>PatternLayout</option>.
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>logger_pushThreadName "myThread"</funcsynopsisinfo>
 #   </funcsynopsis>
@@ -3445,10 +3508,13 @@ logger_pushThreadName()
 #       <void />
 #     </funcprototype>
 #   </funcsynopsis>
-#   <para>Removes the topmost thread name from the stack. The next thread name
-#   on the stack is then placed in the __log4sh_threadName variable. If the
-#   stack is empty, or has only one element left, then a warning is given that
-#   no more thread names can be popped from the stack.</para>
+#   <para><emphasis role="strong">Deprecated as of 1.3.7</emphasis></para>
+#   <para>
+#     Removes the topmost thread name from the stack. The next thread name on
+#     the stack is then placed in the <varname>__log4sh_threadName</varname>
+#     variable. If the stack is empty, or has only one element left, then a
+#     warning is given that no more thread names can be popped from the stack.
+#   </para>
 #   <funcsynopsis>
 #     <funcsynopsisinfo>logger_popThreadName</funcsynopsisinfo>
 #   </funcsynopsis>
