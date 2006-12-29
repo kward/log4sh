@@ -18,6 +18,7 @@ http://svn.sourceforge.net/log4sh
 For these steps, it is assumed we are working with release 1.3.6.
 
 Steps:
+* run the unit tests
 * write release notes
 * update version
 * finish changelog
@@ -29,9 +30,23 @@ Steps:
 * update website
 * post to SourceForge and Freshmeat
 
+RUN THE UNIT TESTS
+
+Run make with the 'test-prep' option to create the test/ directory. Change
+there and run the tests. Record the output into the
+website/testresults/<version>/ directory so that they can be posted to the
+website. Repeate this for each of the supported OSes.
+
+$ make test-prep
+...
+$ cd test
+$ ./run-test-suite 2>&1 |tee .../testresults/1.3.7/Linux-Ubuntu_Edgy-6.10.txt
+...
+
 WRITE RELEASE NOTES
 
-Pretty self explainatory.
+Again, pretty self explainatory. Use one of the release notes from a previous
+release as an example.
 
 To get the versions of the various shells, do the following:
 Cygwin

@@ -41,6 +41,8 @@ compliance with log4j
 
 [kwd] added a testMultipleAppender unit test. found that pdksh doesn't actually work with multiple appenders :-(
 
+[kwd] fix a bug which caused the pdksh shell to not work properly
+
 -- Changes with shUnit 1.0.2
 
 [kwd] fixed problem where some of the unit test functions were reportingerrors

@@ -15,7 +15,7 @@ Linux
 + bash 3.1.17(1)
 + dash 0.5.3
 + ksh 1993-12-28
-+ pdksh 5.2.14 (works only with a single appender)
++ pdksh 5.2.14
 + zsh 4.3.2 (does not work)
 
 OSX
@@ -63,6 +63,8 @@ shUnit, so they had to be slightly altered.
 
 The subject was not being set properly in the SMTPAppender.
 
+The pdksh shell now works properly.
+
 Bug# 1611574 -- 'unbound variable' error
 
 Bug# 1614338 -- SyslogAppender not logging
@@ -80,9 +82,6 @@ KNOWN BUGS AND ISSUES
 Passing of the '\' character in an logging message does not work under the
 standard Solaris Bourne shell [/bin/sh], under the dash shell [/bin/dash], or
 under Cygwin with ksh [/bin/ksh].
-
-The pdksh shell [/bin/pdksh] does not work with multiple appenders. It works
-just fine with a single appender though.
 
 The DailyRollingFileAppender appender do not roll files.
 
