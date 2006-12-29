@@ -23,9 +23,17 @@ ${DEBUG} 'debug output enabled'
 
 tf_RANDOM=0
 
-# debugging functions
+#
+# functions
+#
+
+# message functions
 tf_trace() { echo "${MY_NAME}:TRACE $@" >&2; }
 tf_debug() { echo "${MY_NAME}:DEBUG $@" >&2; }
+tf_info() { echo "${MY_NAME}:INFO $@" >&2; }
+tf_warn() { echo "${MY_NAME}:WARN $@" >&2; }
+tf_error() { echo "${MY_NAME}:ERROR $@" >&2; }
+tf_fatal() { echo "${MY_NAME}:FATAL $@" >&2; }
 
 # generate a random number
 tf_generateRandom()
