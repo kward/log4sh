@@ -597,7 +597,7 @@ _log4sh_getArrayElement()
     if [ ${_lgae_arraySize} -le ${__log4shAppenderCount} ]; then
       # the evaled set *didn't* work; failing back to original set command and
       # disabling the work around. (pdksh)
-      __log4sh_wa_setNeedsEval=${FALSE}
+      __log4sh_wa_setNeedsEval=${__LOG4SH_FALSE}
       set -- junk ${_lgae_array}
     fi
   fi
