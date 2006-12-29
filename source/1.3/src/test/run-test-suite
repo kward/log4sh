@@ -1,11 +1,41 @@
 #! /bin/sh
 # $Id$
 
-myName=`basename $0`
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
 
 SHELLS='/bin/sh /bin/bash /bin/dash /bin/ksh /bin/pdksh'
 
-[ $# -ne 0 ] && shells=$@ || shells=${SHELLS}
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
+
+usage()
+{
+  echo "usage: ${MY_NAME} -s shell(s) -t test(s)"
+}
+
+# process command line flags
+while getopts 'hs:t:' opt; do
+  case ${opt} in
+    h) usage; exit 0 ;;
+    s) shells=${OPTARG} ;;
+    t) tests=${OPTARG} ;;
+    *) usage; exit 1 ;;
+  esac
+done
+shift `expr ${OPTIND} - 1`
+
+# fill shells and/or tests
+[ -z "${shells}" ] && shells=${SHELLS}
+if [ -z "${tests}" ]; then
+  tests=test[A-Z]*
+fi
+
+# error checking
+if [ -z "${tests}" ]; then
+  tf_error 'no tests found to run; exiting'
+  exit 1
+fi
 
 cat <<EOF
 #------------------------------------------------------------------------------
@@ -25,13 +55,7 @@ echo
 for shell in ${shells}; do
   # check for existance of shell
   if [ ! -x ${shell} ]; then
-    echo "${myName}:WARN unable to run tests with the ${shell} shell"
-    continue
-  fi
-
-  # see if shell is a sym-link
-  if [ -h ${shell} ]; then
-    echo "${myName}:WARN the ${shell} shell is a sym-link; ignoring"
+    echo "${MY_NAME}:WARN unable to run tests with the ${shell} shell"
     continue
   fi
 
@@ -57,7 +81,7 @@ EOF
     zsh) ;;
   esac
 
-  for suite in test[A-Z]*; do
+  for suite in ${tests}; do
     if [ -x ${suite} ]; then
       # execute the test
       suiteName=`expr "${suite}" : 'test\(.*\)'`
