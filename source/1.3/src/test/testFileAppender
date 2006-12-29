@@ -4,21 +4,19 @@
 MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
 
-debug() { echo "${MY_NAME}:DEBUG $@" >&2; }
-DEBUG=${DEBUG:+'debug '}
-[ -z "${DEBUG}" ] && DEBUG=':'
-${DEBUG} 'debugging enabled'
-
 APP_ACCESSORS='accessors'
-APP_ACCESSORS_FILE='myAccessors.out'
+APP_ACCESSORS_FILE=''
 APP_ACCESSORS_LOG4SH="${MY_NAME}-${APP_ACCESSORS}.log4sh"
 
 APP_SIMPLE='mySimple'
-APP_SIMPLE_FILE='mySimple.out'
+APP_SIMPLE_FILE=''
 APP_SIMPLE_LOG4SH="${MY_NAME}-${APP_SIMPLE}.log4sh"
 
 APP_STDERR='mySTDERR'
 APP_STDERR_LOG4SH="${MY_NAME}-${APP_STDERR}.log4sh"
+
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -167,7 +165,8 @@ testAccessors_setgetFilename()
 
 oneTimeSetUp()
 {
-  assertFile="${__shunit_tmpDir}/assert.dat"
+  APP_ACCESSORS_FILE="${__shunit_tmpDir}/myAccessors.out"
+  APP_SIMPLE_FILE="${__shunit_tmpDir}/mySimple.out"
 
   # load log4sh
   ${DEBUG} 'loading log4sh'
@@ -182,7 +181,7 @@ setUp()
 
 tearDown()
 {
-  rm -f "${assertFile}" "${APP_SIMPLE_FILE}"
+  rm -f "${APP_ACCESSORS_FILE}" "${APP_SIMPLE_FILE}"
 }
 
 #------------------------------------------------------------------------------
