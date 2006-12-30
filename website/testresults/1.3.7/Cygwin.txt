@@ -420,6 +420,7 @@ tests passed: 24
 tests failed: 44
 tests total:  68
 success rate: 35%
+
 run-test-suite:WARN unable to run tests with the /bin/dash shell
 
 #------------------------------------------------------------------------------
