@@ -51,8 +51,13 @@ date
 echo "$ uname -a"
 uname -a
 
-echo
+#
+# run tests
+#
+
 for shell in ${shells}; do
+  echo
+
   # check for existance of shell
   if [ ! -x ${shell} ]; then
     echo "${MY_NAME}:WARN unable to run tests with the ${shell} shell"
