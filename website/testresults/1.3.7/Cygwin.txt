@@ -1,0 +1,835 @@
+#------------------------------------------------------------------------------
+# System data
+#
+
+$ date
+Fri Dec 29 20:06:14 GMT 2006
+$ uname -a
+CYGWIN_NT-5.1 girly-winxp 1.5.21(0.156/4/2) 2006-07-30 14:21 i686 Cygwin
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/sh
+#
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed: 6
+tests failed: 0
+tests total:  6
+success rate: 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed: 6
+tests failed: 0
+tests total:  6
+success rate: 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed: 10
+tests failed: 0
+tests total:  10
+success rate: 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed: 2
+tests failed: 0
+tests total:  2
+success rate: 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+
+#
+# Test report
+#
+tests passed: 24
+tests failed: 0
+tests total:  24
+success rate: 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+
+#
+# Test report
+#
+tests passed: 42
+tests failed: 0
+tests total:  42
+success rate: 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed: 32
+tests failed: 0
+tests total:  32
+success rate: 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:ERROR [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+ASSERT: unable to read from the test syslog output file (/var/log/log4sh.log).
+testPriorityMatrix
+  testing appender priority 'TRACE'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'DEBUG'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'INFO'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'WARN'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'ERROR'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'FATAL'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'OFF'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+testRemoteLogging
+log4sh:ERROR unrecognized command alternative 'nc'
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+ASSERT: failed
+
+#
+# Test report
+#
+tests passed: 24
+tests failed: 44
+tests total:  68
+success rate: 35%
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/bash
+#
+
+GNU bash, version 3.1.17(6)-release (i686-pc-cygwin)
+Copyright (C) 2005 Free Software Foundation, Inc.
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed: 6
+tests failed: 0
+tests total:  6
+success rate: 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed: 6
+tests failed: 0
+tests total:  6
+success rate: 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed: 10
+tests failed: 0
+tests total:  10
+success rate: 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed: 2
+tests failed: 0
+tests total:  2
+success rate: 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+
+#
+# Test report
+#
+tests passed: 24
+tests failed: 0
+tests total:  24
+success rate: 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+
+#
+# Test report
+#
+tests passed: 42
+tests failed: 0
+tests total:  42
+success rate: 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed: 32
+tests failed: 0
+tests total:  32
+success rate: 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:ERROR [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+ASSERT: unable to read from the test syslog output file (/var/log/log4sh.log).
+testPriorityMatrix
+  testing appender priority 'TRACE'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'DEBUG'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'INFO'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'WARN'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'ERROR'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'FATAL'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'OFF'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+testRemoteLogging
+log4sh:ERROR unrecognized command alternative 'nc'
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+ASSERT: failed
+
+#
+# Test report
+#
+tests passed: 24
+tests failed: 44
+tests total:  68
+success rate: 35%
+run-test-suite:WARN unable to run tests with the /bin/dash shell
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/ksh
+#
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+ASSERT: 'PQRSTUVWXYZ[\]^_' != 'PQRSTUVWXYZ[]^_'
+
+#
+# Test report
+#
+tests passed: 5
+tests failed: 1
+tests total:  6
+success rate: 83%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed: 6
+tests failed: 0
+tests total:  6
+success rate: 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed: 10
+tests failed: 0
+tests total:  10
+success rate: 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed: 2
+tests failed: 0
+tests total:  2
+success rate: 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+
+#
+# Test report
+#
+tests passed: 24
+tests failed: 0
+tests total:  24
+success rate: 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+
+#
+# Test report
+#
+tests passed: 42
+tests failed: 0
+tests total:  42
+success rate: 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed: 32
+tests failed: 0
+tests total:  32
+success rate: 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:ERROR [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+ASSERT: unable to read from the test syslog output file (/var/log/log4sh.log).
+testPriorityMatrix
+  testing appender priority 'TRACE'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'DEBUG'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'INFO'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'WARN'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'ERROR'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'FATAL'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'OFF'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+testRemoteLogging
+log4sh:ERROR unrecognized command alternative 'nc'
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+ASSERT: failed
+
+#
+# Test report
+#
+tests passed: 24
+tests failed: 44
+tests total:  68
+success rate: 35%
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/pdksh
+#
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+ASSERT: 'PQRSTUVWXYZ[\]^_' != 'PQRSTUVWXYZ[]^_'
+
+#
+# Test report
+#
+tests passed: 5
+tests failed: 1
+tests total:  6
+success rate: 83%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed: 6
+tests failed: 0
+tests total:  6
+success rate: 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed: 10
+tests failed: 0
+tests total:  10
+success rate: 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed: 2
+tests failed: 0
+tests total:  2
+success rate: 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+
+#
+# Test report
+#
+tests passed: 24
+tests failed: 0
+tests total:  24
+success rate: 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+
+#
+# Test report
+#
+tests passed: 42
+tests failed: 0
+tests total:  42
+success rate: 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed: 32
+tests failed: 0
+tests total:  32
+success rate: 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:ERROR [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+ASSERT: unable to read from the test syslog output file (/var/log/log4sh.log).
+testPriorityMatrix
+  testing appender priority 'TRACE'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'DEBUG'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'INFO'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'WARN'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'ERROR'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'FATAL'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+  testing appender priority 'OFF'
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+ASSERT: failed
+testRemoteLogging
+log4sh:ERROR unrecognized command alternative 'nc'
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+ASSERT: failed
+
+#
+# Test report
+#
+tests passed: 24
+tests failed: 44
+tests total:  68
+success rate: 35%
