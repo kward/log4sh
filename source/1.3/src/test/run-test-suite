@@ -70,7 +70,7 @@ EOF
     bash) echo; ${shell} --version; ;;
     dash) ;;
     ksh)
-      version=`${shell} --version 2>&1`
+      version=`${shell} --version exit 2>&1`
       exitVal=$?
       if [ ${exitVal} -eq 2 ]; then
         echo
