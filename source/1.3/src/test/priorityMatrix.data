@@ -4,11 +4,15 @@
 #  priority
 #  which priorities should generate a message
 #
+# note: the default IFS in pure POSIX shells seems to parse only spaces when
+# using the 'read' builtin. as such, only spaces are used as separation
+# characters below.
+#
 # priority TRACE DEBUG INFO WARN ERROR FATAL
-TRACE	1 1 1 1 1 1
-DEBUG	0 1 1 1 1 1
-INFO	0 0 1 1 1 1
-WARN	0 0 0 1 1 1
-ERROR	0 0 0 0 1 1
-FATAL	0 0 0 0 0 1
-OFF	0 0 0 0 0 0
+TRACE   1 1 1 1 1 1
+DEBUG   0 1 1 1 1 1
+INFO    0 0 1 1 1 1
+WARN    0 0 0 1 1 1
+ERROR   0 0 0 0 1 1
+FATAL   0 0 0 0 0 1
+OFF     0 0 0 0 0 0
