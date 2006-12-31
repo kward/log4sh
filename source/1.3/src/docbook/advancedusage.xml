@@ -10,7 +10,61 @@ Advanced Usage Guide
 <chapter id="advancedusage"><title>Advanced Usage</title>
   <para>This chapter is dedicated to some more advanced usage of log4sh. It is meant to demonstrate some functionality that might not normally be understood.</para>
 
-  <section id="advancedusage-remotesyslog"><title>Remote Syslog Logging</title>
+  <section id="advancedusage-sect-envvars"><title>Environment Variables</title>
+    <para>There are several environment variables that can be set to alter the behavior of log4sh. The full listing is below.</para>
+
+    <table id="advancedusage-envvars">
+      <title>log4sh Environment Variables</title>
+      <tgroup cols="3">
+      <thead>
+	<row>
+	  <entry>Variable</entry>
+	  <entry>Default</entry>
+	  <entry>Description</entry>
+	</row>
+      </thead>
+      <tbody>
+	<row>
+	  <entry><varname>LOG4SH_ALTERNATIVE_NC</varname></entry>
+	  <entry><emphasis>none</emphasis></entry>
+	  <entry>Provide log4sh with the absolute path to the <command>nc</command> (netcat) command -- e.g. <filename>/bin/nc</filename></entry>
+	</row>
+	<row>
+	  <entry><varname>LOG4SH_CONFIGURATION</varname></entry>
+	  <entry><emphasis>none</emphasis></entry>
+	  <entry>Provide log4sh with the absolute path to the log4sh properties file.</entry>
+	</row>
+	<row>
+	  <entry><varname>LOG4SH_CONFIG_PREFIX</varname></entry>
+	  <entry><option>log4sh</option></entry>
+	  <entry>Define the expected prefix to use for parsing the properties file -- e.g. <option>log4j</option></entry>
+	</row>
+	<row>
+	  <entry><varname>LOG4SH_DEBUG</varname></entry>
+	  <entry><emphasis>none</emphasis></entry>
+	  <entry>Enable internal log4sh debug output. Set to any non-empty value.</entry>
+	</row>
+	<row>
+	  <entry><varname>LOG4SH_DEBUG_FILE</varname></entry>
+	  <entry><emphasis>none</emphasis></entry>
+	  <entry>Define a file where all internal log4sh trace/debug/info output will be written to -- e.g. <filename>log4sh_internal.log</filename></entry>
+	</row>
+	<row>
+	  <entry><varname>LOG4SH_INFO</varname></entry>
+	  <entry><emphasis>none</emphasis></entry>
+	  <entry>Enable internal log4sh info output. Set to any non-empty value.</entry>
+	</row>
+	<row>
+	  <entry><varname>LOG4SH_TRACE</varname></entry>
+	  <entry><emphasis>none</emphasis></entry>
+	  <entry>Enable internal log4sh trace output. Set to any non-empty value.</entry>
+	</row>
+      </tbody>
+      </tgroup>
+    </table>
+  </section>
+
+  <section id="advancedusage-sect-remotesyslog"><title>Remote Syslog Logging</title>
     <para>Logging to a remote syslog host is incredibly easy with log4sh, but it is not functionality that is normally exposed to a shell user. The <command>logger</command> command, which is used for local syslog logging, unfortunately does not support logging to a remote syslog host. As such, a couple of choices are available to enable logging to remote hosts.</para>
 
     <para>Choice #1 -- reconfigure the <command>syslogd</command> daemon</para>
@@ -69,7 +123,7 @@ logger_info 'Hello, world'
     </example>
   </section>
 
-  <section id="advancedusage-filerolling">
+  <section id="advancedusage-sect-filerolling">
     <title>Automated File Rolling</title>
 
     <para>Logging is great, but not when it runs you out of hard drive space. To help prevent such situations, log4sh has automated file rolling built in. By changing your <option>FileAppender</option> into a <option>RollingFileAppender</option>, you enable automatic rolling of your log files. Each logfile will be rolled after it reaches a maximum file size that you determine, and you can also decide the number of backups to be kept.</para>

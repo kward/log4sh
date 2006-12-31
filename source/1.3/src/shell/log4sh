@@ -518,8 +518,10 @@ log4sh_setAlternative()
   fi
 
   # set the alternative
-  [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ] \
-      && eval __log4sh_alternative_${lsa_cmdName}="\${lsa_cmdPath}"
+  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+    eval __log4sh_alternative_${lsa_cmdName}="\${lsa_cmdPath}"
+    ${__LOG4SH_DEBUG} "alternative '${lsa_cmdName}' command set to '${lsa_cmdPath}'"
+  fi
 
   unset lsa_cmdName lsa_cmdPath
   return ${__log4sh_return}
@@ -1606,7 +1608,7 @@ EOF
   exec 1>&4 4>&-
 
   # source the newly created function
-  ${__LOG4SH_DEBUG} 're-sourcing the newly created function'
+  ${__LOG4SH_TRACE} 're-sourcing the newly created function'
   . "${_aa_inc}"
 
   unset _aa_appender _aa_inc _aa_layout _aa_pattern _aa_type
@@ -3676,6 +3678,10 @@ ${__LOG4SH_INFO} 'setting traps'
 trap '_log4sh_cleanup EXIT' 0
 trap '_log4sh_cleanup INT' 2
 trap '_log4sh_cleanup TERM' 15
+
+# alternative commands
+[ -n "${LOG4SH_ALTERNATIVE_NC:-}" ] \
+    && log4sh_setAlternative nc "${LOG4SH_ALTERNATIVE_NC}"
 
 # prepare the environment for configuration
 log4sh_resetConfiguration

@@ -5,18 +5,32 @@ MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
 
 SHELLS='/bin/sh /bin/bash /bin/dash /bin/ksh /bin/pdksh'
+for f in test[A-Z]*; do
+  [ -x "${f}" ] && TESTS="${TESTS:+${TESTS} }${f}"
+done
 
 # load common unit test functions
 . "${MY_PATH}/test-functions.inc"
 
 usage()
 {
-  echo "usage: ${MY_NAME} -s shell(s) -t test(s)"
+  echo "usage: ${MY_NAME} [-e key=val ...] [-s shell(s)] [-t test(s)]"
 }
 
 # process command line flags
-while getopts 'hs:t:' opt; do
+while getopts 'e:hs:t:' opt; do
   case ${opt} in
+    e)
+      key=`expr "${OPTARG}" : '\([^=]*\)='`
+      val=`expr "${OPTARG}" : '[^=]*=\(.*\)'`
+      if [ -z "${key}" -o -z "${val}" ]; then
+        usage
+        exit 1
+      fi
+      eval "${key}='${val}'"
+      export ${key}
+      env="${env:+${env} }${key}"
+      ;;
     h) usage; exit 0 ;;
     s) shells=${OPTARG} ;;
     t) tests=${OPTARG} ;;
@@ -26,10 +40,8 @@ done
 shift `expr ${OPTIND} - 1`
 
 # fill shells and/or tests
-[ -z "${shells}" ] && shells=${SHELLS}
-if [ -z "${tests}" ]; then
-  tests=test[A-Z]*
-fi
+shells=${shells:-${SHELLS}}
+tests=${tests:-${TESTS}}
 
 # error checking
 if [ -z "${tests}" ]; then
@@ -42,9 +54,17 @@ cat <<EOF
 # System data
 #
 
+# test run info
+shells="${shells}"
+tests="${tests}"
 EOF
+for key in ${env}; do
+  eval "echo \"${key}=\$${key}\""
+done
+echo
 
 # output system data
+echo "# system info"
 echo "$ date"
 date
 
@@ -60,7 +80,7 @@ for shell in ${shells}; do
 
   # check for existance of shell
   if [ ! -x ${shell} ]; then
-    echo "${MY_NAME}:WARN unable to run tests with the ${shell} shell"
+    tf_warn "unable to run tests with the ${shell} shell"
     continue
   fi
 
@@ -86,13 +106,11 @@ EOF
     zsh) ;;
   esac
 
+  # execute the tests
   for suite in ${tests}; do
-    if [ -x ${suite} ]; then
-      # execute the test
-      suiteName=`expr "${suite}" : 'test\(.*\)'`
-      echo
-      echo "--- Executing the '${suiteName}' test suite ---" >&2
-      ( exec ${shell} ./${suite} )
-    fi
+    suiteName=`expr "${suite}" : 'test\(.*\)'`
+    echo
+    echo "--- Executing the '${suiteName}' test suite ---" >&2
+    ( exec ${shell} ./${suite}; )
   done
 done
