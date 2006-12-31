@@ -11,11 +11,9 @@
 TRACE=${TRACE:+'tf_trace '}
 [ -n "${TRACE}" ] && DEBUG=1
 [ -z "${TRACE}" ] && TRACE=':'
-${TRACE} 'trace output enabled'
 
 DEBUG=${DEBUG:+'tf_debug '}
 [ -z "${DEBUG}" ] && DEBUG=':'
-${DEBUG} 'debug output enabled'
 
 #
 # variables
@@ -77,3 +75,10 @@ tf_sgrep()
 
   unset tf_pattern
 }
+
+#
+# main
+#
+
+${TRACE} 'trace output enabled'
+${DEBUG} 'debug output enabled'
