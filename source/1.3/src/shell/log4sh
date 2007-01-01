@@ -83,7 +83,6 @@ __LOG4SH_LEVEL_CLOSED_STR='CLOSED'
 __LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
 __LOG4SH_THREAD_DEFAULT='main'
 
-__LOG4SH_ALTERNATIVES=' nc '
 __LOG4SH_CONFIGURATION="${LOG4SH_CONFIGURATION:-log4sh.properties}"
 __LOG4SH_CONFIG_PREFIX="${LOG4SH_CONFIG_PREFIX:-log4sh}"
 
@@ -373,30 +372,33 @@ _log4sh_fatal()
 #*/
 _log4sh_mktempDir()
 {
-  _tmpPrefix='log4sh'
+  _lmd_tmpPrefix='log4sh'
 
   # try the standard mktemp function
-  ( exec mktemp -dqt ${_tmpPrefix}.XXXXXX 2>/dev/null ) && return
+  ( exec mktemp -dqt ${_lmd_tmpPrefix}.XXXXXX 2>/dev/null ) && return
 
   # the standard mktemp didn't work. doing our own.
   if [ -n "${RANDOM:-}" ]; then
     # $RANDOM works
-    _random=${RANDOM}${RANDOM}${RANDOM}$$
+    _lmd_random=${RANDOM}${RANDOM}${RANDOM}$$
+  elif [ -r '/dev/urandom' ]; then
+    _lmd_random=`od -vAn -N4 -tu4 </dev/urandom |sed 's/^[^0-9]*//'`
   else
     # $RANDOM doesn't work
-    _date=`date '+%Y%m%d%H%M%S'`
-    _random=`expr ${_date} / $$`
+    _lmd_date=`date '+%Y%m%d%H%M%S'`
+    _lmd_random=`expr ${_lmd_date} / $$`
+    unset _lmd_date
   fi
 
-  _tmpDir="${TMPDIR:-/tmp}/${_tmpPrefix}.${_random}"
-  ( umask 077 && mkdir "${_tmpDir}" ) || {
+  _lmd_tmpDir="${TMPDIR:-/tmp}/${_lmd_tmpPrefix}.${_lmd_random}"
+  ( umask 077 && mkdir "${_lmd_tmpDir}" ) || {
     _log4sh_fatal 'could not create temporary directory! exiting'
     exit 1
   }
 
-  ${__LOG4SH_DEBUG} "created temporary directory (${_tmpDir})"
-  echo "${_tmpDir}"
-  unset _date _random _tmpDir _tmpPrefix
+  ${__LOG4SH_DEBUG} "created temporary directory (${_lmd_tmpDir})"
+  echo "${_lmd_tmpDir}"
+  unset _lmd_random _lmd_tmpDir _lmd_tmpPrefix
 }
 
 #/**
@@ -1523,12 +1525,12 @@ EOF
     ${__LOG4SH_TYPE_SYSLOG})
       cat <<EOF
   case "\${_la_level}" in
-    ${__LOG4SH_LEVEL_FATAL_STR}) _la_tag='alert' ;;
-    ${__LOG4SH_LEVEL_ERROR_STR}) _la_tag='error' ;;  # deprecated! now 'err'
-    ${__LOG4SH_LEVEL_WARN_STR}) _la_tag='warn' ;;    # deprecated! now 'warning'
-    ${__LOG4SH_LEVEL_INFO_STR}) _la_tag='info' ;;
-    ${__LOG4SH_LEVEL_DEBUG_STR}) _la_tag='debug' ;;
     ${__LOG4SH_LEVEL_TRACE_STR}) _la_tag='debug' ;;  # no 'trace' equivalent
+    ${__LOG4SH_LEVEL_DEBUG_STR}) _la_tag='debug' ;;
+    ${__LOG4SH_LEVEL_INFO_STR}) _la_tag='info' ;;
+    ${__LOG4SH_LEVEL_WARN_STR}) _la_tag='warning' ;;  # 'warn' is deprecated
+    ${__LOG4SH_LEVEL_ERROR_STR}) _la_tag='err' ;;     # 'error' is deprecated
+    ${__LOG4SH_LEVEL_FATAL_STR}) _la_tag='alert' ;;
   esac
 EOF
 
