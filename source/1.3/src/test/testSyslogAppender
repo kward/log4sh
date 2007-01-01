@@ -182,9 +182,10 @@ testPriorityMatrix()
 testRemoteLogging()
 {
   # define the netcat alternative command (required!)
-  log4sh_setAlternative 'nc' "${LOG4SH_ALTERNATIVE_NC:+/bin/nc}"
+  log4sh_setAlternative 'nc' "${LOG4SH_ALTERNATIVE_NC:-/bin/nc}"
 
   # configure log4sh
+  ${DEBUG} 'configuring log4sh'
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} SyslogAppender
   appender_syslog_setFacility ${APP_NAME} 'local4'
