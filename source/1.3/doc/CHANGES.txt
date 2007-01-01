@@ -43,6 +43,9 @@ compliance with log4j
 
 [kwd] fix a bug which caused the pdksh shell to not work properly
 
+[kwd] added additional random number generator to _log4sh_mktempDir() function.
+it uses /dev/urandom if present.
+
 -- Changes with shUnit 1.0.2
 
 [kwd] fixed problem where some of the unit test functions were reportingerrors
