@@ -499,22 +499,33 @@ log4sh_setAlternative()
   lsa_cmdPath=${2:-}
   __log4sh_return=${__LOG4SH_TRUE}
 
-  # check for valid alternative
-  echo "${__LOG4SH_ALTERNATIVES}" |grep " ${lsa_cmdName} " >/dev/null
-  if [ $? -ne 0 ]; then
-    # the alternative is not valid
+  # check that the alternative command exists and is executable
+  if [ ! -x "${lsa_cmdPath}"  ]; then
+    # the alternative command is not executable
     _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
     __log4sh_return=${__LOG4SH_FALSE}
   fi
 
-  # check that the alternative command exists and is executable
-  if [ \
-      ${__log4sh_return} -eq ${__LOG4SH_TRUE} \
-      -a ! -x "${lsa_cmdPath}" \
-  ]; then
-    # the alternative command is not executable
-    _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
-    __log4sh_return=${__LOG4SH_FALSE}
+  # check for valid alternative
+  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+    case ${lsa_cmdName} in
+      nc)
+        lsa_cmdVers=`${lsa_cmdPath} --version 2>&1 |head -1`
+        if echo "${lsa_cmdVers}" |grep '^netcat' >/dev/null; then
+          # GNU Netcat
+          __log4sh_alternative_nc_opts='-c'
+        else
+          # original netcat
+          __log4sh_alternative_nc_opts='-q 0'
+        fi
+        unset lsa_cmdVers
+        ;;
+      *)
+        # the alternative is not valid
+        _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
+        __log4sh_return=${__LOG4SH_FALSE}
+        ;;
+    esac
   fi
 
   # set the alternative
@@ -1575,10 +1586,11 @@ EOF
 
   # do RFC 3164 cleanups
   _la_date=\`echo \"\${_la_date}\" |sed 's/ 0\([0-9]\) /  \1 /'\`
-  _la_syslogMsg=\`expr "\${_la_syslogMsg}" : '\(.\{,1024\}\)'\`
+  _la_syslogMsg=\`echo "\${_la_syslogMsg}" |cut -b1-1024\`
 
   ( echo "\${_la_syslogMsg}" |\
-      exec ${__log4sh_alternative_nc} -w 1 -u ${_aa_syslogHost} 514 )
+      exec ${__log4sh_alternative_nc} ${__log4sh_alternative_nc_opts} -w 1 -u \
+          ${_aa_syslogHost} 514 )
   unset _la_tag _la_priority _la_date _la_hostname _la_syslogMsg
 EOF
           unset _aa_facilityCode _aa_syslogHost _aa_hostname
