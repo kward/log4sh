@@ -8,8 +8,8 @@ by users.
 TESTED PLATFORMS
 
 Cygwin
-+ bash 3.1.17(6)
-+ pdksh 5.2.4 (works only with a single appender)
++ bash 3.2.9(10)
++ pdksh 5.2.14
 
 Linux
 + bash 3.1.17(1)
@@ -18,13 +18,20 @@ Linux
 + pdksh 5.2.14
 + zsh 4.3.2 (does not work)
 
-OSX
-? bash
+Solaris 8 U3 (x86)
++ /bin/sh
++ bash 2.03.0(1)
++ ksh M-11/16/88i
 
-Solaris 10 U2
-? /bin/sh
-? bash 3.00.16(1)
-? ksh M-11/16/88i
+Solaris 10 U2 (sparc)
++ /bin/sh
++ bash 3.00.16(1)
++ ksh M-11/16/88i
+
+Solaris 10 U2 (x86)
++ /bin/sh
++ bash 3.00.16(1)
++ ksh M-11/16/88i
 
 
 NEW FEATURES
