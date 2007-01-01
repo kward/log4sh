@@ -43,7 +43,7 @@ tf_generateRandom()
       # $RANDOM works
       tfgr_random=${RANDOM}${RANDOM}${RANDOM}$$
     elif [ -r '/dev/urandom' ]; then
-      tfgr_random=`od -vAn -N4 -tu4 </dev/urandom`
+      tfgr_random=`od -vAn -N4 -tu4 </dev/urandom |sed 's/^[^0-9]*//'`
     else
       tfgr_date=`date '+%H%M%S'`
       tfgr_random=`expr ${tfgr_date} \* $$`
