@@ -131,8 +131,8 @@ $ pwd
 .../log4sh
 $ ls
 source  website
-$ svn cp -m "Release 1.3.6" \
-website https://svn.sourceforge.net/svnroot/log4sh/tags/website/20060916
+$ svn cp -m "Release 1.3.7" \
+website https://log4sh.svn.sourceforge.net/svnroot/log4sh/tags/website/20060916
 
 POST TO SOURCEFORGE AND FRESHMEAT
 
