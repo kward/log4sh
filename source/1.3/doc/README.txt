@@ -134,6 +134,10 @@ source  website
 $ svn cp -m "Release 1.3.7" \
 website https://log4sh.svn.sourceforge.net/svnroot/log4sh/tags/website/20060916
 
+Now, copy the website into place
+
+$ rsync -aP --delete --exclude '.svn' website/ sf.net:www/projects/log4sh
+
 POST TO SOURCEFORGE AND FRESHMEAT
 
 http://sourceforge.net/projects/log4sh/
