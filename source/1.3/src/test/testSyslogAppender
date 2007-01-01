@@ -8,10 +8,14 @@
 # expects that syslog has been configured to write its output to the
 # /var/log/log4sh.log logfile so that this file can be parsed.
 #
-# Sample syslog.conf entry. Note, one should *not* add a '-' char before the
+# Sample syslog.conf entries. Note, one should *not* add a '-' char before the
 # filename to enable buffering (available only with certain Syslog variants).
 #
-# local4.*  /var/log/log4sh.log
+### Linux (sysklogd)
+# local4.*		/var/log/log4sh.log
+#
+### Solaris (syslogd; use tabs for whitespace!)
+# local4.debug		/var/log/log4sh.log
 #
 # Possible issues:
 # * race conditions waiting for logs to be output via syslog. our backoff might
@@ -149,7 +153,8 @@ testPriorityMatrix()
         [ ${backoff} -eq 2 ] \
             && echo "    waiting for possible '${testPriority}' message..."
         sleep ${backoff}
-        result=`tail -n ${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |grep ${random}`
+        result=`tail ${tailNumOpt}${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |\
+	    grep "${random}"`
         [ -n "${result}" ] && break
       done
       ${DEBUG} "result=${result}"
@@ -207,7 +212,8 @@ testRemoteLogging()
       [ ${backoff} -eq 2 ] \
           && echo "    waiting longer for message..."
       sleep ${backoff}
-      result=`tail -n ${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |grep ${random}`
+      result=`tail ${tailNumOpt}${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |\
+          grep "${random}"`
       [ -n "${result}" ] && break
     done
     ${DEBUG} "result=${result}"
@@ -250,6 +256,15 @@ suite()
   suite_addTest testPriorityMatrix
   suite_addTest testRemoteLogging
 }
+
+# check options on tail command
+result=`echo '' |tail -n 1 >/dev/null 2>&1`
+if [ $? -eq 0 ]; then
+  # newer tail command
+  tailNumOpt='-n '
+else
+  tailNumOpt='-'
+fi
 
 # load and run shUnit
 ${DEBUG} 'loading shUnit'
