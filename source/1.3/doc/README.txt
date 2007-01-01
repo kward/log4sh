@@ -6,7 +6,7 @@ This project is stored on SourceForge as http://sf.net/projects/log4sh. The
 source code can be accessed using the following information.
 
 * Subversion
-$ svn co https://svn.sourceforge.net/svnroot/log4sh/trunk log4sh
+$ svn co https://log4sh.svn.sourceforge.net/svnroot/log4sh/trunk log4sh
 
 Subversion may also be browsed via a web browser at
 http://svn.sourceforge.net/log4sh
@@ -102,7 +102,7 @@ $ pwd
 $ ls
 1.2  1.3
 $ svn cp -m "Release 1.3.6" \
-1.3 https://svn.sourceforge.net/svnroot/log4sh/tags/source/1.3.6
+1.3 https://log4sh.svn.sourceforge.net/svnroot/log4sh/tags/source/1.3.6
 
 EXPORT THE RELEASE
 
