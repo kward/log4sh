@@ -497,8 +497,8 @@ log4sh_setAlternative()
     return ${__LOG4SH_FALSE}
   fi
 
-  lsa_cmdName=${1:-}
-  lsa_cmdPath=${2:-}
+  lsa_cmdName=$1
+  lsa_cmdPath=$2
   __log4sh_return=${__LOG4SH_TRUE}
 
   # check that the alternative command exists and is executable
@@ -1857,8 +1857,8 @@ appender_file_setMaxBackupIndex()
     return ${__LOG4SH_FALSE}
   fi
 
-  afsmbi_appender=${1:-}
-  afsmbi_maxIndex=${2:-}
+  afsmbi_appender=$1
+  afsmbi_maxIndex=$2
 
   # TODO: put check for valid input
 
@@ -1958,8 +1958,8 @@ appender_file_setMaxFileSize()
     return ${__LOG4SH_FALSE}
   fi
 
-  afsmfs_appender=${1:-}
-  afsmfs_size=${2:-}
+  afsmfs_appender=$1
+  afsmfs_size=$2
   __log4sh_return=${__LOG4SH_TRUE}
 
   # split the file size into parts
@@ -2216,8 +2216,8 @@ appender_smtp_setSubject()
     return ${__LOG4SH_FALSE}
   fi
 
-  asss_appender=${1:-}
-  asss_subject=${2:-}
+  asss_appender=$1
+  asss_subject=$2
 
   # set the Subject
   asss_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asss_appender}`
@@ -2386,8 +2386,8 @@ appender_syslog_setFacility()
     _log4sh_error 'appender_syslog_setFacility(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
   fi
-  assf_appender=${1:-}
-  assf_facility=${2:-}
+  assf_appender=$1
+  assf_facility=$2
 
   # check for valid facility
   echo "${__LOG4SH_TYPE_SYSLOG_FACILITY_NAMES}" |grep " ${assf_facility} " >/dev/null
@@ -2521,8 +2521,8 @@ appender_syslog_setHost()
     return ${__LOG4SH_FALSE}
   fi
 
-  assh_appender=${1:-}
-  assh_host=${2:-}
+  assh_appender=$1
+  assh_host=$2
 
   [ -z "${__log4sh_alternative_nc:-}" ] \
       && _log4sh_warn 'the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().'
@@ -2863,6 +2863,7 @@ log()
 {
   _l_level=$1
   shift
+  # if no message was passed, read it from STDIN
   [ $# -ne 0 ] && _l_msg="$@" || _l_msg=`cat`
 
   _l_levelInt=`logger_level_toInt ${_l_level}`
@@ -3115,6 +3116,42 @@ _log4sh_stripPropPrefix()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
+#       <funcdef><function>_log4sh_propAlternative</function></funcdef>
+#       <paramdef>string <parameter>property</parameter></paramdef>
+#       <paramdef>string <parameter>value</parameter></paramdef>
+#     </funcprototype>
+#   </funcsynopsis>
+#   <para>
+#     Configures log4sh to use an alternative command.
+#   </para>
+#   <funcsynopsis>
+#     <funcsynopsisinfo>_log4sh_propAlternative property value</funcsynopsisinfo>
+#   </funcsynopsis>
+# </entry>
+# </s:function>
+#*/
+_log4sh_propAlternative()
+{
+  _lpa_key=$1
+  _lpa_value=$2
+
+  # strip the leading 'alternative.'
+  _lpa_alternative=`_log4sh_stripPropPrefix ${_lpa_key}`
+
+  # set the alternative
+  log4sh_setAlternative ${_lpa_alternative} "${_lrp_value}"
+
+  unset _lpa_key _lpa_value _lpa_alternative
+}
+
+#/**
+# <s:function group="Property" modifier="private">
+# <entry align="right">
+#   <emphasis>void</emphasis>
+# </entry>
+# <entry>
+#   <funcsynopsis>
+#     <funcprototype>
 #       <funcdef><function>_log4sh_propAppender</function></funcdef>
 #       <paramdef>string <parameter>property</parameter></paramdef>
 #       <paramdef>string <parameter>value</parameter></paramdef>
@@ -3194,8 +3231,8 @@ _log4sh_propAppender()
         appender_file_setMaxFileSize ${_lpa_appender} "${_lpa_value}" ;;
 
       # SMTPAppender
-      To) appender_smtp_setTo $_lpa_appender "$_lpa_value" ;;
-      Subject) appender_smtp_setSubject $_lpa_appender "$_lpa_value" ;;
+      To) appender_smtp_setTo ${_lpa_appender} "${_lpa_value}" ;;
+      Subject) appender_smtp_setSubject ${_lpa_appender} "${_lpa_value}" ;;
 
       # SyslogAppender
       SyslogHost) appender_syslog_setHost ${_lpa_appender} "${_lpa_value}" ;;
@@ -3340,14 +3377,14 @@ log4sh_doConfigure()
   # parent script.
   exec 3<&0 <"${_lrp_tmpFile}"
   while read _lrp_line; do
-    _lrp_key=`expr "${_lrp_line}" : '\([^= ]*\) *=.*'`
-    _lrp_value=`expr "${_lrp_line}" : '[^= ]* *= *\(.*\)'`
+    _lrp_key="`expr \"${_lrp_line}\" : '\([^= ]*\) *=.*'`"
+    _lrp_value="`expr \"${_lrp_line}\" : '[^= ]* *= *\(.*\)'`"
 
     # strip the leading 'log4sh.'
-    _lrp_key=`_log4sh_stripPropPrefix ${_lrp_key}`
-    _lrp_keyword=`_log4sh_getPropPrefix ${_lrp_key}`
+    _lrp_key="`_log4sh_stripPropPrefix ${_lrp_key}`"
+    _lrp_keyword="`_log4sh_getPropPrefix ${_lrp_key}`"
     case ${_lrp_keyword} in
-      alternative) log4sh_setAlternative ${_lrp_key} "${_lrp_value}" ;;
+      alternative) _log4sh_propAlternative ${_lrp_key} "${_lrp_value}" ;;
       appender) _log4sh_propAppender ${_lrp_key} "${_lrp_value}" ;;
       logger) _log4sh_propLogger ${_lrp_key} "${_lrp_value}" ;;
       rootLogger) _log4sh_propRootLogger "${_lrp_value}" ;;
