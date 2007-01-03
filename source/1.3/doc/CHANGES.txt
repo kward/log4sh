@@ -1,3 +1,16 @@
+Changes with 1.3.8
+
+[kwd] removed unset variable checks for parameters passed to functions for
+those functions that already check beforehand for enough parameters being
+passed
+
+[kwd] fixed the reading of a command alternative from a config file (credits to
+Mickaël Canévet)
+
+[kwd] fix for reading of the SMTP Subject from a config file -- it didn't work
+if there were spaces in the Subject (credits to Mickaël Canévet)
+
+
 Changes with 1.3.7
 
 [kwd] added more unit tests
