@@ -1236,7 +1236,7 @@ appender_getType()
 {
   _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
   _log4sh_getArrayElement "$__log4shAppenderTypes" $_index
-  unset $_index
+  unset _index
 }
 
 #/**
