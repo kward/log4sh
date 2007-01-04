@@ -1,5 +1,7 @@
 # $Id$
 
+- document the SMTPAppender
+
 - implement line number conversion character (where possible)
 
 - look into traps. exit codes seem to be lost
