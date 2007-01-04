@@ -478,6 +478,7 @@ log4sh_enableStrictBehavior()
 #       <funcdef><function>log4sh_setAlternative</function></funcdef>
 #       <paramdef>string <parameter>command</parameter></paramdef>
 #       <paramdef>string <parameter>path</parameter></paramdef>
+#       <paramdef>boolean <parameter>useRuntimePath</parameter> (optional)</paramdef>
 #     </funcprototype>
 #   </funcsynopsis>
 #   <para>
@@ -492,17 +493,21 @@ log4sh_enableStrictBehavior()
 #*/
 log4sh_setAlternative()
 {
-  if [ $# -ne 2 ]; then
+  if [ $# -lt 2 ]; then
     _log4sh_error 'log4sh_setAlternative(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
   fi
 
   lsa_cmdName=$1
   lsa_cmdPath=$2
+  lsa_useRuntimePath=${3:-}
   __log4sh_return=${__LOG4SH_TRUE}
 
   # check that the alternative command exists and is executable
-  if [ ! -x "${lsa_cmdPath}"  ]; then
+  if [ \
+    ! -x "${lsa_cmdPath}" \
+    -a ${lsa_useRuntimePath:-${__LOG4SH_FALSE}} -eq ${__LOG4SH_FALSE} \
+  ]; then
     # the alternative command is not executable
     _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
     __log4sh_return=${__LOG4SH_FALSE}
@@ -511,6 +516,7 @@ log4sh_setAlternative()
   # check for valid alternative
   if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
     case ${lsa_cmdName} in
+      mail) ;;
       nc)
         lsa_cmdVers=`${lsa_cmdPath} --version 2>&1 |head -1`
         if echo "${lsa_cmdVers}" |grep '^netcat' >/dev/null; then
@@ -518,13 +524,13 @@ log4sh_setAlternative()
           __log4sh_alternative_nc_opts='-c'
         else
           # older netcat (v1.10)
-	  if nc -q 0 2>&1 |grep '^no destination$' >/dev/null 2>&1; then
-	    # supports -q option
+          if nc -q 0 2>&1 |grep '^no destination$' >/dev/null 2>&1; then
+            # supports -q option
             __log4sh_alternative_nc_opts='-q 0'
-	  else
-	    # doesn't support the -q option
+          else
+            # doesn't support the -q option
             __log4sh_alternative_nc_opts=''
-	  fi
+          fi
         fi
         unset lsa_cmdVers
         ;;
@@ -537,10 +543,12 @@ log4sh_setAlternative()
   fi
 
   # set the alternative
+set -x
   if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
     eval __log4sh_alternative_${lsa_cmdName}="\${lsa_cmdPath}"
     ${__LOG4SH_DEBUG} "alternative '${lsa_cmdName}' command set to '${lsa_cmdPath}'"
   fi
+set +x
 
   unset lsa_cmdName lsa_cmdPath
   return ${__log4sh_return}
@@ -1520,11 +1528,12 @@ EOF
       ;;
 
     ${__LOG4SH_TYPE_SMTP})
+      _aa_smtpTo=`appender_smtp_getTo ${_aa_appender}`
+      _aa_smtpSubject=`appender_smtp_getSubject ${_aa_appender}`
+
       cat <<EOF
-  _la_smtpTo='`_appender_smtp_getToByIndex ${_aa_index}`'
-  _la_smtpSubject='`_appender_smtp_getSubjectByIndex ${_aa_index}`'
-  echo \"\${_la_layout}\" |mail -s \"\${_la_smtpSubject}\" \${_la_smtpTo}
-  unset _la_smtpTo _la_smtpSubject
+  echo "\${_la_layout}" |\\
+      ${__log4sh_alternative_mail} -s "${_aa_smtpSubject}" ${_aa_smtpTo}
 EOF
       ;;
 
@@ -1809,7 +1818,7 @@ appender_file_getMaxBackupIndex()
     return ${__LOG4SH_FALSE}
   fi
 
-  afgmbi_appender=${1:-}
+  afgmbi_appender=$1
 
   afgmbi_index=`_log4sh_findArrayElement \
       "${__log4shAppenders}" ${afgmbi_appender}`
@@ -1907,7 +1916,7 @@ appender_file_getMaxFileSize()
     return ${__LOG4SH_FALSE}
   fi
 
-  afgmfs_appender=${1:-}
+  afgmfs_appender=$1
 
   afgmfs_index=`_log4sh_findArrayElement \
       "${__log4shAppenders}" ${afgmfs_appender}`
@@ -2027,33 +2036,9 @@ appender_file_setMaxFileSize()
 #
 
 #/**
-# <s:function group="SMTPAppender" modifier="private">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>_appender_smtp_getToByIndex</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Get the email to address for the given appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>email=`_appender_smtp_getToByIndex 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-_appender_smtp_getToByIndex()
-{
-  _log4sh_getArrayElement "$__log4shAppender_smtp_tos" $1
-}
-
-#/**
 # <s:function group="SMTPAppender" modifier="public">
 # <entry align="right">
-#   <code>string</code>
+#   <code>string</code>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -2071,15 +2056,30 @@ _appender_smtp_getToByIndex()
 #*/
 appender_smtp_getTo()
 {
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppender_smtp_tos" $_index
-  unset _index
+  if [ $# -ne 1 ]; then
+    _log4sh_error 'appender_smtp_getTo(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+
+  asgt_appender=$1
+
+  asgt_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asgt_appender}`
+  # TODO: put check for valid index here
+  asgt_to=`_log4sh_getArrayElement \
+      "${__log4shAppender_smtp_tos}" ${asgt_index}`
+  __log4sh_return=$?
+
+  [ "${asgt_to}" = "${__LOG4SH_NULL}" ] && asgt_to=''
+  echo "${asgt_to}"
+
+  unset asgt_appender asgt_index asgt_to
+  return ${__log4sh_return}
 }
 
 #/**
 # <s:function group="SMTPAppender" modifier="public">
 # <entry align="right">
-#   <emphasis>void</emphasis>
+#   <emphasis>void</emphasis>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -2098,17 +2098,23 @@ appender_smtp_getTo()
 #*/
 appender_smtp_setTo()
 {
+  if [ $# -ne 2 ]; then
+    _log4sh_error 'appender_smtp_setTo(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+
   asst_appender=$1
   asst_email=$2
 
-  _index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asst_appender}`
+  asst_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asst_appender}`
+  # TODO: put check for valid index here
   __log4shAppender_smtp_tos=`_log4sh_setArrayElement \
-    "${__log4shAppender_smtp_tos}" ${_index} "${asst_email}"`
+    "${__log4shAppender_smtp_tos}" ${asst_index} "${asst_email}"`
 
   # resource the appender
   _appender_cache ${asst_appender}
 
-  unset asst_appender asst_email _index
+  unset asst_appender asst_email asst_index
 }
 
 #/**
@@ -2140,33 +2146,9 @@ appender_setAppenderRecipient()
 }
 
 #/**
-# <s:function group="SMTPAppender" modifier="private">
-# <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>_appender_smtp_getSubjectByIndex</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para>Get the email subject for the given appender</para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>subject=`_appender_smtp_getSubjectByIndex 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-_appender_smtp_getSubjectByIndex()
-{
-  _log4sh_getArrayElement "$__log4shAppender_smtp_subjects" $1
-}
-
-#/**
 # <s:function group="SMTPAppender" modifier="public">
 # <entry align="right">
-#   <code>string</code>
+#   <code>string</code>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -2184,9 +2166,24 @@ _appender_smtp_getSubjectByIndex()
 #*/
 appender_smtp_getSubject()
 {
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppender_smtp_subjects" $_index
-  unset _index
+  if [ $# -ne 1 ]; then
+    _log4sh_error 'appender_smtp_getSubject(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+
+  asgs_appender=$1
+
+  asgs_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asgs_appender}`
+  # TODO: put check for valid index here
+  asgs_subject=`_log4sh_getArrayElement \
+      "${__log4shAppender_smtp_subjects}" ${asgs_index}`
+  __log4sh_return=$?
+
+  [ "${asgs_subject}" = "${__LOG4SH_NULL}" ] && asgs_subject=''
+  echo "${asgs_subject}"
+
+  unset asgs_appender asgs_index asgs_subject
+  return ${__log4sh_return}
 }
 
 #/**
@@ -2352,7 +2349,7 @@ appender_syslog_getFacility()
     return ${__LOG4SH_FALSE}
   fi
 
-  asgf_appender=${1:-}
+  asgf_appender=$1
 
   asgf_index=`_log4sh_findArrayElement "$__log4shAppenders" ${asgf_appender}`
   _log4sh_getArrayElement "${__log4shAppender_syslog_facilities}" ${asgf_index}
@@ -2467,7 +2464,7 @@ appender_syslog_getHost()
     return ${__LOG4SH_FALSE}
   fi
 
-  asgh_appender=${1:-}
+  asgh_appender=$1
 
   asgh_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${asgh_appender}`
   # TODO: put check for valid index here
@@ -2475,13 +2472,10 @@ appender_syslog_getHost()
       "${__log4shAppender_syslog_hosts}" ${asgh_index}`
   __log4sh_return=$?
 
-  if [ "${asgh_host}" != "${__LOG4SH_NULL}" ]; then
-    echo "${asgh_host}"
-  else
-    echo ''
-  fi
+  [ "${asgh_host}" = "${__LOG4SH_NULL}" ] && asgh_host=''
+  echo "${asgh_host}"
 
-  unset asgh_appender asgh_index
+  unset asgh_appender asgh_index asgh_host
   return ${__log4sh_return}
 }
 
@@ -3364,45 +3358,48 @@ _log4sh_propRootLogger()
 log4sh_doConfigure()
 {
   [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
-  _lrp_file=$1
+  ldc_file=$1
+
+  # prepare the environment for configuration
+  log4sh_resetConfiguration
 
   # strip the config prefix and dump output to a temporary file
-  _lrp_tmpFile="${__log4sh_tmpDir}/properties"
+  ldc_tmpFile="${__log4sh_tmpDir}/properties"
   ${__LOG4SH_TRACE} "__LOG4SH_CONFIG_PREFIX='${__LOG4SH_CONFIG_PREFIX}'"
-  grep "^${__LOG4SH_CONFIG_PREFIX}\." "${_lrp_file}" >"${_lrp_tmpFile}"
+  grep "^${__LOG4SH_CONFIG_PREFIX}\." "${ldc_file}" >"${ldc_tmpFile}"
 
   # read the file in. using awk here instead of piping the file into 'while'
   # and then reading with 'read' as the pipe causes a fork under the Solaris
   # shell which makes it impossible to get the variables passed back to the
   # parent script.
-  exec 3<&0 <"${_lrp_tmpFile}"
-  while read _lrp_line; do
-    _lrp_key="`expr \"${_lrp_line}\" : '\([^= ]*\) *=.*'`"
-    _lrp_value="`expr \"${_lrp_line}\" : '[^= ]* *= *\(.*\)'`"
+  exec 3<&0 <"${ldc_tmpFile}"
+  while read ldc_line; do
+    ldc_key=`expr "${ldc_line}" : '\([^= ]*\) *=.*'`
+    ldc_value=`expr "${ldc_line}" : '[^= ]* *= *\(.*\)'`
 
     # strip the leading 'log4sh.'
-    _lrp_key="`_log4sh_stripPropPrefix ${_lrp_key}`"
-    _lrp_keyword="`_log4sh_getPropPrefix ${_lrp_key}`"
-    case ${_lrp_keyword} in
-      alternative) _log4sh_propAlternative ${_lrp_key} "${_lrp_value}" ;;
-      appender) _log4sh_propAppender ${_lrp_key} "${_lrp_value}" ;;
-      logger) _log4sh_propLogger ${_lrp_key} "${_lrp_value}" ;;
-      rootLogger) _log4sh_propRootLogger "${_lrp_value}" ;;
-      *) _log4sh_error "unrecognized properties keyword (${_lrp_keyword})" ;;
+    ldc_key=`_log4sh_stripPropPrefix ${ldc_key}`
+    ldc_keyword=`_log4sh_getPropPrefix ${ldc_key}`
+    case ${ldc_keyword} in
+      alternative) _log4sh_propAlternative ${ldc_key} "${ldc_value}" ;;
+      appender) _log4sh_propAppender ${ldc_key} "${ldc_value}" ;;
+      logger) _log4sh_propLogger ${ldc_key} "${ldc_value}" ;;
+      rootLogger) _log4sh_propRootLogger "${ldc_value}" ;;
+      *) _log4sh_error "unrecognized properties keyword (${ldc_keyword})" ;;
     esac
   done
   exec 0<&3 3<&-
 
   # activate all of the appenders
-  for _lrp_appender in ${__log4shAppenders}; do
-    ${__LOG4SH_APPENDER_FUNC_PREFIX}${_lrp_appender}_activateOptions
+  for ldc_appender in ${__log4shAppenders}; do
+    ${__LOG4SH_APPENDER_FUNC_PREFIX}${ldc_appender}_activateOptions
   done
 
   # remove the temporary file
-  rm -f "${_lrp_tmpFile}"
+  rm -f "${ldc_tmpFile}"
 
-  unset _lrp_appender _lrp_file _lrp_tmpFile _lrp_line _lrp_key _lrp_keyword
-  unset _lrp_value
+  unset ldc_appender ldc_file ldc_tmpFile ldc_line ldc_key ldc_keyword
+  unset ldc_value
 }
 
 #/**
@@ -3454,6 +3451,8 @@ log4sh_readProperties()
 # </entry>
 # </s:function>
 #*/
+# XXX if a configuration is *repeatedly* established via logger_addAppender and
+# reset using this command, there is a risk of running out of memory.
 log4sh_resetConfiguration()
 {
   __log4shAppenders=''
@@ -3737,11 +3736,9 @@ trap '_log4sh_cleanup INT' 2
 trap '_log4sh_cleanup TERM' 15
 
 # alternative commands
+log4sh_setAlternative mail "${LOG4SH_ALTERNATIVE_MAIL:-mail}" ${__LOG4SH_TRUE}
 [ -n "${LOG4SH_ALTERNATIVE_NC:-}" ] \
     && log4sh_setAlternative nc "${LOG4SH_ALTERNATIVE_NC}"
-
-# prepare the environment for configuration
-log4sh_resetConfiguration
 
 # load the properties file
 ${__LOG4SH_TRACE} "__LOG4SH_CONFIGURATION='${__LOG4SH_CONFIGURATION}'"
@@ -3755,6 +3752,9 @@ else
     _log4sh_warn 'Please initalize the log4sh system properly.'
   fi
   ${__LOG4SH_INFO} 'configuring at runtime'
+
+  # prepare the environment for configuration
+  log4sh_resetConfiguration
 
   # note: not using the constant variables here (e.g. for ConsoleAppender) so
   # that those perusing the code can have a working example
