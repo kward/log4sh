@@ -34,12 +34,14 @@ Solaris 10 U2 (x86)
 
 NEW FEATURES
 
-None.
+The 'mail' command can now be configured as an alternative command using
+log4sh_setAlternative().
 
 
 CHANGES AND ENHANCEMENTS
 
-None.
+The log4sh_doConfigure() function now calls log4sh_resetConfiguration() before
+loading a new configuration.
 
 Additional unit tests:
 + testSMTPAppender
