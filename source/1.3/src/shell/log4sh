@@ -543,12 +543,10 @@ log4sh_setAlternative()
   fi
 
   # set the alternative
-set -x
   if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
     eval __log4sh_alternative_${lsa_cmdName}="\${lsa_cmdPath}"
     ${__LOG4SH_DEBUG} "alternative '${lsa_cmdName}' command set to '${lsa_cmdPath}'"
   fi
-set +x
 
   unset lsa_cmdName lsa_cmdPath
   return ${__log4sh_return}
@@ -2189,7 +2187,7 @@ appender_smtp_getSubject()
 #/**
 # <s:function group="SMTPAppender" modifier="public">
 # <entry align="right">
-#   <emphasis>void/boolean</emphasis>
+#   <emphasis>void</emphasis>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -2237,7 +2235,7 @@ appender_smtp_setSubject()
 #/**
 # <s:function group="SMTPAppender" modifier="public">
 # <entry align="right">
-#   <emphasis>void/boolean</emphasis>
+#   <emphasis>void</emphasis>
 # </entry>
 # <entry>
 #   <funcsynopsis>
