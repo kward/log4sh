@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: testAsciiCharset 303 2006-09-16 21:27:27Z sfsetse $
+# $Id$
 # vim:sts=2
 #
 # This unit test tests the general logging functionality of Syslog. It sends
@@ -46,59 +46,61 @@ TEST_LOGFILE='/var/log/log4sh.log'
 
 testFacilityGetterSetter()
 {
-  # configure log4sh (appender_activateOptions called later)
+  # configure log4sh
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} SyslogAppender
-
-  # TODO: test the passing of invalid params
+  appender_activateOptions ${APP_NAME}
 
   ${DEBUG} 'testing the setting and getting of the valid syslog facilities'
   for facility in `tf_getDataSect facilities "${TEST_SYSLOG_DATA}"`; do
     appender_syslog_setFacility ${APP_NAME} "${facility}"
     appender_activateOptions ${APP_NAME}
-    gotFacility=`appender_syslog_getFacility ${APP_NAME}`
+    currFacility=`appender_syslog_getFacility ${APP_NAME}`
     assertEquals \
         'the syslog facility does not match the one set' \
-        "${facility}" "${gotFacility}"
+        "${facility}" "${currFacility}"
   done
 
   ${DEBUG} 'testing an invalid syslog facility'
   testFacility='invalid'
   appender_syslog_setFacility ${APP_NAME} "${testFacility}"
   appender_activateOptions ${APP_NAME}
-  gotFacility=`appender_syslog_getFacility ${APP_NAME}`
+  currFacility=`appender_syslog_getFacility ${APP_NAME}`
   failNotEquals \
       'the syslog facility does not match the one set' \
-      "${testFacility}" "${gotFacility}"
+      "${testFacility}" "${currFacility}"
 
-  unset facility gotFacility testFacility result
+  # TODO: test the passing of invalid params
+
+  unset facility currFacility testFacility
 }
 
 testHostGetterSetter()
 {
-  # configure log4sh (appender_activateOptions called later)
+  # configure log4sh
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} SyslogAppender
-
-  # TODO: test the passing of invalid params
+  appender_activateOptions ${APP_NAME}
 
   ${DEBUG} 'testing that the default syslog host is empty'
-  gotHost=`appender_syslog_getHost ${APP_NAME}`
+  currHost=`appender_syslog_getHost ${APP_NAME}`
   assertNull \
       'the default syslog host was not empty' \
-      "${gotHost}"
+      "${currHost}"
 
   ${DEBUG} 'testing that it is possible to set and get the syslog host'
   testHost='localhost'
   # TODO: test for the log4sh:ERROR message
   appender_syslog_setHost ${APP_NAME} "${testHost}"
   appender_activateOptions ${APP_NAME}
-  gotHost=`appender_syslog_getHost ${APP_NAME}`
+  currHost=`appender_syslog_getHost ${APP_NAME}`
   assertEquals \
       'the syslog host does not match the one that was set' \
-      "${testHost}" "${gotHost}"
+      "${testHost}" "${currHost}"
 
-  unset gotHost testHost result
+  # TODO: test the passing of invalid params
+
+  unset currHost testHost
 }
 
 testSyslogLogfilePresent()
