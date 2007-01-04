@@ -1,0 +1,10 @@
+# $Id$
+
+# set root logger to ERROR, and give it one appenders; mySMTP
+log4sh.rootLogger = ERROR, mySMTP
+
+# setup the mySMTP appender as a rolling file appender at the INFO level
+log4sh.appender.mySMTP = SMTPAppender
+log4sh.appender.mySMTP.Threshold = INFO
+log4sh.appender.mySMTP.To = some.user@some.host
+log4sh.appender.mySMTP.Subject=This is a Subject worth testing
