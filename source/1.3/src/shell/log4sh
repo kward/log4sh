@@ -3131,7 +3131,7 @@ _log4sh_propAlternative()
   _lpa_alternative=`_log4sh_stripPropPrefix ${_lpa_key}`
 
   # set the alternative
-  log4sh_setAlternative ${_lpa_alternative} "${_lrp_value}"
+  log4sh_setAlternative ${_lpa_alternative} "${_lpa_value}"
 
   unset _lpa_key _lpa_value _lpa_alternative
 }
