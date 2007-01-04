@@ -7,4 +7,4 @@ log4sh.rootLogger = ERROR, mySMTP
 log4sh.appender.mySMTP = SMTPAppender
 log4sh.appender.mySMTP.Threshold = INFO
 log4sh.appender.mySMTP.To = some.user@some.host
-log4sh.appender.mySMTP.Subject=This is a Subject worth testing
+log4sh.appender.mySMTP.Subject = This is a Subject worth testing
