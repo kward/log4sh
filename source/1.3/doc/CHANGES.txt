@@ -7,8 +7,10 @@ passed
 [kwd] fixed the reading of a command alternative from a config file (credits to
 Mickaël Canévet)
 
-[kwd] fix for reading of the SMTP Subject from a config file -- it didn't work
-if there were spaces in the Subject (credits to Mickaël Canévet)
+[kwd] fix for sending mail via the SMTPAppender -- a Subject with spaces in it
+did not work (credits to Mickaël Canévet)
+
+[kwd] added an SMTPAppender unit test
 
 
 Changes with 1.3.7

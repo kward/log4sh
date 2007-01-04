@@ -1,8 +1,5 @@
 # $Id$
 
-- check whether the deprecated syslog facility names (security) or level names
-(error, panic, warn) must not be used
-
 - implement line number conversion character (where possible)
 
 - look into traps. exit codes seem to be lost
@@ -29,15 +26,6 @@ file is not renamed until the first message is logged some time after midnight.
   so, remove the "unset" stuff before returns as they aren't needed
 
 - make logger level's case insensitive??
-
-- support netcat for telnet
-
-- support logger for syslog
-SyslogAppender
-  Facility
-    The facilityName parameter must be one of the strings KERN, USER, MAIL, DAEMON, AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, AUTHPRIV, FTP, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7. Case is unimportant.
-  FacilityPrinting
-  SyslogHost
 
 - add more error checking on the appender_*set* functions.  see smtp_setSubject
 
