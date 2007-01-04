@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: testPriority 265 2006-09-07 16:13:13Z sfsetse $
+# $Id$
 
 MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
