@@ -1,0 +1,100 @@
+﻿RELEASE NOTES FOR 1.3.7
+
+This release of log4sh continues to fill out the planned functionality of the
+1.3 series. It adds some more unit tests, as well as fixes some bugs reported
+by users.
+
+
+TESTED PLATFORMS
+
+Cygwin
++ bash 3.2.9(10)
++ pdksh 5.2.14
+
+Linux
++ bash 3.1.17(1)
++ dash 0.5.3
++ ksh 1993-12-28
++ pdksh 5.2.14
++ zsh 4.3.2 (does not work)
+
+Solaris 8 U3 (x86)
++ /bin/sh
++ bash 2.03.0(1)
++ ksh M-11/16/88i
+
+Solaris 10 U2 (sparc)
++ /bin/sh
++ bash 3.00.16(1)
++ ksh M-11/16/88i
+
+Solaris 10 U2 (x86)
++ /bin/sh
++ bash 3.00.16(1)
++ ksh M-11/16/88i
+
+
+NEW FEATURES
+
+Added dash to the list of supported shells.
+
+Logging to remote hosts via syslog now supported. This requires setting 'nc'
+alternative command to point to nc (netcat) as the command is not present by
+default on most systems.
+
+The RollingFileAppender now works properly. Files are rotated based upon a
+maximum file size, and the number of backup files can be limited with a maximum
+backup index.
+
+
+CHANGES AND ENHANCEMENTS
+
+There seems to be slowly growing interest in log4sh, so the time has come to
+start tracking some bugs more officially in the bug tracking of SourceForge.
+The few bugs that were reported for this release have been entered into the
+tracking system for the sake of posterity.
+
+Additional unit tests:
++ testMultipleAppenders
++ testSyslogAppender
+
+
+BUG FIXES
+
+There were some small bugs reported by users with the SMTPAppender and
+SyslogAppender that were fixed.
+
+There were as well a tiny issue with the dash shell that required some source
+rearrangement. The dash shell also did not like the dummy functions used in
+shUnit, so they had to be slightly altered.
+
+The subject was not being set properly in the SMTPAppender.
+
+The pdksh shell now works properly.
+
+Bug# 1611574 -- 'unbound variable' error
+
+Bug# 1614338 -- SyslogAppender not logging
+
+
+DEPRECATED FEATURES
+
+The logger_pushThreadName() and logger_popThreadName() functions have been
+deprecated. They are not part of the standard log4j, and their usefulness is
+quite limited seeing as shell does not support threads.
+
+
+KNOWN BUGS AND ISSUES
+
+Passing of the '\' character in an logging message does not work under the
+standard Solaris Bourne shell [/bin/sh], under the dash shell [/bin/dash], or
+under Cygwin with ksh [/bin/ksh].
+
+The DailyRollingFileAppender appender do not roll files.
+
+Trap handling is not yet absolutely 100% fool-proof.
+
+Performance is prohibitively slow under Cygwin
+
+More error checking/reporting needs to be added; this includes validating input
+to public functions.

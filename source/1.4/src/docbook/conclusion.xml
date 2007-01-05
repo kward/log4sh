@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id$ -->
+<!-- vim:softtabstop=2 shiftwidth=2 -->
+<!-- =========================================================================
+Conclusion
+-->
+<chapter id="conclusion"><title>Conclusion</title>
+  <para>The idea of log4sh is obviously not novel, but the availibility of such a powerful logging framework that is available in (nearly) pure shell is.  Hopefully you will find it useful in one of your projects as well.</para>
+  
+  <para>If you like what you see, or have any suggestions on improvements, please feel free to drop me an email at <email>&myEmail;</email>.</para>
+
+  <para>Log4sh is licensed under the GNU Lesser Public License.  The contents and copyright of this document and all provided source code are owned by Kate Ward.</para>
+</chapter>

@@ -1,0 +1,11 @@
+# set root logger to ERROR, and give it one appenders; R
+log4sh.rootLogger = ERROR, R
+
+# setup the R appender as a rolling file appender at the INFO level
+log4sh.appender.R = RollingFileAppender
+log4sh.appender.R.Threshold = INFO
+log4sh.appender.R.File = ${__shunit_tmpDir:+${__shunit_tmpDir}/}rfa.log
+log4sh.appender.R.MaxFileSize = 10KiB
+log4sh.appender.R.MaxBackupIndex = 1
+log4sh.appender.R.layout = PatternLayout
+log4sh.appender.R.layout.ConversionPattern = %d [%t] %-5p %c - %m%n
