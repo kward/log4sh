@@ -15,6 +15,7 @@ the primary production platform used by myself.<br>
 <span style="font-style: italic;">Tested Operating Systems:<span style="font-style: italic;"></span></span><br>
 Cygwin<br>
 Linux<br>
+Mac OS X<br>
 Solaris 8, 9, 10<br>
 <br>
 <span style="font-style: italic;">User Tested OSes:<span style="font-style: italic;"></span></span><br>
@@ -29,13 +30,14 @@ Public Domain Korn Shell (pdksh)<br>
 
 <p>For the test results of the various releases (starting with v1.3.7), take a look in the <a href="testresults/">testresults</a> directory.</p>
 
-<p>There are current two release series of log4sh
-available. The 1.2 series is the stable release, and it contains mainly
-bugfixes. It is stable enough for production use. The 1.3 series is
-meant for new features and is still under development. Generally, the
-1.3 series should be stable enough to use as it is run through unit
-testing before being released, but there are no guarantees that
-everything works.</p>
+<p>There are current two release series of log4sh available. The 1.4 series is
+the stable release, and it contains mainly bugfixes. It is stable enough for
+production use. The 1.5 series is meant for new features and is still under
+development. Generally, the 1.5 series should be stable enough to use as it is
+run through unit testing before being released, but there are no guarantees
+that everything works.</p>
+
+<p><i>The new 1.5 series has not been started yet. Once it has, links will be posted for it.</i>
 
 <h2>Getting log4sh</h2>
 The latest version of log4sh can be downloaded from the SourceForge <a href="http://sourceforge.net/project/showfiles.php?group_id=134622">Project Filelist</a>.
@@ -43,17 +45,78 @@ The latest version of log4sh can be downloaded from the SourceForge <a href="htt
 <h2>Documentation</h2>
 <p>Documentation is included with the distribution in the <span style="font-family: monospace;">doc</span> directory.  It may also be viewed online.</p>
 
-<a href="http://forestent.com/projects/log4sh/log4sh-1.3.html">log4sh 1.3.X (Development)</a><br>
-<a href="http://forestent.com/projects/log4sh/log4sh-1.2.html">log4sh 1.2.X (Stable)</a><br>
-
 <p><font color="red">New!</font> There is now a <a
 href="/wiki/index.php/Log4sh:Main_Page">Wiki</a> available for log4sh. It is in
 very early stages, but some example work arounds are already posted to work
 around the limited <tt>%d</tt> conversion character.</p> 
 
+<h3>Current releases</h3>
+<a href="http://forestent.com/projects/log4sh/log4sh-1.4.html">log4sh 1.4.X (Stable)</a><br>
+
+<h3>Previous releases</h3>
+<a href="http://forestent.com/projects/log4sh/log4sh-1.3.html">log4sh 1.3.X (Development)</a><br>
+<a href="http://forestent.com/projects/log4sh/log4sh-1.2.html">log4sh 1.2.X (Stable)</a><br>
+
 <h2>Release History</h2>
 
-<h3>Development series</h3>
+<h3>Current releases</h3>
+
+<table style="text-align: left;" border="0" cellpadding="2" cellspacing="2">
+<tbody><tr valign="top">
+
+<td>
+<h4>1.5.X -- Development series</h4>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>MD5 Sum</th>
+    </tr>
+
+    <!-- 1.5.0 -->
+    <!--
+    <tr>
+      <td><a href="http://prdownloads.sourceforge.net/log4sh/log4sh-1.4.0.tgz?download">1.4.0</a></td>
+      <td>Fri Jan 05 2007</td>
+      <td><span style="font-family: monospace;">???</span></td>
+    </tr>
+    -->
+  </tbody>
+</table>
+</td>
+
+<td>&nbsp</td>
+
+<td>
+<h4>1.4.X -- Stable series</h4>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>MD5 Sum</th>
+    </tr>
+
+    <!-- 1.4.0 -->
+    <tr>
+      <td><a href="http://prdownloads.sourceforge.net/log4sh/log4sh-1.4.0.tgz?download">1.4.0</a></td>
+      <td>Fri Jan 05 2007</td>
+      <td><span style="font-family: monospace;">b8cf7d33b0aaa0dcc8b0f6a6e4cb7f9c</span></td>
+    </tr>
+  </tbody>
+</table>
+
+</tr></tbody>
+</table>
+
+<h3>Previous releases</h3>
+
+<table style="text-align: left;" border="0" cellpadding="2" cellspacing="2">
+<tbody><tr valign="top">
+
+<td>
+<h4>1.3.X -- Development series</h4>
 <table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
@@ -63,6 +126,15 @@ around the limited <tt>%d</tt> conversion character.</p>
       </th>
       <td style="vertical-align: top;"><span style="font-weight: bold;">MD5
 Sum</span><br>
+      </td>
+    </tr>
+
+    <!-- 1.3.8 -->
+    <tr>
+      <td style="vertical-align: top;">1.3.8</a></td>
+      <td style="vertical-align: top;">Fri Jan 05 2007<br>
+      </td>
+      <td style="vertical-align: top;"><span style="font-family: monospace;">(released as 1.4.0)</span><br>
       </td>
     </tr>
 
@@ -139,9 +211,12 @@ Sum</span><br>
     </tr>
   </tbody>
 </table>
+</td>
 
+<td>&nbsp</td>
 
-<h3>Stable series</h3>
+<td>
+<h4>1.2.X -- Stable series</h4>
 <table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
@@ -229,19 +304,23 @@ Sum</span><br>
     </tr>
   </tbody>
 </table>
+</td>
+
+</tr></tbody>
+</table>
 
 <h2>Miscellaneous Info</h2>
 
 <p>log4sh was originally developed to solve a logging problem I had in some of
 the production environments I have worked in where I either had too much
-logging, or not enough. Cron jobs in particular caused me the most
-headaches with their constant and annoying emails telling me that everything
-worked, or that nothing worked but not a detailed reason why. I now use
-log4sh in environments where logging from shell scripts is critical, but where
-I need more than just a simple "Hello, fix me!" type of logging message.
-If you like what you see, or have any suggestions on improvements, please feel
-free to drop me an email. If there is enough interest in the project, I
-will develop it further.</p>
+logging, or not enough. Cron jobs in particular caused me the most headaches
+with their constant and annoying emails telling me that everything worked, or
+that nothing worked but not a detailed reason why. I now use log4sh in
+environments where logging from shell scripts is critical, but where I need
+more than just a simple "Hello, fix me!" type of logging message.  If you like
+what you see, or have any suggestions on improvements, please feel free to drop
+me an email. If there is enough interest in the project, I will develop it
+further.</p>
 
 <p>log4sh is licensed under the GNU Lesser General Public License (LGPL). The
 contents and copyright of this site and all provided source code are
