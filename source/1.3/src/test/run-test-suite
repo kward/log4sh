@@ -68,8 +68,8 @@ echo "# system info"
 echo "$ date"
 date
 
-echo "$ uname -a"
-uname -a
+echo "$ uname -mprsv"
+uname -mprsv
 
 #
 # run tests
