@@ -6,34 +6,34 @@ This release of log4sh fixes some bugs that were reported by users. There is no 
 TESTED PLATFORMS
 
 Cygwin
-? bash 3.2.9(10)
-? pdksh 5.2.14
++ bash 3.2.9(10)
++ pdksh 5.2.14
 
 Linux
-? bash 3.1.17(1)
-? dash 0.5.3
-? ksh 1993-12-28
-? pdksh 5.2.14
-? zsh 4.3.2 (does not work)
++ bash 3.1.17(1)
++ dash 0.5.3
++ ksh 1993-12-28
++ pdksh 5.2.14
++ zsh 4.3.2 (does not work)
 
 Mac OS X 1.4.8 (Darwin 8.8)
 + bash 2.05b.0(1)
 + ksh 1993-12-28
 
 Solaris 8 U3 (x86)
-? /bin/sh
-? bash 2.03.0(1)
-? ksh M-11/16/88i
++ /bin/sh
++ bash 2.03.0(1)
++ ksh M-11/16/88i
 
 Solaris 10 U2 (sparc)
-? /bin/sh
-? bash 3.00.16(1)
-? ksh M-11/16/88i
++ /bin/sh
++ bash 3.00.16(1)
++ ksh M-11/16/88i
 
 Solaris 10 U2 (x86)
-? /bin/sh
-? bash 3.00.16(1)
-? ksh M-11/16/88i
++ /bin/sh
++ bash 3.00.16(1)
++ ksh M-11/16/88i
 
 
 NEW FEATURES
