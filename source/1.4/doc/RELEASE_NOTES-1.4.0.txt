@@ -47,6 +47,8 @@ CHANGES AND ENHANCEMENTS
 The log4sh_doConfigure() function now calls log4sh_resetConfiguration() before
 loading a new configuration.
 
+Added Mac OS X 1.4 as a tested platform.
+
 Additional unit tests:
 + testSMTPAppender
 
