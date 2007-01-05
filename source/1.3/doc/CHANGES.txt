@@ -23,6 +23,8 @@ indicates the command should be searched using the runtime path
 [kwd] fixed bug where an unset was attempting to unset the value of a variable
 rather than the variable itself
 
+[kwd] brought appender_getLevel() up to standard
+
 
 Changes with 1.3.7
 
