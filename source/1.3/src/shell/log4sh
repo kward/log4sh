@@ -962,7 +962,7 @@ _appender_getLayoutByIndex()
 #/**
 # <s:function group="Appender" modifier="public">
 # <entry align="right">
-#   <code>string</code>
+#   <code>string</code>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -980,9 +980,23 @@ _appender_getLayoutByIndex()
 #*/
 appender_getLevel()
 {
-  _index=`_log4sh_findArrayElement "$__log4shAppenders" $1`
-  _log4sh_getArrayElement "$__log4shAppenderLevels" $_index
-  unset _index
+  if [ $# -ne 1 ]; then
+    _log4sh_error 'appender_getLevel(): invalid number of parameters'
+    return ${__LOG4SH_FALSE}
+  fi
+
+  agl_appender=$1
+
+  agl_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${agl_appender}`
+  # TODO: put check for valid index here
+  agl_level=`_log4sh_getArrayElement \
+      "${__log4shAppenderLevels}" ${agl_index}`
+  __log4sh_return=$?
+
+  echo "${agl_level}"
+
+  unset agl_appender agl_index agl_level
+  return ${__log4sh_return}
 }
 
 #/**
