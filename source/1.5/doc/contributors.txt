@@ -1,0 +1,13 @@
+The following people have contributed in some way or another to log4sh.
+
+Aaron Rodden
+Aaron Walker
+Dan Johansson
+Kate Ward
+Mickaël Canévet
+Omner Calhoun
+Rob Holland
+Steve Etchelecu
+Tim Kordick
+
+$Revision$

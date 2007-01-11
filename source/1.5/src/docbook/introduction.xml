@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+$Id$
+vim:softtabstop=2 shiftwidth=2
+ -->
+
+<!-- =========================================================================
+Introduction
+-->
+
+<chapter label="1" id="intro">
+  <title>Introduction</title>
+  <para>Log4sh has been developed under the Bourne Again Shell (<command>bash</command>) on Linux, but great care has been taken to make sure it works under the default Bourne Shell of Solaris (<command>sh</command>) as the platform is still widely used.</para>
+
+  <para><blockquote><title>Tested Operating Systems</title>
+    <itemizedlist>
+      <listitem><para>Cygwin</para></listitem>
+      <listitem><para>Linux</para></listitem>
+      <listitem><para>Mac OS X</para></listitem>
+      <listitem><para>Solaris 8+</para></listitem>
+    </itemizedlist>
+  </blockquote></para>
+
+  <para><blockquote><title>Verified Shells</title>
+    <itemizedlist>
+      <listitem><para>BSD Shell (<command>dash</command>)</para></listitem>
+      <listitem><para>Bourne Shell (<command>sh</command>)</para></listitem>
+      <listitem><para>Bourne Again Shell (<command>bash</command>)</para></listitem>
+      <listitem><para>Korn Shell (<command>ksh</command>)</para></listitem>
+      <listitem><para>Public Domain Korn Shell (<command>pdksh</command>) -- partial functionality</para></listitem>
+    </itemizedlist>
+  </blockquote></para>
+
+  <para>See the appropriate Release Notes (<filename>doc/RELEASE_NOTES-X.X.X.txt</filename>) for this release for the actual versions tested.</para>
+
+  <!-- Give credit where credit is due...very important -->
+  <section id="credits"><title>Credits / Contributors</title>
+    <para>A list of contributors to <command>log4sh</command> can be found in the source archive as <filename>doc/contributors.txt</filename>. I want to personally thank all those who have contributed to make this a better tool.</para>
+  </section>
+
+  <!-- Feedback -->
+  <section id="feedback"><title>Feedback</title>
+    <para>Feedback is most certainly welcome for this document. Send your additions, comments and criticisms to the following email address: <email>&myEmail;</email>.</para>
+  </section>
+</chapter>

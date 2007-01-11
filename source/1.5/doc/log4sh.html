@@ -1,0 +1,766 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>log4sh</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.71.1"><meta name="description" content='log4sh is a logging framework for shell scripts that works similar to the other wonderful logging products available from the Apache Software Foundation (eg. log4j, log4perl). Although not as powerful as the others, it can make the task of adding advanced logging to shell scripts easier. It has much more power than just using simple "echo" commands throughout. In addition, it can be configured from a properties file so that scripts in a production environment do not need to be altered to change the amount of logging they produce.'></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book" lang="en-US"><div class="titlepage"><div><div><h1 class="title"><a name="log4sh"></a>log4sh version 1.4.0</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Kate</span> <span class="surname">Ward</span></h3><div class="affiliation"><div class="address"><p><br>
+            <code class="email">&lt;<a href="mailto:kate.ward@forestent.com">kate.ward@forestent.com</a>&gt;</code><br>
+          </p></div></div></div></div></div><div><p class="pubdate">2007-01-05</p></div><div><div class="revhistory"><table border="1" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><b>Revision History</b></th></tr><tr><td align="left">Revision 1.4.0</td><td align="left">2007-01-05</td><td align="left">kwd</td></tr></table></div></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>log4sh is a logging framework for shell scripts that works similar to the other wonderful <a href="http://logging.apache.org/" target="_top">logging products</a> available from the <a href="http://www.apache.org/" target="_top">Apache Software Foundation</a> (eg. log4j, log4perl). Although not as powerful as the others, it can make the task of adding advanced logging to shell scripts easier.  It has much more power than just using simple "echo" commands throughout.  In addition, it can be configured from a properties file so that scripts in a production environment do not need to be altered to change the amount of logging they produce.</p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#intro">1. Introduction</a></span></dt><dd><dl><dt><span class="section"><a href="#credits">1. Credits / Contributors</a></span></dt><dt><span class="section"><a href="#feedback">2. Feedback</a></span></dt></dl></dd><dt><span class="chapter"><a href="#quickstart">2. Quickstart</a></span></dt><dt><span class="chapter"><a href="#usage">3. Usage Guide</a></span></dt><dd><dl><dt><span class="section"><a href="#usage-preconfigure">1. Preconfigure log4sh (optional)</a></span></dt><dt><span class="section"><a href="#usage-source">2. Source log4sh</a></span></dt><dt><span class="section"><a href="#usage-code">3. Configure log4sh in code</a></span></dt><dt><span class="section"><a href="#usage-logging">4. Logging with log4sh</a></span></dt></dl></dd><dt><span class="chapter"><a href="#configuration">4. Configuration</a></span></dt><dd><dl><dt><span class="section"><a href="#properties_file">1. Properties File</a></span></dt><dd><dl><dt><span class="section"><a href="#properties-root_logger">1.1. Root Logger</a></span></dt><dt><span class="section"><a href="#levels">1.2. Levels</a></span></dt><dt><span class="section"><a href="#appenders">1.3. Appenders</a></span></dt></dl></dd><dt><span class="section"><a href="#env_vars">2. Environment Variables</a></span></dt></dl></dd><dt><span class="chapter"><a href="#advancedusage">5. Advanced Usage</a></span></dt><dd><dl><dt><span class="section"><a href="#advancedusage-sect-envvars">1. Environment Variables</a></span></dt><dt><span class="section"><a href="#advancedusage-sect-remotesyslog">2. Remote Syslog Logging</a></span></dt><dt><span class="section"><a href="#advancedusage-sect-filerolling">3. Automated File Rolling</a></span></dt></dl></dd><dt><span class="chapter"><a href="#shelldoc">6. Function Reference</a></span></dt><dd><dl><dt><span class="section"><a href="#id2536635">1. Appender</a></span></dt><dt><span class="section"><a href="#id2538008">2. FileAppender</a></span></dt><dt><span class="section"><a href="#id2538503">3. Level</a></span></dt><dt><span class="section"><a href="#id2538629">4. Log4sh</a></span></dt><dt><span class="section"><a href="#id2538777">5. Logger</a></span></dt><dt><span class="section"><a href="#id2539495">6. Property</a></span></dt><dt><span class="section"><a href="#id2539693">7. SMTPAppender</a></span></dt><dt><span class="section"><a href="#id2540071">8. SyslogAppender</a></span></dt><dt><span class="section"><a href="#id2540460">9. Thread</a></span></dt><dt><span class="section"><a href="#id2540712">10. Trap</a></span></dt></dl></dd><dt><span class="chapter"><a href="#conclusion">7. Conclusion</a></span></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>4.1. <a href="#id2533915">Logging Levels (from most output to least)</a></dt><dt>4.2. <a href="#id2534098">Appender Types</a></dt><dt>4.3. <a href="#id2534234">Appender Options</a></dt><dt>4.4. <a href="#id2534356">Layouts</a></dt><dt>4.5. <a href="#id2534443">Pattern Options</a></dt><dt>4.6. <a href="#id2534763">log4sh environment variables</a></dt><dt>5.1. <a href="#advancedusage-envvars">log4sh Environment Variables</a></dt><dt>5.2. <a href="#advancedusage-fileunits">Acceptable file size units</a></dt><dt>6.1. <a href="#id2536640">Appender</a></dt><dt>6.2. <a href="#id2538013">FileAppender</a></dt><dt>6.3. <a href="#id2538508">Level</a></dt><dt>6.4. <a href="#id2538634">Log4sh</a></dt><dt>6.5. <a href="#id2538782">Logger</a></dt><dt>6.6. <a href="#id2539501">Property</a></dt><dt>6.7. <a href="#id2539698">SMTPAppender</a></dt><dt>6.8. <a href="#id2540076">SyslogAppender</a></dt><dt>6.9. <a href="#id2540465">Thread</a></dt><dt>6.10. <a href="#id2540718">Trap</a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>2.1. <a href="#id2479431">Hello, World!</a></dt><dt>2.2. <a href="#id2479481">Properties Configuration Test</a></dt><dt>2.3. <a href="#id2494680">Runtime Configuration Test</a></dt><dt>3.1. <a href="#ex:sourcing_log4sh">Sourcing external shell code into current program</a></dt><dt>3.2. <a href="#ex:hello_world_via_properties_file">Hello, world (using properties file)</a></dt><dt>3.3. <a href="#ex:hello_world_properties_file">Hello, world; properties file</a></dt><dt>3.4. <a href="#ex:hello_world_code">Hello, world (configured in code)</a></dt><dt>3.5. <a href="#ex:logger_info">Standard method of logging a message</a></dt><dt>3.6. <a href="#id2533420">Alternate method of logging a message</a></dt><dt>4.1. <a href="#id2533876">Recommended minimum log4sh.properties file</a></dt><dt>4.2. <a href="#id2534066">Sample appender names</a></dt><dt>4.3. <a href="#id2534087">Setting an appender type</a></dt><dt>4.4. <a href="#id2534222">Setting an appender option</a></dt><dt>4.5. <a href="#id2534343">Setting an appender's layout</a></dt><dt>4.6. <a href="#id2534430">Setting an appender's layout pattern</a></dt><dt>4.7. <a href="#id2534804">LOG4SH_CONFIGURATION variable</a></dt><dt>4.8. <a href="#id2534835">LOG4SH_CONFIG_PREFIX variable</a></dt><dt>5.1. <a href="#alternative-nc-config">Sample log4sh properties file demonstrating remote syslog logging</a></dt><dt>5.2. <a href="#alternative-nc-runtime">Sample shell script demonstrating remote syslog logging</a></dt><dt>5.3. <a href="#alternative-rolling-config">Sample log4sh properties file demonstrating a RollingFileAppender</a></dt><dt>5.4. <a href="#alternative-rolling-runtime">Sample shell script demonstrating a RollingFileAppender</a></dt></dl></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="intro"></a>Chapter 1. Introduction</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#credits">1. Credits / Contributors</a></span></dt><dt><span class="section"><a href="#feedback">2. Feedback</a></span></dt></dl></div><p>Log4sh has been developed under the Bourne Again Shell (<span><strong class="command">bash</strong></span>) on Linux, but great care has been taken to make sure it works under the default Bourne Shell of Solaris (<span><strong class="command">sh</strong></span>) as the platform is still widely used.</p><div class="blockquote"><blockquote class="blockquote"><div class="blockquote-title"><p><b>Tested Operating Systems</b></p></div><div class="itemizedlist"><ul type="disc"><li><p>Cygwin</p></li><li><p>Linux</p></li><li><p>Mac OS X</p></li><li><p>Solaris 8+</p></li></ul></div></blockquote></div><div class="blockquote"><blockquote class="blockquote"><div class="blockquote-title"><p><b>Verified Shells</b></p></div><div class="itemizedlist"><ul type="disc"><li><p>BSD Shell (<span><strong class="command">dash</strong></span>)</p></li><li><p>Bourne Shell (<span><strong class="command">sh</strong></span>)</p></li><li><p>Bourne Again Shell (<span><strong class="command">bash</strong></span>)</p></li><li><p>Korn Shell (<span><strong class="command">ksh</strong></span>)</p></li><li><p>Public Domain Korn Shell (<span><strong class="command">pdksh</strong></span>) -- partial functionality</p></li></ul></div></blockquote></div><p>See the appropriate Release Notes (<code class="filename">doc/RELEASE_NOTES-X.X.X.txt</code>) for this release for the actual versions tested.</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="credits"></a>1. Credits / Contributors</h2></div></div></div><p>A list of contributors to <span><strong class="command">log4sh</strong></span> can be found in the source archive as <code class="filename">doc/contributors.txt</code>. I want to personally thank all those who have contributed to make this a better tool.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="feedback"></a>2. Feedback</h2></div></div></div><p>Feedback is most certainly welcome for this document. Send your additions, comments and criticisms to the following email address: <code class="email">&lt;<a href="mailto:kate.ward@forestent.com">kate.ward@forestent.com</a>&gt;</code>.</p></div></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="quickstart"></a>Chapter 2. Quickstart</h2></div></div></div><p>First things first. Go to the directory from which you extracted the log4sh software. In there, you should find a <code class="filename">Makefile</code>. If you find one, you are in the right place. We need to setup the environment for running tests, so from this directory, execute the <span><strong class="command">make test-prep</strong></span> command as shown below. Once this is done, a <code class="filename">test</code> directory will be created and prepared with everything needed to run the log4sh tests.</p><p>Prepare your environment.</p><pre class="screen">
+$ make test-prep
+$ cd test
+</pre><div class="example"><a name="id2479431"></a><p class="title"><b>Example 2.1. Hello, World!</b></p><div class="example-contents"><p>Ok.  What kind of a quickstart would this be if the first example wasn't a "Hello, World!" example?  Who knows, but this isn't one of those kind of quickstarts.</p><p>Run the Hello World test.</p><pre class="screen">
+$ ./hello_world
+1 [main] INFO shell  - Hello, world!
+</pre><p>You should have seen output similar to that above.  If not, make sure you are in the right location and such.  If you really had problems, please send a letter to the log4sh maintainers.  Who knows, maybe you already found a bug.  Hopefully not!</p><p>The Hello, World! test is about as simple as it gets.  If you take a look at the test, all it does is load <code class="filename">log4sh</code>, reset the default logging level from <code class="option">ERROR</code> to <code class="option">INFO</code>, and the logs a "Hello, world!" message.  As you can see, it didn't take much to setup and use log4sh.</p></div></div><br class="example-break"><div class="example"><a name="id2479481"></a><p class="title"><b>Example 2.2. Properties Configuration Test</b></p><div class="example-contents"><p>In this example, a <code class="filename">log4sh.properties</code> configuraiton file will be used to pre-configure log4sh before any logging messages are output.  It demonstrates that a configuration file can be used to alter the behavior of log4sh without having to change any shell code.</p><p>Run the properties configuration test.</p><pre class="screen">
+$ ./test-prop-config
+INFO - We are the Simpsons!
+INFO - Mmmmmm .... Chocolate.
+INFO - Homer likes chocolate
+...
+</pre><p>You should see much more output on your terminal that what was listed above. What is actually happening is log4sh is outputting information to STDERR using logging statements that were stored in the <code class="filename">test-common</code> script. In addition, there were multiple logfiles generated (take a look in the <code class="filename">test</code> directory), and output was written also written via Syslog. Take a look at both the property configuration script (<code class="filename">test-prop-config</code>) and the common script (<code class="filename">test-common</code>) if you would like to see what is happening. If you do, you will notice that nowhere in code was it configured to write to the any of those different locations. The <code class="filename">log4sh.properties</code> configuration file did all of that work for us. Go ahead and take a look at it too. You might be amazed with how easy it was to write to so many locations with such a small amount of code.</p></div></div><br class="example-break"><div class="example"><a name="id2494680"></a><p class="title"><b>Example 2.3. Runtime Configuration Test</b></p><div class="example-contents"><p>This example is <span class="emphasis"><em>exactly</em></span> like the last example as far as output is concerned (they both execute the same <code class="filename">test-common</code> script), but this one is configured instead at runtime with function calls. It demonstrates that log4sh is fully configurable at runtime.</p><p>Run the runtime configuration test.</p><pre class="screen">
+$ ./test-runtime-config
+INFO - We are the Simpsons!
+INFO - Mmmmmm .... Chocolate.
+INFO - Homer likes chocolate
+...
+</pre><p>You should again see much more output on your terminal that what was listed above. The output should also have been exactly the same (except that the times were different) as the above example. This is because the same logging commands were used. If you take a look a look in the <code class="filename">test-runtime-config</code> script though, you will see that this time log4sh was configured completly at runtime. The <code class="filename">log4sh.properties</code> was not used. It shows that log4sh can be fully configured without a pre-existing configuration file. This isn't nearly as friendly as using the configuration file, but there are times when it is needed.</p></div></div><br class="example-break"></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="usage"></a>Chapter 3. Usage Guide</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#usage-preconfigure">1. Preconfigure log4sh (optional)</a></span></dt><dt><span class="section"><a href="#usage-source">2. Source log4sh</a></span></dt><dt><span class="section"><a href="#usage-code">3. Configure log4sh in code</a></span></dt><dt><span class="section"><a href="#usage-logging">4. Logging with log4sh</a></span></dt></dl></div><p>The usage of log4sh is simple. There are only a few simple steps required to setup and use log4sh in your application.</p><p>
+    </p><div class="orderedlist"><ol type="1" compact><li><p>preconfigure log4sh (properties file)</p></li><li><p>source the log4sh script code into the shell script</p></li><li><p>configure log4sh in code (optional)</p></li><li><p>call logging statements</p></li></ol></div><p>
+  </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="usage-preconfigure"></a>1. Preconfigure log4sh (optional)</h2></div></div></div><p>To preconfigure log4sh, create a properties file (see the <a href="#properties_file" title="1. Properties File">Properties File</a> later in this document).  If the properties file is not located in the same directory as log4sh, set the <code class="varname">LOG4SH_CONFIGURATION</code> environment variable to the full path to the properties file.  If you do not wish to preconfigure log4sh, please read the <a href="#usage-code" title="3. Configure log4sh in code">Configure log4sh in code</a> section later in this chapter.</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="usage-source"></a>2. Source log4sh</h2></div></div></div><p>To source the code into your script (also known as including), one uses the sourcing ability of shell to source one script into another.  See the following quick example for how easy this is done.</p><div class="example"><a name="ex:sourcing_log4sh"></a><p class="title"><b>Example 3.1. Sourcing external shell code into current program</b></p><div class="example-contents"><pre class="programlisting">
+#! /bin/sh
+
+# source log4sh from current directory
+. ./log4sh
+</pre></div></div><br class="example-break"><p>Here is some sample code that looks for log4sh in the same directory as the script is located, as well as the current directory. If log4sh could not be found, it exits with an error. If log4sh is found, it is loaded, along with the <code class="filename">log4sh.properties</code> file in the current directory (see the following example). It then logs a message at the <code class="constant">INFO</code> level to <code class="filename">STDOUT</code>.</p><div class="example"><a name="ex:hello_world_via_properties_file"></a><p class="title"><b>Example 3.2. Hello, world (using properties file)</b></p><div class="example-contents"><pre class="programlisting">
+#! /bin/sh
+#
+# log4sh example: Hello, world
+#
+myDir=`dirname $0`
+
+# find and source log4sh
+if [ -r "$myDir/log4sh" ]; then
+  log4shDir=$myDir
+elif [ -r "./log4sh" ]; then
+  log4shDir=.
+else
+  echo "fatal: could not find log4sh" &gt;&amp;2
+  exit 1
+fi
+. $log4shDir/log4sh
+
+# say Hello to the world
+logger_info "Hello, world"
+</pre></div></div><br class="example-break"><p>Here is the <code class="filename">log4sh.properties</code> file for the previous example. Save it in the same directory you are running the above script from.</p><div class="example"><a name="ex:hello_world_properties_file"></a><p class="title"><b>Example 3.3. Hello, world; properties file</b></p><div class="example-contents"><pre class="programlisting">
+#
+# log4sh example: Hello, world properties file
+#
+
+# Set root logger level to INFO and its only appender to A1
+log4sh.rootLogger=INFO, A1
+
+# A1 is set to be a ConsoleAppender.
+log4sh.appender.A1=ConsoleAppender
+
+# A1 uses a PatternLayout.
+log4sh.appender.A1.layout=PatternLayout
+log4sh.appender.A1.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
+</pre></div></div><br class="example-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="usage-code"></a>3. Configure log4sh in code</h2></div></div></div><p>If log4sh was not preconfigured, the default configuration will be equivalent the config shown below.</p><p>Note: log4sh will complain if no configuration file was specified or found. If you meant for the default configuration to be used, or you want to configure log4sh via code, make sure to define the <code class="varname">LOG4SH_CONFIGURATION</code> with the value of '<code class="constant">none</code>'.</p><pre class="programlisting">
+log4sh.rootLogger=ERROR, stdout
+log4sh.appender.stdout=ConsoleAppender
+log4sh.appender.stdout.layout=PatternLayout
+log4sh.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c %x - %m%n
+</pre><p>To configure log4sh in code, simply call the appropriate functions in your code. The following code sample loads log4sh from the current directory, configures it for <code class="filename">STDERR</code> output, and the logs a message at the <code class="constant">INFO</code> level.</p><div class="example"><a name="ex:hello_world_code"></a><p class="title"><b>Example 3.4. Hello, world (configured in code)</b></p><div class="example-contents"><pre class="programlisting">
+#! /bin/sh
+#
+# log4sh example: Hello, world
+#
+
+# load log4sh (disabling properties file warning) and clear the default
+# configuration
+LOG4SH_CONFIGURATION='none' . ./log4sh
+log4sh_resetConfiguration
+
+# set the global logging level to INFO
+logger_setLevel INFO
+
+# add and configure a FileAppender that outputs to STDERR, and activate the
+# configuration
+logger_addAppender stderr
+appender_setType stderr FileAppender
+appender_file_setFile stderr STDERR
+appender_activateOptions stderr
+
+# say Hello to the world
+logger_info 'Hello, world'
+</pre></div></div><br class="example-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="usage-logging"></a>4. Logging with log4sh</h2></div></div></div><p>Once log4sh is loaded, logging is as simple as calling the appropriate logging function with a message to be logged. Take a look at the above examples to see just how easy it was to log the statement <code class="literal">"Hello, world"</code> at an <code class="constant">INFO</code> level.</p><p>The samples above show the standard way of logging a message via log4sh. That standard method is by calling the appropriate function, and passing the message as a parameter.</p><div class="example"><a name="ex:logger_info"></a><p class="title"><b>Example 3.5. Standard method of logging a message</b></p><div class="example-contents"><pre class="programlisting">logger_info 'message to log'</pre></div></div><br class="example-break"><p>There is a second way of logging as well. The second method is via pipes. What this method is really good for is logging the standard output (<code class="filename">STDOUT</code>) of a command to the logfile. Piping <span><strong class="command">echo</strong></span> statements is a bit silly, but something like piping the output of a <span><strong class="command">ls</strong></span> is more practical (e.g. <code class="literal">ls -l |logger_info</code>).</p><div class="example"><a name="id2533420"></a><p class="title"><b>Example 3.6. Alternate method of logging a message</b></p><div class="example-contents"><pre class="programlisting">echo 'message to log' |logger_info</pre></div></div><br class="example-break"></div></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="configuration"></a>Chapter 4. Configuration</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#properties_file">1. Properties File</a></span></dt><dd><dl><dt><span class="section"><a href="#properties-root_logger">1.1. Root Logger</a></span></dt><dt><span class="section"><a href="#levels">1.2. Levels</a></span></dt><dt><span class="section"><a href="#appenders">1.3. Appenders</a></span></dt></dl></dd><dt><span class="section"><a href="#env_vars">2. Environment Variables</a></span></dt></dl></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="properties_file"></a>1. Properties File</h2></div></div></div><p>Log4sh can be configured with a properties file that is separate from the actual script where the logging takes place.  By default, log4sh looks for its properties file called <code class="filename">log4sh.properties</code> in the current directory.  If the file is located elsewhere or with a different name, log4sh can be configured by setting the <code class="varname">LOG4SH_CONFIGURATION</code> environment variable (eg. <code class="code">LOG4SH_CONFIGURATION="/etc/log4sh.conf"</code>).</p><p>A <code class="filename">log4sh.properties</code> file that is completly empty is sufficient to configure log4sh.  There will be absolutely no output however (which might just be what is desired).  Usually though, some output is desired, so there is at least a recommended minimum configuration file.  An explaination of the file follows the example.</p><div class="example"><a name="id2533876"></a><p class="title"><b>Example 4.1. Recommended minimum log4sh.properties file</b></p><div class="example-contents"><pre class="programlisting">
+  log4sh.rootLogger=INFO, stdout
+  log4sh.appender.stdout=ConsoleAppender
+  </pre></div></div><br class="example-break"><p>In the first line, the root logger is configured by setting the default logging level, and defining the name of an appender.  In the second line, the stdout appender is defined as a <code class="constant">ConsoleAppender</code>.</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="properties-root_logger"></a>1.1. Root Logger</h3></div></div></div><p>(future)</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="levels"></a>1.2. Levels</h3></div></div></div><div class="table"><a name="id2533915"></a><p class="title"><b>Table 4.1. Logging Levels (from most output to least)</b></p><div class="table-contents"><table summary="Logging Levels (from most output to least)" border="1"><colgroup><col><col></colgroup><thead><tr><th>Level</th><th>Definition</th></tr></thead><tbody><tr><td><code class="constant">TRACE</code></td><td>The <code class="constant">TRACE</code> level has the lowest possible rank and is intended to turn on all logging.</td></tr><tr><td><code class="constant">DEBUG</code></td><td>The <code class="constant">DEBUG</code> level designates fine-grained informational events that are most useful to debug an application.</td></tr><tr><td><code class="constant">INFO</code></td><td>The <code class="constant">INFO</code> level designates informational messages that highlight the progress of the application at coarse-grained level.</td></tr><tr><td><code class="constant">WARN</code></td><td>The <code class="constant">WARN</code> level designates potentially harmful situations.</td></tr><tr><td><code class="constant">ERROR</code></td><td>The <code class="constant">ERROR</code> level designates error events that might still allow the application to continue running.</td></tr><tr><td><code class="constant">FATAL</code></td><td>The <code class="constant">FATAL</code> level designates very severe error events that will presumably lead the application to abort.</td></tr><tr><td><code class="constant">OFF</code></td><td>The <code class="constant">OFF</code> level has the highest possible rank and is intended to turn off logging.</td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a name="appenders"></a>1.3. Appenders</h3></div></div></div><p>An appender name can be any alpha-numeric string containing no spaces.</p><div class="example"><a name="id2534066"></a><p class="title"><b>Example 4.2. Sample appender names</b></p><div class="example-contents"><p>myAppender - good</p></div></div><br class="example-break"><div class="section" lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a name="types"></a>1.3.1. Types</h4></div></div></div><p>An appender can be set to one of several different types.</p><div class="example"><a name="id2534087"></a><p class="title"><b>Example 4.3. Setting an appender type</b></p><div class="example-contents"><pre class="programlisting">
+    log4sh.appender.A1=FileAppender
+    </pre></div></div><br class="example-break"><div class="table"><a name="id2534098"></a><p class="title"><b>Table 4.2. Appender Types</b></p><div class="table-contents"><table summary="Appender Types" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Type</th><th>Definition</th><th>Supported?</th></tr></thead><tbody><tr><td>ConsoleAppender</td><td>output sent to console (STDOUT)</td><td>yes</td></tr><tr><td>FileAppender</td><td>output sent to a file</td><td>yes</td></tr><tr><td>DailyRollingFileAppender</td><td>output sent to a file that rolls over daily</td><td>partial; logs written, but not rotated</td></tr><tr><td>RollingFileAppender</td><td>output sent to a file that rolls over by size</td><td>partial; works, but nees improvement</td></tr><tr><td>SMTPAppender</td><td>output sent via email</td><td>parital; works, but needs improvement</td></tr><tr><td>SyslogAppender</td><td>output sent to a remote syslog daemon</td><td>partial; only localhost supported</td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a name="options"></a>1.3.2. Options</h4></div></div></div><p>An appender can take several different options.</p><div class="example"><a name="id2534222"></a><p class="title"><b>Example 4.4. Setting an appender option</b></p><div class="example-contents"><pre class="programlisting">
+    log4sh.appender.A1.File=output.log
+    </pre></div></div><br class="example-break"><div class="table"><a name="id2534234"></a><p class="title"><b>Table 4.3. Appender Options</b></p><div class="table-contents"><table summary="Appender Options" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Option</th><th>Definition</th><th>Supported?</th></tr></thead><tbody><tr><td>DatePattern</td><td>configure a pattern for the output filename</td><td>no (ignored)</td></tr><tr><td>File</td><td>output filename (special filename of STDERR used for logging to STDERR)</td><td>yes</td></tr><tr><td>MaxBackupIndex</td><td>number of old logfiles to keep</td><td>no (ignored)</td></tr><tr><td>MaxFileSize</td><td>maximum size of old logfiles</td><td>no (ignored)</td></tr><tr><td>Threshold</td><td>logging level of the appender</td><td>yes</td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a name="layouts"></a>1.3.3. Layouts</h4></div></div></div><p>An appender can be configured with various Layouts to customize how the output looks.</p><div class="example"><a name="id2534343"></a><p class="title"><b>Example 4.5. Setting an appender's layout</b></p><div class="example-contents"><pre class="programlisting">
+    log4sh.appender.A1.layout=PatternLayout
+    </pre></div></div><br class="example-break"><div class="table"><a name="id2534356"></a><p class="title"><b>Table 4.4. Layouts</b></p><div class="table-contents"><table summary="Layouts" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Layout</th><th>Definition</th><th>Supported?</th></tr></thead><tbody><tr><td>HTMLLayout</td><td>layout using HTML</td><td>no (same as SimpleLayout)</td></tr><tr><td>SimpleLayout</td><td>a simple default layout ('%p - %m')</td><td>yes</td></tr><tr><td>PatternLayout</td><td>a patterned layout (default: '%d %p - %m%n')</td><td>yes</td></tr></tbody></table></div></div><br class="table-break"><p>An layout has many different options to configure how it appears.  These are known as patterns.</p><div class="example"><a name="id2534430"></a><p class="title"><b>Example 4.6. Setting an appender's layout pattern</b></p><div class="example-contents"><pre class="programlisting">
+    log4sh.appender.A1.layout.ConversionPattern=%d [%p] %c - %m%n
+    </pre></div></div><br class="example-break"><div class="table"><a name="id2534443"></a><p class="title"><b>Table 4.5. Pattern Options</b></p><div class="table-contents"><table summary="Pattern Options" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Option</th><th>Definition</th><th>Supported?</th></tr></thead><tbody><tr><td align="center">c</td><td>Used to output the category of logging request.  As this is not applicable in shell, the conversion character will always returns 'shell'.</td><td>partial (fixed)</td></tr><tr><td align="center">d</td><td>
+  		<p>Used to output the date of the logging event.  The date conversion specifier may be followed by a <span class="emphasis"><em>date format specifier</em></span> enclosed between braces, but this specifier will be ignored.  For example, <code class="option">%d{HH:mm:ss,SSS}</code>, or <code class="option">%d{ISODATE}</code>.  The specifier is allowed only for compatibility with log4j properties files.</p>
+  		<p>The default format of the date returned is equavilant to the output of the Unix <span><strong class="command">date</strong></span> command with a format of <code class="option">+%Y-%m-%d %H:%M:%S</code>.</p>
+  	      </td><td>yes</td></tr><tr><td align="center">F</td><td>
+  		<p>Used to output the file name where the logging request was issued.</p>
+  		<p>The default value is equavilent <span><strong class="command">basename $0</strong></span>.</p>
+  	      </td><td>yes</td></tr><tr><td align="center">L</td><td>This option is for compatibility with log4j properties files.</td><td>no (ignored)</td></tr><tr><td align="center">m</td><td>Used to output the script supplied message associated with the logging event.</td><td>yes</td></tr><tr><td align="center">n</td><td>This option is for compatibility with log4j properties files.</td><td>no (ignored)</td></tr><tr><td align="center">p</td><td>Used to output the priority of the logging event.</td><td>yes</td></tr><tr><td align="center">r</td><td>Used to output the number of seconds elapsed since the start of the script until the creation of the logging event.</td><td>yes</td></tr><tr><td align="center">t</td><td>
+  	        <p>Used to output the current executing thread.  As shell doesn't actually support threads, this is simply a value that can be set that can be put into the messages.i</p>
+  		<p>The default value is 'main'.</p>
+  	      </td><td>yes</td></tr><tr><td align="center">x</td><td>This option is for compatibility with log4j properties files.</td><td>no (ignored)</td></tr><tr><td align="center">X</td><td>Used to output the MDC (mapped diagnostic context) associated with the thread that generated the logging event.  The <code class="option">X</code> conversion character <span class="emphasis"><em>must</em></span> be followed by an environment variable name placed between braces, as in <code class="option">%X{clientNumber}</code> where <code class="option">clientNumber</code> is the name of the environment variable.  The value in the MDC corresponding to the environment variable will be output.</td><td>no (ignored)</td></tr><tr><td align="center">%</td><td>The sequence <code class="option">%%</code> outputs a single percent sign.</td><td>yes</td></tr></tbody></table></div></div><br class="table-break"></div></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="env_vars"></a>2. Environment Variables</h2></div></div></div><p>There are some environment variables that can be used to pre-configure log4sh, or to change some of its default behavior.  These variables should be set before log4sh is sourced so that they are immediately available to log4sh.</p><p>Here is the full list of supported variables.</p><div class="table"><a name="id2534763"></a><p class="title"><b>Table 4.6. log4sh environment variables</b></p><div class="table-contents"><table summary="log4sh environment variables" border="1"><colgroup><col><col></colgroup><thead><tr><th>Variable</th><th>Usage</th></tr></thead><tbody><tr><td><code class="varname">LOG4SH_CONFIGURATION</code></td><td>
+	      <p>This variable is used to tell log4sh what the name of (and possibly the full path to) the configuration (a.k.a properties) file that should be used to configure log4sh at the time log4sh is sourced.  If the value 'none' is passed, than log4sh will expect to be configured at a later time via run-time configuration.</p>
+	      <div class="example"><a name="id2534804"></a><p class="title"><b>Example 4.7. LOG4SH_CONFIGURATION variable</b></p><div class="example-contents"><pre class="programlisting">LOG4SH_CONFIGURATION='/path/to/log4j.properties'</pre></div></div><br class="example-break">
+	    </td></tr><tr><td><code class="varname">LOG4SH_CONFIG_PREFIX</code></td><td>
+	      <p>This variable is used to tell log4sh what prefix it should use when parsing the configuration file.  Normally, the default value is 'log4sh' (e.g. 'log4sh.rootLogger'), but the value can be redefined so that a configuration file from another logging frame work such as log4j can be read.</p>
+	      <div class="example"><a name="id2534835"></a><p class="title"><b>Example 4.8. LOG4SH_CONFIG_PREFIX variable</b></p><div class="example-contents"><pre class="programlisting">LOG4SH_CONFIG_PREFIX='log4j'</pre></div></div><br class="example-break">
+	    </td></tr></tbody></table></div></div><br class="table-break"></div></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="advancedusage"></a>Chapter 5. Advanced Usage</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#advancedusage-sect-envvars">1. Environment Variables</a></span></dt><dt><span class="section"><a href="#advancedusage-sect-remotesyslog">2. Remote Syslog Logging</a></span></dt><dt><span class="section"><a href="#advancedusage-sect-filerolling">3. Automated File Rolling</a></span></dt></dl></div><p>This chapter is dedicated to some more advanced usage of log4sh. It is meant to demonstrate some functionality that might not normally be understood.</p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="advancedusage-sect-envvars"></a>1. Environment Variables</h2></div></div></div><p>There are several environment variables that can be set to alter the behavior of log4sh. The full listing is below.</p><div class="table"><a name="advancedusage-envvars"></a><p class="title"><b>Table 5.1. log4sh Environment Variables</b></p><div class="table-contents"><table summary="log4sh Environment Variables" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code class="varname">LOG4SH_ALTERNATIVE_NC</code></td><td><span class="emphasis"><em>none</em></span></td><td>Provide log4sh with the absolute path to the <span><strong class="command">nc</strong></span> (netcat) command -- e.g. <code class="filename">/bin/nc</code></td></tr><tr><td><code class="varname">LOG4SH_CONFIGURATION</code></td><td><span class="emphasis"><em>none</em></span></td><td>Provide log4sh with the absolute path to the log4sh properties file.</td></tr><tr><td><code class="varname">LOG4SH_CONFIG_PREFIX</code></td><td><code class="option">log4sh</code></td><td>Define the expected prefix to use for parsing the properties file -- e.g. <code class="option">log4j</code></td></tr><tr><td><code class="varname">LOG4SH_DEBUG</code></td><td><span class="emphasis"><em>none</em></span></td><td>Enable internal log4sh debug output. Set to any non-empty value.</td></tr><tr><td><code class="varname">LOG4SH_DEBUG_FILE</code></td><td><span class="emphasis"><em>none</em></span></td><td>Define a file where all internal log4sh trace/debug/info output will be written to -- e.g. <code class="filename">log4sh_internal.log</code></td></tr><tr><td><code class="varname">LOG4SH_INFO</code></td><td><span class="emphasis"><em>none</em></span></td><td>Enable internal log4sh info output. Set to any non-empty value.</td></tr><tr><td><code class="varname">LOG4SH_TRACE</code></td><td><span class="emphasis"><em>none</em></span></td><td>Enable internal log4sh trace output. Set to any non-empty value.</td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="advancedusage-sect-remotesyslog"></a>2. Remote Syslog Logging</h2></div></div></div><p>Logging to a remote syslog host is incredibly easy with log4sh, but it is not functionality that is normally exposed to a shell user. The <span><strong class="command">logger</strong></span> command, which is used for local syslog logging, unfortunately does not support logging to a remote syslog host. As such, a couple of choices are available to enable logging to remote hosts.</p><p>Choice #1 -- reconfigure the <span><strong class="command">syslogd</strong></span> daemon</p><p>One can alter the configuration of the local syslog daemon, and request that certain types of logging information be sent to remote hosts. This choice requires no extra software to be installed on the machine, but it does require a reconfiguration of the system-wide syslog daemon. As the syslog daemon is different between operating systems, and even between OS releases, no attempt will be made to describe how to do this in this document. Read the respective <span><strong class="command">man</strong></span> page for your particular system to learn what is required.</p><p>Choice #2 -- install <span><strong class="command">nc</strong></span> (netcat) command -- <span class="emphasis"><em>recommended</em></span></p><p>The <span><strong class="command">nc</strong></span> (netcat) command has the ability to generate the UDP packet to port 514 that is required for remote syslog logging. If you have this command installed, you can tell log4sh that this <span class="emphasis"><em>alternative</em></span> command exists, and then you will be able to use the <code class="function">appender_syslog_setHost()</code> function as you would expect.</p><p>The examples below show what a minimum properties file or a minimum script should look like that do remote syslog logging.</p><div class="example"><a name="alternative-nc-config"></a><p class="title"><b>Example 5.1. Sample log4sh properties file demonstrating remote syslog logging</b></p><div class="example-contents"><pre class="programlisting">
+#
+# log4sh example: remote syslog logging
+#
+
+# Set the 'nc' alternative command to enable remote syslog logging
+log4sh.alternative.nc = /bin/nc
+
+ Set root logger level to INFO and its only appender to mySyslog
+log4sh.rootLogger=INFO, mySyslog
+
+# mySyslog is set to be a SyslogAppender.
+log4sh.appender.mySyslog = SyslogAppender
+log4sh.appender.mySyslog.SyslogHost = somehost
+</pre></div></div><br class="example-break"><div class="example"><a name="alternative-nc-runtime"></a><p class="title"><b>Example 5.2. Sample shell script demonstrating remote syslog logging</b></p><div class="example-contents"><pre class="programlisting">
+#! /bin/sh
+#
+# log4sh example: remote syslog logging
+#
+
+# load log4sh (disabling properties file warning) and clear the default
+# configuration
+LOG4SH_CONFIGURATION='none' . ./log4sh
+log4sh_resetConfiguration
+
+# set alternative 'nc' command
+log4sh_setAlternative nc /bin/nc
+
+# add and configure a SyslogAppender that logs to a remote host
+logger_addAppender mySyslog
+appender_setType mySyslog SyslogAppender
+appender_syslog_setFacility mySyslog local4
+appender_syslog_setHost mySyslog somehost
+appender_activateOptions mySyslog
+
+# say Hello to the world
+logger_info 'Hello, world'
+</pre></div></div><br class="example-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="advancedusage-sect-filerolling"></a>3. Automated File Rolling</h2></div></div></div><p>Logging is great, but not when it runs you out of hard drive space. To help prevent such situations, log4sh has automated file rolling built in. By changing your <code class="option">FileAppender</code> into a <code class="option">RollingFileAppender</code>, you enable automatic rolling of your log files. Each logfile will be rolled after it reaches a maximum file size that you determine, and you can also decide the number of backups to be kept.</p><p>To limit the maximum size of your log files, you need to set the <code class="option">MaxFileSize</code> appender option in a properties file, or use the <code class="function">appender_file_setMaxFileSize()</code> function. The maximum size is specified by giving a value and a unit for that value (e.g. a 1 megabyte log file can be specified as '1MiB', '1024KiB', or '1048576B'). Note, the unit must be specified with the proper case, i.e. a unit of 'KB' is correct 'kb' is not.</p><p>The default maximum file size is equavilent to 1MiB</p><div class="table"><a name="advancedusage-fileunits"></a><p class="title"><b>Table 5.2. Acceptable file size units</b></p><div class="table-contents"><table summary="Acceptable file size units" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Unit</th><th>Size in bytes</th><th>Equivalent sizes</th></tr></thead><tbody><tr><td>B (bytes)</td><td>1</td><td>1B</td></tr><tr><td>KB</td><td>1,000</td><td>1KB = 1000B</td></tr><tr><td>KiB (kilobytes)</td><td>1,024</td><td>1KiB = 1024B</td></tr><tr><td>MB</td><td>1,000,000</td><td>1MB = 1000KB = 1000000B</td></tr><tr><td>MiB (megabytes)</td><td>1,048,576</td><td>1MiB = 1024KiB = 1048576B</td></tr><tr><td>GB</td><td>1,000,000,000</td><td>1GB = 1000MB = 1000000KB = 1000000000B</td></tr><tr><td>GiB (gigabytes)</td><td>1,073,741,824</td><td>1GiB = 1024MiB = 1048576KiB = 1073741824B</td></tr><tr><td>TB</td><td>1,000,000,000,000</td><td>1TB = 1000GB = 1000000MB = 1000000000KB = 1000000000000B</td></tr><tr><td>TiB (terabytes)</td><td>1,099,511,627,776</td><td>1TiB = 1024GiB = 1048576MiB = 1073741824KiB = 1099511627776B</td></tr></tbody></table></div></div><br class="table-break"><p><span class="strong"><strong>Note:</strong></span> log4sh differes from log4j in the impretation of its units. log4j assumes that all units are base-2 units (i.e. that KB = 1024B), where as log4sh makes a distinction between the standard SI units of KB (base-10 ~ 1000B = 10^3) and KiB (base-2 ~ 1024B = 2^10). If this causes problems, call the <code class="function">log4sh_enableStrictBehavior()</code> once after loading log4sh to force the unit intrepretation to be like log4j.</p><p>To limit the maximum number of backup files kept, you need to set the <code class="option">MaxBackupIndex</code> appender option in a properties file, or use the <code class="function">appender_file_setMaxBackupIndex()</code> function. Whenever a file has reached the point of needing rotation, log4sh will rename the current logfile to include an extension of '.0', and any other backups will have thier extension number increased as well. With a maximum backup index of zero, no backups will be kept.</p><p>The default maximum backup index is equavilent to '1 MiB'</p><div class="example"><a name="alternative-rolling-config"></a><p class="title"><b>Example 5.3. Sample log4sh properties file demonstrating a RollingFileAppender</b></p><div class="example-contents"><pre class="programlisting">
+#
+# log4sh example: using the RollingFileAppender
+#
+
+ Set root logger level to INFO and its only appender to R
+log4sh.rootLogger=INFO, R
+
+# add a RollingFileAppender named R
+log4sh.appender.R = RollingFileAppender
+log4sh.appender.R.File = /path/to/some/file
+log4sh.appender.R.MaxFileSize = 10KB
+log4sh.appender.R.MaxBackupIndex = 1
+</pre></div></div><br class="example-break"><div class="example"><a name="alternative-rolling-runtime"></a><p class="title"><b>Example 5.4. Sample shell script demonstrating a RollingFileAppender</b></p><div class="example-contents"><pre class="programlisting">
+#! /bin/sh
+#
+# log4sh example: using the RollingFileAppender
+#
+
+# load log4sh (disabling properties file warning) and clear the default
+# configuration
+LOG4SH_CONFIGURATION='none' . ./log4sh
+log4sh_resetConfiguration
+
+# add and configure a RollingFileAppender named R
+logger_addAppender R
+appender_setType R RollingFileAppender
+appender_file_setFile R '/path/to/some/file'
+appender_file_setMaxFileSize R 10KB
+appender_file_setMaxBackupIndex R 1
+appender_activateOptions R
+
+# say Hello to the world
+logger_info 'Hello, world'
+</pre></div></div><br class="example-break"></div></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="shelldoc"></a>Chapter 6. Function Reference</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#id2536635">1. Appender</a></span></dt><dt><span class="section"><a href="#id2538008">2. FileAppender</a></span></dt><dt><span class="section"><a href="#id2538503">3. Level</a></span></dt><dt><span class="section"><a href="#id2538629">4. Log4sh</a></span></dt><dt><span class="section"><a href="#id2538777">5. Logger</a></span></dt><dt><span class="section"><a href="#id2539495">6. Property</a></span></dt><dt><span class="section"><a href="#id2539693">7. SMTPAppender</a></span></dt><dt><span class="section"><a href="#id2540071">8. SyslogAppender</a></span></dt><dt><span class="section"><a href="#id2540460">9. Thread</a></span></dt><dt><span class="section"><a href="#id2540712">10. Trap</a></span></dt></dl></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2536635"></a>1. Appender</h2></div></div></div><div class="table"><a name="id2536640"></a><p class="title"><b>Table 6.1. Appender</b></p><div class="table-contents"><table summary="Appender" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_activateOptions</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>
+    Activate an appender's configuration. This should be called after
+    reconfiguring an appender via code. It needs only to be called once
+    before any logging statements are called. This calling of this function
+    will be required in log4sh 1.4.x.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_activateAppender myAppender</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_close</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Disable any further logging via an appender. Once closed, the
+  appender can be reopened by setting it to any logging Level (e.g.
+  INFO).</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_close myAppender</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <code class="code">boolean</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_exists</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Checks for the existance of a named appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">exists=`appender_exists myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_getAppenderType</b>
+                  (</code></td><td><var class="pdparam">index</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>integer </code> </td><td><code><var class="pdparam">index</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.1</strong></span>
+              </p>
+              <p>
+    Gets the Type of an Appender at the given array index
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">type=`appender_getAppenderType 3`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_getLayout</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Gets the Layout of an Appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">type=`appender_getLayout myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><code class="code">string</code>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_getLevel</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Gets the current logging Level of an Appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">type=`appender_getLevel myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_getPattern</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Gets the Pattern of an Appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">pattern=`appender_getPattern myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_getType</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Gets the Type of an Appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">type=`appender_getType myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setAppenderType</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">type</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">type</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.1</strong></span>
+              </p>
+              <p>
+    Sets the Type of an Appender (e.g. FileAppender)
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_setAppenderType myAppender FileAppender</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setLayout</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">layout</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">layout</var>;</code></td></tr></table></div>
+              <p>Sets the Layout of an Appender (e.g. PatternLayout)</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_setLayout myAppender PatternLayout</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/<code class="code">boolean</code></td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setLevel</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">level</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">level</var>;</code></td></tr></table></div>
+              <p>Sets the Level of an Appender (e.g. INFO)</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_setLevel myAppender INFO</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/<code class="code">boolean</code></td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setPattern</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">pattern</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">pattern</var>;</code></td></tr></table></div>
+              <p>Sets the Pattern of an Appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_setPattern myAppender '%d %p - %m%n'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/<code class="code">boolean</code></td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setType</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">type</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">type</var>;</code></td></tr></table></div>
+              <p>Sets the Type of an Appender (e.g. FileAppender)</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_setType myAppender FileAppender</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2538008"></a>2. FileAppender</h2></div></div></div><div class="table"><a name="id2538013"></a><p class="title"><b>Table 6.2. FileAppender</b></p><div class="table-contents"><table summary="FileAppender" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_file_getFile</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Get the filename of a FileAppender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_file_getFile myAppender</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><code class="code">integer</code>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_file_getMaxBackupIndex</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>
+    Returns the value of the MaxBackupIndex option.
+  </p>
+              <p><span class="strong"><strong>Since:</strong></span> 1.3.7</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_file_getMaxBackupIndex myAppender</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><code class="code">integer</code>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_file_getMaxFileSize</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>
+    Get the maximum size that the output file is allowed to reach before
+    being rolled over to backup files.
+  </p>
+              <p><span class="strong"><strong>Since:</strong></span> 1.3.7</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">maxSize=`appender_file_getMaxBackupSize myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_file_setFile</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">filename</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">filename</var>;</code></td></tr></table></div>
+              <p>
+    Set the filename for a FileAppender (e.g. <code class="filename">STDERR</code> or
+    <code class="filename">/var/log/log4sh.log</code>).
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_file_setFile myAppender STDERR</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_file_setMaxBackupIndex</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">index</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>integer </code> </td><td><code><var class="pdparam">index</var>;</code></td></tr></table></div>
+              <p>Set the maximum number of backup files to keep around.</p>
+              <p>
+    The <span class="strong"><strong>MaxBackupIndex</strong></span> option determines
+    how many backup files are kept before the oldest is erased. This option
+    takes a positive integer value. If set to zero, then there will be no
+    backup files and the log file will be truncated when it reaches
+    <code class="option">MaxFileSize</code>.
+  </p>
+              <p><span class="strong"><strong>Since:</strong></span> 1.3.7</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_file_setMaxBackupIndex myAppender 3</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_file_setMaxFileSize</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">size</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">size</var>;</code></td></tr></table></div>
+              <p>
+    Set the maximum size that the output file is allowed to reach before
+    being rolled over to backup files.
+  </p>
+              <p>
+    In configuration files, the <code class="option">MaxFileSize</code> option takes an
+    long integer in the range 0 - 2^40. You can specify the value with the
+    suffixes "KiB", "MiB" or "GiB" so that the integer is interpreted being
+    expressed respectively in kilobytes, megabytes or gigabytes. For example,
+    the value "10KiB" will be interpreted as 10240.
+  </p>
+              <p><span class="strong"><strong>Since:</strong></span> 1.3.7</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_file_setMaxBackupSize myAppender 10KiB</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setAppenderFile</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">filename</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">filename</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.2</strong></span>
+              </p>
+              <p>
+    Set the filename for a FileAppender (e.g. "STDERR" or
+    "/var/log/log4sh.log")
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_setAppenderFile myAppender STDERR</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2538503"></a>3. Level</h2></div></div></div><div class="table"><a name="id2538508"></a><p class="title"><b>Table 6.3. Level</b></p><div class="table-contents"><table summary="Level" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <code class="code">integer</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_level_toInt</b>
+                  (</code></td><td><var class="pdparam">level</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">level</var>;</code></td></tr></table></div>
+              <p>Converts an externally used level tag into its integer
+  equivalent</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">levelInt=`logger_level_toInt WARN`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_level_toLevel</b>
+                  (</code></td><td><var class="pdparam">val</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>integer </code> </td><td><code><var class="pdparam">val</var>;</code></td></tr></table></div>
+              <p>Converts an internally used level integer into its external level
+  equivalent</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">level=`logger_level_toLevel 3`</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2538629"></a>4. Log4sh</h2></div></div></div><div class="table"><a name="id2538634"></a><p class="title"><b>Table 6.4. Log4sh</b></p><div class="table-contents"><table summary="Log4sh" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">log4sh_enableStrictBehavior</b>
+                  (</code></td><td><code>)</code>;</td><td> </td></tr></table></div>
+              <p>
+    Enables strict log4j behavior.
+  </p>
+              <p><span class="strong"><strong>Since:</strong></span> 1.3.7</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">log4sh_enableStrictBehavior</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">log4sh_setAlternative</b>
+                  (</code></td><td><var class="pdparam">command</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">path</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">useRuntimePath</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">command</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">path</var>;</code></td></tr><tr><td><code>boolean </code> </td><td><code><var class="pdparam">useRuntimePath</var>;</code></td></tr></table></div>
+              <p>
+    Specifies an alternative path for a command.
+  </p>
+              <p><span class="strong"><strong>Since:</strong></span> 1.3.7</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">log4sh_setAlternative nc /bin/nc</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2538777"></a>5. Logger</h2></div></div></div><div class="table"><a name="id2538782"></a><p class="title"><b>Table 6.5. Logger</b></p><div class="table-contents"><table summary="Logger" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">log</b>
+                  (</code></td><td><var class="pdparam">level</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">message(s)</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">level</var>;</code></td></tr><tr><td><code>string[] </code> </td><td><code><var class="pdparam">message(s)</var>;</code></td></tr></table></div>
+              <p>The base logging command that logs a message to all defined
+    appenders</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">log DEBUG 'This is a test message'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/<code class="code">boolean</code></td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_addAppender</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Add and initialize a new appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_addAppender $appender</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_addAppenderWithPattern</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">pattern</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">pattern</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.6</strong></span>
+              </p>
+              <p>
+    Add and initialize a new appender with a specific PatternLayout
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_addAppenderWithPattern $appender '%d %p - %m%n'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_debug</b>
+                  (</code></td><td><var class="pdparam">message</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string[] </code> </td><td><code><var class="pdparam">message</var>;</code></td></tr></table></div>
+              <p>This is a helper function for logging a message at the DEBUG
+    priority</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_debug 'This is a debug message'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_error</b>
+                  (</code></td><td><var class="pdparam">message</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string[] </code> </td><td><code><var class="pdparam">message</var>;</code></td></tr></table></div>
+              <p>
+    This is a helper function for logging a message at the ERROR priority
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_error 'This is a error message'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_fatal</b>
+                  (</code></td><td><var class="pdparam">message</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string[] </code> </td><td><code><var class="pdparam">message</var>;</code></td></tr></table></div>
+              <p>This is a helper function for logging a message at the FATAL
+    priority</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_fatal 'This is a fatal message'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_getFilename</b>
+                  (</code></td><td><code>)</code>;</td><td> </td></tr></table></div>
+              <p>
+    Get the filename that would be shown when the '%F' conversion character
+    is used in a PatternLayout.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">filename=`logger_getFilename`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_getLevel</b>
+                  (</code></td><td><code>)</code>;</td><td> </td></tr></table></div>
+              <p>Get the global default logging level (e.g. DEBUG).</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">level=`logger_getLevel`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_info</b>
+                  (</code></td><td><var class="pdparam">message</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string[] </code> </td><td><code><var class="pdparam">message</var>;</code></td></tr></table></div>
+              <p>This is a helper function for logging a message at the INFO
+    priority</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_info 'This is a info message'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_setFilename</b>
+                  (</code></td><td><var class="pdparam">filename</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">filename</var>;</code></td></tr></table></div>
+              <p>Set the filename to be shown when the '%F' conversion character is
+  used in a PatternLayout.</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_setFilename 'myScript.sh'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_setLevel</b>
+                  (</code></td><td><var class="pdparam">level</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">level</var>;</code></td></tr></table></div>
+              <p>Sets the global default logging level (e.g. DEBUG).</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_setLevel INFO</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_trace</b>
+                  (</code></td><td><var class="pdparam">message</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string[] </code> </td><td><code><var class="pdparam">message</var>;</code></td></tr></table></div>
+              <p>This is a helper function for logging a message at the TRACE
+    priority</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_trace 'This is a trace message'</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_warn</b>
+                  (</code></td><td><var class="pdparam">message</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string[] </code> </td><td><code><var class="pdparam">message</var>;</code></td></tr></table></div>
+              <p>
+    This is a helper function for logging a message at the WARN priority
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_warn 'This is a warn message'</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2539495"></a>6. Property</h2></div></div></div><div class="table"><a name="id2539501"></a><p class="title"><b>Table 6.6. Property</b></p><div class="table-contents"><table summary="Property" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">log4sh_doConfigure</b>
+                  (</code></td><td><var class="pdparam">configFileName</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">configFileName</var>;</code></td></tr></table></div>
+              <p>
+    Read configuration from a file. <span class="strong"><strong>The existing
+    configuration is not cleared or reset.</strong></span> If you require a
+    different behavior, then call the <code class="code">log4sh_resetConfiguration</code>
+    before calling <code class="code">log4sh_doConfigure</code>.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">log4sh_doConfigure myconfig.properties</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">log4sh_readProperties</b>
+                  (</code></td><td><var class="pdparam">configFileName</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">configFileName</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.6</strong></span>
+              </p>
+              <p>
+    See <code class="code">log4sh_doConfigure</code>.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">log4sh_readProperties myconfig.properties</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">log4sh_resetConfiguration</b>
+                  (</code></td><td><code>)</code>;</td><td> </td></tr></table></div>
+              <p>
+    This function completely resets the log4sh configuration to have no
+    appenders with a global logging level of ERROR.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">log4sh_resetConfiguration</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2539693"></a>7. SMTPAppender</h2></div></div></div><div class="table"><a name="id2539698"></a><p class="title"><b>Table 6.7. SMTPAppender</b></p><div class="table-contents"><table summary="SMTPAppender" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setAppenderRecipient</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">email</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">email</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.1</strong></span>
+              </p>
+              <p>
+    Set the to address for the given appender
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_smtp_setTo myAppender user@example.com</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setAppenderSubject</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">subject</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">subject</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.1</strong></span>
+              </p>
+              <p>
+    Sets the email subject for an SMTP appender
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_setAppenderSubject myAppender "This is a test"</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><code class="code">string</code>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_smtp_getSubject</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Get the email subject for the given appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">subject=`appender_smtp_getSubject myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><code class="code">string</code>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_smtp_getTo</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>Get the to address for the given appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">email=`appender_smtp_getTo myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_smtp_setSubject</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">subject</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">subject</var>;</code></td></tr></table></div>
+              <p>Sets the email subject for an SMTP appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_smtp_setSubject myAppender "This is a test"</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_smtp_setTo</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">email</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">email</var>;</code></td></tr></table></div>
+              <p>Set the to address for the given appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_smtp_setTo myAppender user@example.com</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2540071"></a>8. SyslogAppender</h2></div></div></div><div class="table"><a name="id2540076"></a><p class="title"><b>Table 6.8. SyslogAppender</b></p><div class="table-contents"><table summary="SyslogAppender" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_getSyslogFacility</b>
+                  (</code></td><td><var class="pdparam">index</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>integer </code> </td><td><code><var class="pdparam">index</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.1</strong></span>
+              </p>
+              <p>
+    Get the syslog facility of the specified appender by index
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">facility=`appender_getSyslogFacility 3`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_setSyslogFacility</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">facility</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">facility</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.2</strong></span>
+              </p>
+              <p>
+    Set the syslog facility for the given appender
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_setSyslogFacility myAppender local4`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_syslog_getFacility</b>
+                  (</code></td><td><var class="pdparam">appender</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr></table></div>
+              <p>
+    Get the syslog facility for the given appender.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">facility=`appender_syslog_getFacility myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><code class="code">string</code>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_syslog_getHost</b>
+                  (</code></td><td><var class="pdparam">index</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>integer </code> </td><td><code><var class="pdparam">index</var>;</code></td></tr></table></div>
+              <p>
+    Get the syslog host of the specified appender.
+  </p>
+              <p><span class="strong"><strong>Since:</strong></span> 1.3.7</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">host=`appender_syslog_getHost myAppender`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_syslog_setFacility</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">facility</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">facility</var>;</code></td></tr></table></div>
+              <p>Set the syslog facility for the given appender</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_syslog_setFacility myAppender local4`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top"><span class="emphasis"><em>void</em></span>/boolean
+</td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">appender_syslog_setHost</b>
+                  (</code></td><td><var class="pdparam">appender</var>, </td><td> </td></tr><tr><td> </td><td><var class="pdparam">host</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">appender</var>;</code></td></tr><tr><td><code>string </code> </td><td><code><var class="pdparam">host</var>;</code></td></tr></table></div>
+              <p>
+    Set the syslog host for the given appender. Requires that the 'nc'
+    command alternative has been previously set with the
+    log4sh_setAlternative() function.
+  </p>
+              <p><span class="strong"><strong>Since:</strong></span> 1.3.7</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">appender_syslog_setHost myAppender localhost</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2540460"></a>9. Thread</h2></div></div></div><div class="table"><a name="id2540465"></a><p class="title"><b>Table 6.9. Thread</b></p><div class="table-contents"><table summary="Thread" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <code class="code">string</code>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_getThreadName</b>
+                  (</code></td><td><code>)</code>;</td><td> </td></tr></table></div>
+              <p>Gets the current thread name.</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">threadName=`logger_getThreadName`</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_popThreadName</b>
+                  (</code></td><td><code>)</code>;</td><td> </td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.7</strong></span>
+              </p>
+              <p>
+    Removes the topmost thread name from the stack. The next thread name on
+    the stack is then placed in the <code class="varname">__log4sh_threadName</code>
+    variable. If the stack is empty, or has only one element left, then a
+    warning is given that no more thread names can be popped from the stack.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_popThreadName</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_pushThreadName</b>
+                  (</code></td><td><var class="pdparam">threadName</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">threadName</var>;</code></td></tr></table></div>
+              <p>
+                <span class="strong"><strong>Deprecated as of 1.3.7</strong></span>
+              </p>
+              <p>
+    Sets the thread name (eg. the name of the script) and pushes the old on
+    to a stack for later use. This thread name can be used with the '%t'
+    conversion character within a <code class="option">PatternLayout</code>.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_pushThreadName "myThread"</pre></div>
+            </td></tr><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">logger_setThreadName</b>
+                  (</code></td><td><var class="pdparam">threadName</var><code>)</code>;</td><td> </td></tr></table><table border="0" summary="Function argument synopsis" cellspacing="0" cellpadding="0"><tr><td><code>string </code> </td><td><code><var class="pdparam">threadName</var>;</code></td></tr></table></div>
+              <p>
+    Sets the thread name (e.g. the name of the script). This thread name can
+    be used with the '%t' conversion character within a
+    <code class="option">PatternLayout</code>.
+  </p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">logger_setThreadName "myThread"</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2540712"></a>10. Trap</h2></div></div></div><div class="table"><a name="id2540718"></a><p class="title"><b>Table 6.10. Trap</b></p><div class="table-contents"><table summary="Trap" border="1"><colgroup><col><col></colgroup><tbody><tr valign="top"><td align="right" valign="top">
+              <span class="emphasis"><em>void</em></span>
+            </td><td valign="top">
+              <div class="funcsynopsis"><table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" style="padding-bottom: 1em"><tr><td><code class="funcdef">
+                    <b class="fsfunc">log4sh_cleanup</b>
+                  (</code></td><td><code>)</code>;</td><td> </td></tr></table></div>
+              <p>This is a cleanup function to remove the temporary directory used by
+  log4sh. It is provided for scripts who want to do log4sh cleanup work
+  themselves rather than using the automated cleanup of log4sh that is
+  invoked upon a normal exit of the script.</p>
+              <div class="funcsynopsis"><pre class="funcsynopsisinfo">log4sh_cleanup</pre></div>
+            </td></tr></tbody></table></div></div><br class="table-break"></div></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a name="conclusion"></a>Chapter 7. Conclusion</h2></div></div></div><p>The idea of log4sh is obviously not novel, but the availibility of such a powerful logging framework that is available in (nearly) pure shell is.  Hopefully you will find it useful in one of your projects as well.</p><p>If you like what you see, or have any suggestions on improvements, please feel free to drop me an email at <code class="email">&lt;<a href="mailto:kate.ward@forestent.com">kate.ward@forestent.com</a>&gt;</code>.</p><p>Log4sh is licensed under the GNU Lesser Public License.  The contents and copyright of this document and all provided source code are owned by Kate Ward.</p></div></div></body></html>

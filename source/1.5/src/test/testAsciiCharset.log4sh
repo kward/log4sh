@@ -1,0 +1,6 @@
+# $Id$
+log4sh.rootLogger = INFO, mySTDOUT
+
+log4sh.appender.mySTDOUT = ConsoleAppender
+log4sh.appender.mySTDOUT.layout = PatternLayout
+log4sh.appender.mySTDOUT.layout.ConversionPattern = %m%n

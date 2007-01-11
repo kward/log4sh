@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+$Id$
+vim:softtabstop=2 shiftwidth=2
+-->
+
+<!-- =========================================================================
+ ! Configuration
+-->
+
+<chapter id="configuration"><title id="configuration.title">Configuration</title>
+
+  <section id="properties_file"><title id="properties_file.title">Properties File</title>
+    <para>Log4sh can be configured with a properties file that is separate from the actual script where the logging takes place.  By default, log4sh looks for its properties file called <filename>log4sh.properties</filename> in the current directory.  If the file is located elsewhere or with a different name, log4sh can be configured by setting the <varname>LOG4SH_CONFIGURATION</varname> environment variable (eg. <code>LOG4SH_CONFIGURATION="/etc/log4sh.conf"</code>).</para>
+  
+    <para>A <filename>log4sh.properties</filename> file that is completly empty is sufficient to configure log4sh.  There will be absolutely no output however (which might just be what is desired).  Usually though, some output is desired, so there is at least a recommended minimum configuration file.  An explaination of the file follows the example.</para>
+  
+    <example><title>Recommended minimum log4sh.properties file</title>
+      <programlisting><![CDATA[
+  log4sh.rootLogger=INFO, stdout
+  log4sh.appender.stdout=ConsoleAppender
+  ]]></programlisting>
+    </example>
+  
+    <para>In the first line, the root logger is configured by setting the default logging level, and defining the name of an appender.  In the second line, the stdout appender is defined as a <constant>ConsoleAppender</constant>.</para>
+  
+    <section id="properties-root_logger"><title>Root Logger</title>
+      <para>(future)</para>
+    </section>
+  
+    <section id="levels"><title>Levels</title>
+      <table><title>Logging Levels (from most output to least)</title>
+        <tgroup cols="2">
+  	<thead>
+  	  <row>
+  	    <entry>Level</entry>
+  	    <entry>Definition</entry>
+  	  </row>
+  	</thead>
+  	<tbody>
+  	  <row>
+  	    <entry>&trace;</entry>
+  	    <entry>The &trace; level has the lowest possible rank and is intended to turn on all logging.</entry>
+  	  </row><row>
+  	    <entry>&debug;</entry>
+  	    <entry>The &debug; level designates fine-grained informational events that are most useful to debug an application.</entry>
+  	  </row><row>
+  	    <entry>&info;</entry>
+  	    <entry>The &info; level designates informational messages that highlight the progress of the application at coarse-grained level.</entry>
+  	  </row><row>
+  	    <entry>&warn;</entry>
+  	    <entry>The &warn; level designates potentially harmful situations.</entry>
+  	  </row><row>
+  	    <entry>&error;</entry>
+  	    <entry>The &error; level designates error events that might still allow the application to continue running.</entry>
+  	  </row><row>
+  	    <entry>&fatal;</entry>
+  	    <entry>The &fatal; level designates very severe error events that will presumably lead the application to abort.</entry>
+  	  </row><row>
+  	    <entry>&off;</entry>
+  	    <entry>The &off; level has the highest possible rank and is intended to turn off logging.</entry>
+  	  </row>
+  	</tbody>
+        </tgroup>
+      </table>
+    </section>
+  
+    <section id="appenders"><title>Appenders</title>
+      <para>An appender name can be any alpha-numeric string containing no spaces.</para>
+      
+      <example><title>Sample appender names</title>
+        <para>myAppender - good</para>
+      </example>
+    
+        <section id="types"><title>Types</title>
+  	<para>An appender can be set to one of several different types.</para>
+  
+        <example><title>Setting an appender type</title>
+  	<programlisting><![CDATA[
+    log4sh.appender.A1=FileAppender
+    ]]></programlisting>
+        </example>
+  
+        <table><title>Appender Types</title>
+  	<tgroup cols="3">
+  	  <thead>
+  	    <row>
+  	      <entry>Type</entry>
+  	      <entry>Definition</entry>
+  	      <entry>Supported?</entry>
+  	    </row>
+  	  </thead>
+  	  <tbody>
+  	    <row>
+  	      <entry>ConsoleAppender</entry>
+  	      <entry>output sent to console (STDOUT)</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  	    <row>
+  	      <entry>FileAppender</entry>
+  	      <entry>output sent to a file</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  	    <row>
+  	      <entry>DailyRollingFileAppender</entry>
+  	      <entry>output sent to a file that rolls over daily</entry>
+  	      <entry>partial; logs written, but not rotated</entry>
+  	    </row>
+  	    <row>
+  	      <entry>RollingFileAppender</entry>
+  	      <entry>output sent to a file that rolls over by size</entry>
+  	      <entry>partial; works, but nees improvement</entry>
+  	    </row>
+  	    <row>
+  	      <entry>SMTPAppender</entry>
+  	      <entry>output sent via email</entry>
+  	      <entry>parital; works, but needs improvement</entry>
+  	    </row>
+  	    <row>
+  	      <entry>SyslogAppender</entry>
+  	      <entry>output sent to a remote syslog daemon</entry>
+  	      <entry>partial; only localhost supported</entry>
+  	    </row>
+  	  </tbody>
+  	</tgroup>
+        </table>
+      </section>
+  
+      <section id="options"><title>Options</title>
+        <para>An appender can take several different options.</para>
+  
+        <example><title>Setting an appender option</title>
+  	<programlisting><![CDATA[
+    log4sh.appender.A1.File=output.log
+    ]]></programlisting>
+        </example>
+  
+        <table><title>Appender Options</title>
+  	<tgroup cols="3">
+  	  <thead>
+  	    <row>
+  	      <entry>Option</entry>
+  	      <entry>Definition</entry>
+  	      <entry>Supported?</entry>
+  	    </row>
+  	  </thead>
+  	  <tbody>
+  	    <row>
+  	      <entry>DatePattern</entry>
+  	      <entry>configure a pattern for the output filename</entry>
+  	      <entry>no (ignored)</entry>
+  	    </row>
+  	    <row>
+  	      <entry>File</entry>
+  	      <entry>output filename (special filename of STDERR used for logging to STDERR)</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  	    <row>
+  	      <entry>MaxBackupIndex</entry>
+  	      <entry>number of old logfiles to keep</entry>
+  	      <entry>no (ignored)</entry>
+  	    </row>
+  	    <row>
+  	      <entry>MaxFileSize</entry>
+  	      <entry>maximum size of old logfiles</entry>
+  	      <entry>no (ignored)</entry>
+  	    </row>
+  	    <row>
+  	      <entry>Threshold</entry>
+  	      <entry>logging level of the appender</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  	  </tbody>
+  	</tgroup>
+        </table>
+      </section>
+  
+      <section id="layouts"><title>Layouts</title>
+        <para>An appender can be configured with various Layouts to customize how the output looks.</para>
+  
+        <example><title>Setting an appender's layout</title>
+  	<programlisting><![CDATA[
+    log4sh.appender.A1.layout=PatternLayout
+    ]]></programlisting>
+        </example>
+  
+        <table><title>Layouts</title>
+  	<tgroup cols="3">
+  	  <thead>
+  	    <row>
+  	      <entry>Layout</entry>
+  	      <entry>Definition</entry>
+  	      <entry>Supported?</entry>
+  	    </row>
+  	  </thead>
+  	  <tbody>
+  	    <row>
+  	      <entry>HTMLLayout</entry>
+  	      <entry>layout using HTML</entry>
+  	      <entry>no (same as SimpleLayout)</entry>
+  	    </row>
+  	    <row>
+  	      <entry>SimpleLayout</entry>
+  	      <entry>a simple default layout ('%p - %m')</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  	    <row>
+  	      <entry>PatternLayout</entry>
+  	      <entry>a patterned layout (default: '%d %p - %m%n')</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  	  </tbody>
+  	</tgroup>
+        </table>
+  
+        <para>An layout has many different options to configure how it appears.  These are known as patterns.</para>
+  
+        <example><title>Setting an appender's layout pattern</title>
+  	<programlisting><![CDATA[
+    log4sh.appender.A1.layout.ConversionPattern=%d [%p] %c - %m%n
+    ]]></programlisting>
+        </example>
+  
+        <table><title>Pattern Options</title>
+  	<tgroup cols="3">
+  	  <thead>
+  	    <row>
+  	      <entry>Option</entry>
+  	      <entry>Definition</entry>
+  	      <entry>Supported?</entry>
+  	    </row>
+  	  </thead>
+  	  <tbody>
+  
+  	    <row>
+  	      <entry align="center">c</entry>
+  	      <entry>Used to output the category of logging request.  As this is not applicable in shell, the conversion character will always returns 'shell'.</entry>
+  	      <entry>partial (fixed)</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">d</entry>
+  	      <entry>
+  		<para>Used to output the date of the logging event.  The date conversion specifier may be followed by a <emphasis>date format specifier</emphasis> enclosed between braces, but this specifier will be ignored.  For example, <option>%d{HH:mm:ss,SSS}</option>, or <option>%d{ISODATE}</option>.  The specifier is allowed only for compatibility with log4j properties files.</para>
+  		<para>The default format of the date returned is equavilant to the output of the Unix <command>date</command> command with a format of <option>+%Y-%m-%d %H:%M:%S</option>.</para>
+  	      </entry>
+  	      <entry>yes</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">F</entry>
+  	      <entry>
+  		<para>Used to output the file name where the logging request was issued.</para>
+  		<para>The default value is equavilent <command>basename $0</command>.</para>
+  	      </entry>
+  	      <entry>yes</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">L</entry>
+  	      <entry>This option is for compatibility with log4j properties files.</entry>
+  	      <entry>no (ignored)</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">m</entry>
+  	      <entry>Used to output the script supplied message associated with the logging event.</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">n</entry>
+  	      <entry>This option is for compatibility with log4j properties files.</entry>
+  	      <entry>no (ignored)</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">p</entry>
+  	      <entry>Used to output the priority of the logging event.</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">r</entry>
+  	      <entry>Used to output the number of seconds elapsed since the start of the script until the creation of the logging event.</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">t</entry>
+  	      <entry>
+  	        <para>Used to output the current executing thread.  As shell doesn't actually support threads, this is simply a value that can be set that can be put into the messages.i</para>
+  		<para>The default value is 'main'.</para>
+  	      </entry>
+  	      <entry>yes</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">x</entry>
+  	      <entry>This option is for compatibility with log4j properties files.</entry>
+  	      <entry>no (ignored)</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">X</entry>
+  	      <entry>Used to output the MDC (mapped diagnostic context) associated with the thread that generated the logging event.  The <option>X</option> conversion character <emphasis>must</emphasis> be followed by an environment variable name placed between braces, as in <option>%X{clientNumber}</option> where <option>clientNumber</option> is the name of the environment variable.  The value in the MDC corresponding to the environment variable will be output.</entry>
+  	      <entry>no (ignored)</entry>
+  	    </row>
+  
+  	    <row>
+  	      <entry align="center">%</entry>
+  	      <entry>The sequence <option>%%</option> outputs a single percent sign.</entry>
+  	      <entry>yes</entry>
+  	    </row>
+  
+  	  </tbody>
+  	</tgroup>
+        </table>
+  
+      </section>
+    </section>
+  </section>
+
+  <section id="env_vars"><title id="env_vars.title">Environment Variables</title>
+    <para>There are some environment variables that can be used to pre-configure log4sh, or to change some of its default behavior.  These variables should be set before log4sh is sourced so that they are immediately available to log4sh.</para>
+    
+    <para>Here is the full list of supported variables.</para>
+
+    <table><title>log4sh environment variables</title>
+      <tgroup cols="2">
+	<thead>
+	  <row>
+	    <entry>Variable</entry>
+	    <entry>Usage</entry>
+	  </row>
+	</thead>
+	<tbody>
+	  <row>
+	    <entry><varname>LOG4SH_CONFIGURATION</varname></entry>
+	    <entry>
+	      <para>This variable is used to tell log4sh what the name of (and possibly the full path to) the configuration (a.k.a properties) file that should be used to configure log4sh at the time log4sh is sourced.  If the value 'none' is passed, than log4sh will expect to be configured at a later time via run-time configuration.</para>
+	      <example>
+	        <title>LOG4SH_CONFIGURATION variable</title>
+	        <programlisting>LOG4SH_CONFIGURATION='/path/to/log4j.properties'</programlisting>
+	      </example>
+	    </entry>
+	  </row>
+	  <row>
+	    <entry><varname>LOG4SH_CONFIG_PREFIX</varname></entry>
+	    <entry>
+	      <para>This variable is used to tell log4sh what prefix it should use when parsing the configuration file.  Normally, the default value is 'log4sh' (e.g. 'log4sh.rootLogger'), but the value can be redefined so that a configuration file from another logging frame work such as log4j can be read.</para>
+	      <example>
+	        <title>LOG4SH_CONFIG_PREFIX variable</title>
+	        <programlisting>LOG4SH_CONFIG_PREFIX='log4j'</programlisting>
+	      </example>
+	    </entry>
+	  </row>
+	</tbody>
+      </tgroup>
+    </table>
+  </section>
+
+</chapter>

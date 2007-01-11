@@ -1,0 +1,120 @@
+﻿RELEASE NOTES FOR 1.3.6
+
+The previous release was somewhat of a brown-bag release. Running log4sh
+through the unit tests provided (something that was completely new for
+the 1.3.5 release) indicated that it worked great under Linux with Bash
+and under Solaris with the standard Bourne shell. Unfortunately, it was
+not tested under ksh for either Linux or Solaris. After testing with ksh
+was done, it was discovered that many of the new internal changes did not
+work whatsoever with ksh, and were often times causing segmentation faults,
+something quite uncommon with a shell script.
+
+This release is meant to fix the problems with the last release. log4sh has
+been fixed to work with the unit tests, and the unit tests themselves have
+been cleaned up and the sub-shells removed as log4sh now supports having
+its configuration reset programmatically.
+
+TESTED PLATFORMS
+
+Cygwin – bash 3.1.17(6); pdksh 5.2.4
+
+Linux – bash 3.00.16(1), 3.1.17(1); ksh 1993-12-28
+
+Solaris 10 U2 – /bin/sh; bash 3.00.16(1); ksh M-11/16/88i
+
+NEW FEATURES
+
+A log4sh_doConfigure() function was added. (Actually, the
+log4shReadProperties() function was renamed). This function can be used to read
+a configuration file at runtime. It does *not* reset the current configuration,
+so one must first call the log4sh_resetConfiguration() function to do that.
+
+A log4sh_resetConfiguration() function was added. This function will completely
+reset the configuration of log4sh to an clean state. No appenders are defined,
+and logging statements will have absolutely no effect.
+
+A appender_activateOptoins() function was added. This was done to closer
+duplicate the functionality of log4j. This function can be optionally
+called to activate an appender after any changes have been made to it
+programmatically. This function call will be required in a future release
+of log4sh.
+
+An additional internal log4sh debug variable can be set so that all log4sh
+debug output will be written to a file. If the LOG4SH_DEBUG_FILE variable is
+set, the internal log4sh debug output will be written to that file instead
+of STDERR (assuming of course one of the other log4sh internal debugging
+variables has been defined – see the Changes and Enhancements).
+
+A appender_file_setMaxBackupIndex() stub function was added.
+
+CHANGES AND ENHANCEMENTS
+
+As of this release, all source code is now stored under Subversion rather
+than CVS.
+
+Continued cleanup of the code. As with the previous releases, even more
+variables are accessed using the ${varname} format rather than just
+$varname. More internal variables are being renamed to prevent variable
+name clashes. Variables cannot be declared local under Bourne shell which
+results in all variables local to a function being inherently global in
+scope. Variable clashes ensue.
+
+The internal log4sh debugging has been reworked. If one of the following
+environment variables is set at the time log4sh is sourced, log4sh will be
+put into the appropriate debugging mode. The variables are LOG4SH_TRACE,
+LOG4SH_DEBUG, and LOG4SH_INFO. Any non-empty string value will enable the
+appropriate debugging level. Internally, putting log4sh into debugging mode
+now handles the output centrally (which can easily be changed) so that log4sh
+debugging statements are shorter and cleaner.
+
+The _log4sh_mktempDir() function was cleaned up a tiny bit to make it easier
+to cut-and-paste this nice function to other shell scripts.
+
+The _log4sh_level2tag() and _log4sh_tag2level() functions were renamed to
+_logger_level_toInt() and _logger_level_toLevel() respectively to better
+match the log4j method names.
+
+The appender_syslog_getFacilityByIndex() and
+appender_syslog_getFacilityByName() functions were removed as they should
+never have been present.
+
+Many of the functions were rearranged to bring common functions closer
+together in the code base.
+
+The PatternLayout '%r' conversion character now works properly under all
+shells.
+
+Unit tests are now used to verify correct functionality on all platforms.
+
+DEPRECATED FEATURES
+
+The log4sh_readProperties() function was deprecated. It was renamed to
+log4sh_doConfigure() to better match the log4j method names.
+
+The logger_addAppenderWithPattern() function was deprecated. It is not
+present in log4j, and was only a helper function.
+
+BUG FIXES
+
+The trap restoring code did not work properly as a regex was poorly
+written. Any traps set before log4sh is sourced should now properly be called.
+
+The 1.3.5 release did not work at all with ksh. This has been fixed. It now
+passes all unit tests.
+
+The 1.3.5 release hardly worked under Cygwin. This has been fixed. It now
+passes all unit tests.
+
+The trap handling was changed slightly to work better under Cygwin.
+
+KNOWN BUGS AND ISSUES
+
+Passing of the '\' character in an logging message does not work under the
+standard Solaris shell [/bin/sh] or under Cygwin with ksh [/bin/ksh].
+
+The RollingFileAppender and DailyRollingFileAppender appenders do not roll
+their files.
+
+Trap handling is not yet 100% fool-proof.
+
+Performance is prohibitively slow under Cygwin

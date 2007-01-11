@@ -1,0 +1,81 @@
+﻿RELEASE NOTES FOR 1.4.0
+
+This release of log4sh fixes some bugs that were reported by users. There is no new functionality included.
+
+
+TESTED PLATFORMS
+
+Cygwin
++ bash 3.2.9(10)
++ pdksh 5.2.14
+
+Linux
++ bash 3.1.17(1)
++ dash 0.5.3
++ ksh 1993-12-28
++ pdksh 5.2.14
++ zsh 4.3.2 (does not work)
+
+Mac OS X 1.4.8 (Darwin 8.8)
++ bash 2.05b.0(1)
++ ksh 1993-12-28
+
+Solaris 8 U3 (x86)
++ /bin/sh
++ bash 2.03.0(1)
++ ksh M-11/16/88i
+
+Solaris 10 U2 (sparc)
++ /bin/sh
++ bash 3.00.16(1)
++ ksh M-11/16/88i
+
+Solaris 10 U2 (x86)
++ /bin/sh
++ bash 3.00.16(1)
++ ksh M-11/16/88i
+
+
+NEW FEATURES
+
+The 'mail' command can now be configured as an alternative command using
+log4sh_setAlternative().
+
+
+CHANGES AND ENHANCEMENTS
+
+The log4sh_doConfigure() function now calls log4sh_resetConfiguration() before
+loading a new configuration.
+
+Added Mac OS X 1.4 as a tested platform.
+
+Additional unit tests:
++ testSMTPAppender
+
+
+BUG FIXES
+
+Alternative commands configured in a config file caused errors when read.
+
+The SMTPAppender did not send mail properly when the Subject contained spaces.
+
+
+DEPRECATED FEATURES
+
+None.
+
+
+KNOWN BUGS AND ISSUES
+
+Passing of the '\' character in an logging message does not work under the
+standard Solaris Bourne shell [/bin/sh], under the dash shell [/bin/dash], or
+under Cygwin with ksh [/bin/ksh].
+
+The DailyRollingFileAppender appender do not roll files.
+
+Trap handling is not yet absolutely 100% fool-proof.
+
+Performance is prohibitively slow under Cygwin
+
+More error checking/reporting needs to be added; this includes validating input
+to public functions.
