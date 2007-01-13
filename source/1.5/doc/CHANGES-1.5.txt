@@ -1,0 +1,6 @@
+Changes with 1.5.0
+
++ updated shUnit to 1.3.0pre
+
+
+$Revision$

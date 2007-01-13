@@ -1,7 +1,7 @@
 # $Id$
 # vim:syntax=sh:sts=2
 #
-# shUnit 1.0.2
+# shUnit 1.0.3
 # Shell Unit Test Framework
 #
 # written by Kate Ward <kate.ward@forestent.com>
@@ -14,7 +14,7 @@
 # u - treat unset variables as an error when performing parameter expansion
 __SHUNIT_SHELL_FLAGS='u'
 
-# save the current set of shell flags, and then set some for log4sh
+# save the current set of shell flags, and then set some for ourselves
 __shunit_oldShellFlags="$-"
 for _su_shellFlag in `echo "${__SHUNIT_SHELL_FLAGS}" |sed 's/\(.\)/\1 /g'`
 do
@@ -23,7 +23,7 @@ done
 
 # constants
 
-__SHUNIT_VERSION=1.0.2
+__SHUNIT_VERSION='1.0.3pre'
 
 __SHUNIT_TRUE=0
 __SHUNIT_FALSE=1
