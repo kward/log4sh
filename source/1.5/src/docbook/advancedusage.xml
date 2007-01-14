@@ -149,42 +149,42 @@ logger_info 'Hello, world'
 	  <entry>1B</entry>
 	</row>
 	<row>
-	  <entry>KB</entry>
+	  <entry>KB (kilobytes)</entry>
 	  <entry>1,000</entry>
 	  <entry>1KB = 1000B</entry>
 	</row>
 	<row>
-	  <entry>KiB (kilobytes)</entry>
+	  <entry>KiB (kibibytes)</entry>
 	  <entry>1,024</entry>
 	  <entry>1KiB = 1024B</entry>
 	</row>
 	<row>
-	  <entry>MB</entry>
+	  <entry>MB (megabytes)</entry>
 	  <entry>1,000,000</entry>
 	  <entry>1MB = 1000KB = 1000000B</entry>
 	</row>
 	<row>
-	  <entry>MiB (megabytes)</entry>
+	  <entry>MiB (mebibytes)</entry>
 	  <entry>1,048,576</entry>
 	  <entry>1MiB = 1024KiB = 1048576B</entry>
 	</row>
 	<row>
-	  <entry>GB</entry>
+	  <entry>GB (gigabytes)</entry>
 	  <entry>1,000,000,000</entry>
 	  <entry>1GB = 1000MB = 1000000KB = 1000000000B</entry>
 	</row>
 	<row>
-	  <entry>GiB (gigabytes)</entry>
+	  <entry>GiB (gibibytes)</entry>
 	  <entry>1,073,741,824</entry>
 	  <entry>1GiB = 1024MiB = 1048576KiB = 1073741824B</entry>
 	</row>
 	<row>
-	  <entry>TB</entry>
+	  <entry>TB (terabytes)</entry>
 	  <entry>1,000,000,000,000</entry>
 	  <entry>1TB = 1000GB = 1000000MB = 1000000000KB = 1000000000000B</entry>
 	</row>
 	<row>
-	  <entry>TiB (terabytes)</entry>
+	  <entry>TiB (tebibytes)</entry>
 	  <entry>1,099,511,627,776</entry>
 	  <entry>1TiB = 1024GiB = 1048576MiB = 1073741824KiB = 1099511627776B</entry>
 	</row>
