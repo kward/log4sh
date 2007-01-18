@@ -1,5 +1,7 @@
 # $Id$
 
+Options +Indexes
+
 AddType multipart/digest .md5
 <Files *.tgz.md5>
   RemoveEncoding .tgz
