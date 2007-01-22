@@ -171,6 +171,7 @@ __log4sh_wa_setNeedsEval=$?
 _log4sh_log()
 {
   _ll__level=$1
+
   shift
   if [ -z "${LOG4SH_DEBUG_FILE:-}" ]; then
     echo "log4sh:${_ll__level} $@" >&2
@@ -503,10 +504,9 @@ log4sh_setAlternative()
   __log4sh_return=${__LOG4SH_TRUE}
 
   # check that the alternative command exists and is executable
-  if [ \
-    ! -x "${lsa_cmdPath}" \
-    -a ${lsa_useRuntimePath:-${__LOG4SH_FALSE}} -eq ${__LOG4SH_FALSE} \
-  ]; then
+  if [ ! -x "${lsa_cmdPath}" \
+      -a ${lsa_useRuntimePath:-${__LOG4SH_FALSE}} -eq ${__LOG4SH_FALSE} ]
+  then
     # the alternative command is not executable
     _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
     __log4sh_return=${__LOG4SH_FALSE}
@@ -581,9 +581,20 @@ log4sh_setAlternative()
 #*/
 _log4sh_findArrayElement()
 {
-  __pos=`echo "$1" |awk '$0==e{print NR}' e="$2"`
-  [ -n "${__pos}" ] && echo "${__pos}" || echo 0
-  unset __pos
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
+  _lfae_array=$1
+  _lfae_element=$2
+  __log4sh_return=${TRUE}
+
+  _lfae_pos=`echo "${_lfae_array}" |awk '$0==e{print NR}' e="${_lfae_element}"`
+  if [ -n "${_lfae_pos}" ]; then
+    echo "${_lfae_pos}"
+  else
+    echo 0
+  fi
+
+  unset _lfae_pos
+  return ${__log4sh_return}
 }
 
 #/**
@@ -609,6 +620,7 @@ _log4sh_findArrayElement()
 _log4sh_getArrayElement()
 {
   [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
+
   _lgae_array=$1
   _lgae_index=$2
   ${__LOG4SH_TRACE} "_lgae_array='${_lgae_array}' _lgae_index='${_lgae_index}'"
@@ -1256,33 +1268,6 @@ appender_getType()
 #/**
 # <s:function group="Appender" modifier="public">
 # <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_getAppenderType</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
-#   <para>
-#     Gets the Type of an Appender at the given array index
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>type=`appender_getAppenderType 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_getAppenderType()
-{
-  _appender_getTypeByIndex "$@"
-}
-
-#/**
-# <s:function group="Appender" modifier="public">
-# <entry align="right">
 #   <emphasis>void</emphasis>/<code>boolean</code>
 # </entry>
 # <entry>
@@ -1316,34 +1301,6 @@ appender_setType()
 
   unset ast_appender ast_type _index
   return ${__LOG4SH_TRUE}
-}
-
-#/**
-# <s:function group="Appender" modifier="public">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_setAppenderType</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>type</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
-#   <para>
-#     Sets the Type of an Appender (e.g. FileAppender)
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_setAppenderType myAppender FileAppender</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_setAppenderType()
-{
-  appender_setType "$@"
 }
 
 #/**
@@ -1774,35 +1731,6 @@ appender_file_setFile()
 #/**
 # <s:function group="FileAppender" modifier="public">
 # <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_setAppenderFile</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>filename</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.2</emphasis></para>
-#   <para>
-#     Set the filename for a FileAppender (e.g. "STDERR" or
-#     "/var/log/log4sh.log")
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_setAppenderFile myAppender STDERR</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_setAppenderFile()
-{
-  appender_file_setFile "$@"
-}
-
-#/**
-# <s:function group="FileAppender" modifier="public">
-# <entry align="right">
 #   <code>integer</code>/boolean
 # </entry>
 # <entry>
@@ -2131,34 +2059,6 @@ appender_smtp_setTo()
 #/**
 # <s:function group="SMTPAppender" modifier="public">
 # <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_setAppenderRecipient</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>email</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
-#   <para>
-#     Set the to address for the given appender
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_smtp_setTo myAppender user@example.com</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_setAppenderRecipient()
-{
-  appender_smtp_setTo "$@"
-}
-
-#/**
-# <s:function group="SMTPAppender" modifier="public">
-# <entry align="right">
 #   <code>string</code>/boolean
 # </entry>
 # <entry>
@@ -2219,6 +2119,7 @@ appender_smtp_getSubject()
 #*/
 appender_smtp_setSubject()
 {
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
   if [ $# -ne 2 ]; then
     _log4sh_error 'appender_smtp_setSubject(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
@@ -2243,34 +2144,6 @@ appender_smtp_setSubject()
 
   unset asss_appender asss_subject asss_index
   return ${__log4sh_return}
-}
-
-#/**
-# <s:function group="SMTPAppender" modifier="public">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_setAppenderSubject</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>subject</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
-#   <para>
-#     Sets the email subject for an SMTP appender
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_setAppenderSubject myAppender "This is a test"</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_setAppenderSubject()
-{
-  appender_smtp_setSubject "$@"
 }
 
 #-----------------------------------------------------------------------------
@@ -2308,33 +2181,6 @@ _appender_syslog_getFacilityByIndex()
 #/**
 # <s:function group="SyslogAppender" modifier="public">
 # <entry align="right">
-#   <code>string</code>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_getSyslogFacility</function></funcdef>
-#       <paramdef>integer <parameter>index</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.1</emphasis></para>
-#   <para>
-#     Get the syslog facility of the specified appender by index
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>facility=`appender_getSyslogFacility 3`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_getSyslogFacility()
-{
-  _appender_syslog_getFacilityByIndex "$@"
-}
-
-#/**
-# <s:function group="SyslogAppender" modifier="public">
-# <entry align="right">
 #   <emphasis>void</emphasis>
 # </entry>
 # <entry>
@@ -2355,6 +2201,7 @@ appender_getSyslogFacility()
 #*/
 appender_syslog_getFacility()
 {
+  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
   if [ $# -ne 1 ]; then
     _log4sh_error 'appender_syslog_getFacility(): invalid number of parameters'
     return ${__LOG4SH_FALSE}
@@ -2416,34 +2263,6 @@ appender_syslog_setFacility()
 
   unset assf_appender assf_facility assf_index
   return ${__LOG4SH_TRUE}
-}
-
-#/**
-# <s:function group="SyslogAppender" modifier="public">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>appender_setSyslogFacility</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>facility</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.2</emphasis></para>
-#   <para>
-#     Set the syslog facility for the given appender
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>appender_setSyslogFacility myAppender local4`</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-appender_setSyslogFacility()
-{
-  appender_syslog_setFacility "$@"
 }
 
 #/**
@@ -2697,41 +2516,6 @@ logger_addAppender()
 
   unset laa_appender
   return ${__LOG4SH_TRUE}
-}
-
-#/**
-# <s:function group="Logger" modifier="public">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>logger_addAppenderWithPattern</function></funcdef>
-#       <paramdef>string <parameter>appender</parameter></paramdef>
-#       <paramdef>string <parameter>pattern</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.6</emphasis></para>
-#   <para>
-#     Add and initialize a new appender with a specific PatternLayout
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>logger_addAppenderWithPattern $appender '%d %p - %m%n'</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-logger_addAppenderWithPattern()
-{
-  _myAppender=$1
-  _myPattern=$2
-
-  logger_addAppender ${_myAppender}
-  appender_setLayout ${_myAppender} "${__LOG4SH_LAYOUT_PATTERN}"
-  appender_setPattern ${_myAppender} "${_myPattern}"
-
-  unset _myAppender _myPattern
 }
 
 #/**
@@ -3421,33 +3205,6 @@ log4sh_doConfigure()
 # <entry>
 #   <funcsynopsis>
 #     <funcprototype>
-#       <funcdef><function>log4sh_readProperties</function></funcdef>
-#       <paramdef>string <parameter>configFileName</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.6</emphasis></para>
-#   <para>
-#     See <code>log4sh_doConfigure</code>.
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>log4sh_readProperties myconfig.properties</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-log4sh_readProperties()
-{
-  log4sh_doConfiguration "$@"
-}
-
-#/**
-# <s:function group="Property" modifier="public">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
 #       <funcdef><function>log4sh_resetConfiguration</function></funcdef>
 #       <void />
 #     </funcprototype>
@@ -3544,72 +3301,6 @@ logger_setThreadName()
   __log4sh_threadName=$_thread
 
   unset _index _thread
-}
-
-#/**
-# <s:function group="Thread" modifier="public">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>logger_pushThreadName</function></funcdef>
-#       <paramdef>string <parameter>threadName</parameter></paramdef>
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.7</emphasis></para>
-#   <para>
-#     Sets the thread name (eg. the name of the script) and pushes the old on
-#     to a stack for later use. This thread name can be used with the '%t'
-#     conversion character within a <option>PatternLayout</option>.
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>logger_pushThreadName "myThread"</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-logger_pushThreadName()
-{
-  __log4sh_threadStack=`_log4sh_pushStack "$__log4sh_threadStack" $1`
-  __log4sh_threadName=$1
-}
-
-#/**
-# <s:function group="Thread" modifier="public">
-# <entry align="right">
-#   <emphasis>void</emphasis>
-# </entry>
-# <entry>
-#   <funcsynopsis>
-#     <funcprototype>
-#       <funcdef><function>logger_popThreadName</function></funcdef>
-#       <void />
-#     </funcprototype>
-#   </funcsynopsis>
-#   <para><emphasis role="strong">Deprecated as of 1.3.7</emphasis></para>
-#   <para>
-#     Removes the topmost thread name from the stack. The next thread name on
-#     the stack is then placed in the <varname>__log4sh_threadName</varname>
-#     variable. If the stack is empty, or has only one element left, then a
-#     warning is given that no more thread names can be popped from the stack.
-#   </para>
-#   <funcsynopsis>
-#     <funcsynopsisinfo>logger_popThreadName</funcsynopsisinfo>
-#   </funcsynopsis>
-# </entry>
-# </s:function>
-#*/
-logger_popThreadName()
-{
-  _length=`_log4sh_getArrayLength "$__log4sh_threadStack"`
-  if [ $_length -gt 1 ]; then
-    __log4sh_threadStack=`_log4sh_popStack "$__log4sh_threadStack"`
-    __log4sh_threadName=`_log4sh_peekStack "$__log4sh_threadStack"`
-  else
-    echo 'log4sh:WARN no more thread names available on thread name stack.' >&2
-  fi
 }
 
 #==============================================================================
