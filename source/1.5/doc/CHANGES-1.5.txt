@@ -1,6 +1,10 @@
-Changes with 1.5.0
+CHANGES WITH 1.5.0
 
-+ updated shUnit to 1.3.0pre
+updated shUnit to 1.0.3pre
+
+removed all deprecated functions
+
+remove old non-unit-test tests
 
 
 $Revision$

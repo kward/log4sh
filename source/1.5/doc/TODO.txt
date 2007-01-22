@@ -1,13 +1,10 @@
-# $Id$
+Stop the execution of the current unit test if an assert is encountered
 
 - document the SMTPAppender
 
 - implement line number conversion character (where possible)
 
 - look into traps. exit codes seem to be lost
-
-- enable passing the configuration filename on the source line instead of
-  requiring the LOG4SH_CONFIGURATION variable
 
 - DatedFileAppender
 DatedFileAppender works in the same manner as the Tomcat FileLogger. Contrary
@@ -30,8 +27,6 @@ file is not renamed until the first message is logged some time after midnight.
 - make logger level's case insensitive??
 
 - add more error checking on the appender_*set* functions.  see smtp_setSubject
-
-- try a `wc -l` in the _log4sh_getArrayLength function
 
 - resolve absolute filename
 D=`dirname "$relpath"`
@@ -66,3 +61,12 @@ False
 
 - research fanout - writing to multiple locations
 http://linuxgazette.net/122/TWDT.html#smith
+
+#
+# infeasable
+#
+
+enable passing the configuration filename on the source line instead of requiring the LOG4SH_CONFIGURATION variable. -- this doesn't work because the arguments are not passed into the sourced code
+
+$Revision$
+
