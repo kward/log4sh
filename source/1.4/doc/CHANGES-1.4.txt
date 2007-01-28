@@ -1,6 +1,11 @@
-Changes with 1.4.1
+CHANGES WITH 1.4.1
 
-+ Updated shUnit to 1.0.3pre
+updated shUnit to 1.0.3pre
+
+removed extra parameters that were being wrongly passed to the appender_setType
+and appender_setLayout functions
+
+fixed the unsetting of variables in several locations
 
 
 $Revision$
