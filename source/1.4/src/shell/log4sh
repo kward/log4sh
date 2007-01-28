@@ -6,7 +6,7 @@
 # <?xml version="1.0" encoding="UTF-8"?>
 # <s:shelldoc xmlns:s="http://www.forestent.com/2005/XSL/ShellDoc">
 # <s:header>
-# log4sh 1.4.0
+# log4sh 1.4.1
 #
 # http://log4sh.sourceforge.net/
 #
@@ -37,7 +37,7 @@ done
 #
 # constants
 #
-__LOG4SH_VERSION='1.4.0'
+__LOG4SH_VERSION='1.4.1pre'
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
@@ -1031,7 +1031,7 @@ appender_setLevel()
   # resource the appender
   _appender_cache ${asl_appender}
 
-  unset asl_appender asl_type _index
+  unset asl_appender asl_level _index
   return ${__LOG4SH_TRUE}
 }
 
@@ -2665,7 +2665,7 @@ logger_addAppender()
   laa_appender=$1
 
   # FAQ should we be using setter functions here?? for performance, no.
-  __log4shAppenders=`_log4sh_pushStack "${__log4shAppenders}" $1`
+  __log4shAppenders=`_log4sh_pushStack "${__log4shAppenders}" ${laa_appender}`
   __log4shAppenderCount=`expr ${__log4shAppenderCount} + 1`
   __log4shAppenderCounts="${__log4shAppenderCounts} ${__log4shAppenderCount}"
   __log4shAppenderLayouts=`_log4sh_pushStack \
@@ -3543,7 +3543,7 @@ logger_setThreadName()
   __log4sh_threadStack=`_log4sh_setArrayElement "$__log4sh_threadStack" $_length $_thread`
   __log4sh_threadName=$_thread
 
-  unset _index _thread
+  unset _length _thread
 }
 
 #/**
@@ -3771,8 +3771,8 @@ else
   # that those perusing the code can have a working example
   logger_setLevel ${__LOG4SH_LEVEL_ERROR_STR}
   logger_addAppender stdout
-  appender_setType stdout ConsoleAppender ${__LOG4SH_FALSE}
-  appender_setLayout stdout PatternLayout ${__LOG4SH_FALSE}
+  appender_setType stdout ConsoleAppender
+  appender_setLayout stdout PatternLayout
   appender_setPattern stdout '%-4r [%t] %-5p %c %x - %m%n'
 fi
 
