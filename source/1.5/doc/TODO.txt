@@ -1,5 +1,13 @@
 Stop the execution of the current unit test if an assert is encountered
 
+- check return values from functions
+
+- standardize all variable names
+
+- write shlint
+  + max 80 char lines
+  + wrapped lines should start 4 chars in
+
 - document the SMTPAppender
 
 - implement line number conversion character (where possible)

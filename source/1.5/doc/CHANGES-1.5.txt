@@ -1,10 +1,25 @@
-CHANGES WITH 1.5.0
+CHANGES WITH 1.5.0 (SINCE 1.4.0)
 
 updated shUnit to 1.0.3pre
 
 removed all deprecated functions
 
 remove old non-unit-test tests
+
+removed extra parameters that were being wrongly passed to the appender_setType
+and appender_setLayout functions
+
+removed the 'appender_activateOptions' call when caching the appender
+
+made the /dev/urandom random number generater the default when the mktemp
+function is present
+
+consolidated appender data get/set requests with new _appender_getData() and
+_appender_setData() functions
+
+added return values to all functions [where it makes sense]
+
+added return value checking in *many* locations
 
 
 $Revision$
