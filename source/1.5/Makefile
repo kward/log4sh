@@ -50,13 +50,6 @@ docs-transform-docbook: docs-prep
 	@xsltproc $(HTML_XSL) $(DOCBOOK_BUILD_DIR)/log4sh.xml >$(BUILD_DIR)/log4sh.html
 
 test: test-prep
-	@echo -------------------------------------------------------------------------------
-	@echo "testing log4sh from an initial properties configuration"
-	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-prop-config )
-	@echo -------------------------------------------------------------------------------
-	@echo "testing log4sh via runtime configuration"
-	( cd $(TEST_DIR); $(TEST_SRC_DIR)/test-runtime-config )
-	@echo -------------------------------------------------------------------------------
 	@echo "executing log4sh unit tests"
 	( cd $(TEST_DIR); $(TEST_SRC_DIR)/run-test-suite )
 
