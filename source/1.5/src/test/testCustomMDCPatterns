@@ -136,13 +136,6 @@ tearDown()
 # main
 #
 
-suite()
-{
-  suite_addTest testCustomDateMDC
-  suite_addTest testCustomTimeMDC
-  suite_addTest testCustomUserHostMDC
-}
-
 # load and run shUnit
 ${DEBUG} 'loading shUnit'
 . ./shunit

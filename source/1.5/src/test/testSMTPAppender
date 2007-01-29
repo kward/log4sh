@@ -127,17 +127,6 @@ setUp()
 # main
 #
 
-suite()
-{
-  for suite in \
-    testSubjectGetterSetter \
-    testToGetterSetter \
-    testAppenderSetupFromConfig
-  do
-    suite_addTest ${suite}
-  done
-}
-
 # load and run shUnit
 ${DEBUG} 'loading shUnit'
 . ./shunit

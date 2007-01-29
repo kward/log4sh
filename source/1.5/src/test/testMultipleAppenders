@@ -76,11 +76,6 @@ oneTimeTearDown()
 # main
 #
 
-suite()
-{
-  suite_addTest testTwoSimilarFileAppenders
-}
-
 # load and run shUnit
 ${DEBUG} 'loading shUnit'
 . ./shunit

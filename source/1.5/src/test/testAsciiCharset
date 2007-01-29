@@ -45,11 +45,6 @@ oneTimeSetUp()
 # main
 #
 
-suite()
-{
-  suite_addTest testAsciiCharset
-}
-
 # load and run shUnit
 ${DEBUG} echo "loading shUnit" >&2
 . ./shunit

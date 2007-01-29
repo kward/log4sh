@@ -71,11 +71,6 @@ oneTimeSetUp()
 # main
 #
 
-suite()
-{
-  suite_addTest testPriorityMatrix
-}
-
 # load and run shUnit
 ${DEBUG} echo "loading shUnit" >&2
 . ./shunit

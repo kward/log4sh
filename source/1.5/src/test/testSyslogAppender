@@ -249,16 +249,6 @@ setUp()
 # main
 #
 
-suite()
-{
-  suite_addTest testFacilityGetterSetter
-  suite_addTest testHostGetterSetter
-
-  suite_addTest testSyslogLogfilePresent
-  suite_addTest testPriorityMatrix
-  suite_addTest testRemoteLogging
-}
-
 # check options on tail command
 result=`echo '' |tail -n 1 >/dev/null 2>&1`
 if [ $? -eq 0 ]; then

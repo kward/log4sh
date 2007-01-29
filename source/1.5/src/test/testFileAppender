@@ -188,18 +188,6 @@ tearDown()
 # main
 #
 
-suite()
-{
-  suite_addTest testSTDERR_runtime
-  suite_addTest testSTDERR_config
-
-  suite_addTest testSimple_runtime
-  suite_addTest testSimple_config
-
-  suite_addTest testAccessors_getFilename
-  suite_addTest testAccessors_setgetFilename
-}
-
 # load and run shUnit
 ${DEBUG} 'loading shUnit'
 . ./shunit
