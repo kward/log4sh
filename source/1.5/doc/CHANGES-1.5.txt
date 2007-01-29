@@ -1,6 +1,6 @@
 CHANGES WITH 1.5.0 (SINCE 1.4.0)
 
-updated shUnit to 1.0.3pre
+updated shUnit to 1.0.4pre
 
 removed all deprecated functions
 
