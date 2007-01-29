@@ -21,6 +21,7 @@ commonPatternAssert()
   msg=$3
 
   appender_setPattern ${APP_NAME} "${pattern}"
+  appender_activateOptions ${APP_NAME}
   actual=`logger_info 'dummy'`
   ${DEBUG} echo "pattern='${pattern}' expected='${expected}' actual='${actual}'"
   msg=`eval "echo \"${msg}\""`
@@ -41,6 +42,7 @@ commonDatePatternAssert()
   regex=$2
 
   appender_setPattern ${APP_NAME} "${pattern}"
+  appender_activateOptions ${APP_NAME}
   result=`logger_info 'dummy'`
   matched=`echo ${result} |sed "s/${regex}//"`
   ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
@@ -109,6 +111,7 @@ commonPriorityPatternAssert()
   msg=$3
 
   appender_setPattern ${APP_NAME} "${pattern}"
+  appender_activateOptions ${APP_NAME}
   actual=`logger_info 'dummy'`
   ${DEBUG} echo "pattern='${pattern}' expected='${expected}' actual='${actual}'"
   msg=`eval echo "${msg}"`
@@ -125,6 +128,7 @@ testPriorityPattern()
   appender_setPattern ${APP_NAME} "${pattern}"
   for priority in TRACE DEBUG INFO WARN ERROR FATAL; do
     appender_setLevel ${APP_NAME} ${priority}
+    appender_activateOptions ${APP_NAME}
     result=`log ${priority} 'dummy'`
     ${DEBUG} echo "pattern='${pattern}' priority='${priority}' result='${result}'"
     assertEquals \
@@ -133,6 +137,7 @@ testPriorityPattern()
   done
 
   appender_setLevel ${APP_NAME} ${currPriority}
+  appender_activateOptions ${APP_NAME}
 }
 
 testRunningTimePattern()
@@ -141,6 +146,7 @@ testRunningTimePattern()
   regex='^[0-9]*(\.[0-9]*){0,1}$'
 
   appender_setPattern ${APP_NAME} "${pattern}"
+  appender_activateOptions ${APP_NAME}
   result=`logger_info 'dummy'`
   matched=`echo "${result}" |egrep "${regex}"`
   ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
@@ -227,22 +233,6 @@ oneTimeSetUp()
 #------------------------------------------------------------------------------
 # main
 #
-
-suite()
-{
-  suite_addTest testCategoryPattern
-  suite_addTest testDatePattern
-  suite_addTest testFileNamePattern
-  suite_addTest testLineNumberPattern
-  suite_addTest testLineSeparatorPattern
-  suite_addTest testMessagePattern
-  suite_addTest testPriorityPattern
-  suite_addTest testRunningTimePattern
-  suite_addTest testThreadNamePattern
-  suite_addTest testNDCPattern
-  suite_addTest testMDCPattern
-  suite_addTest testPercentPattern
-}
 
 # need working egrep. the one for Solaris is in /usr/xpg4/bin, so we will add
 # that to the path
