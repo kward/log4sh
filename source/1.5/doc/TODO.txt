@@ -1,3 +1,6 @@
+Provide function to clean up log4sh, and that clears the traps (the first is
+there already)
+
 Stop the execution of the current unit test if an assert is encountered
 
 - check return values from functions
