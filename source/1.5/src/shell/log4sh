@@ -3379,10 +3379,10 @@ log4sh_doConfigure()
   ${__LOG4SH_TRACE} "__LOG4SH_CONFIG_PREFIX='${__LOG4SH_CONFIG_PREFIX}'"
   grep "^${__LOG4SH_CONFIG_PREFIX}\." "${ldc_file}" >"${ldc_tmpFile}"
 
-  # read the file in. using awk here instead of piping the file into 'while'
-  # and then reading with 'read' as the pipe causes a fork under the Solaris
-  # shell which makes it impossible to get the variables passed back to the
-  # parent script.
+  # read the file in. using a temporary file and a file descriptor here instead
+  # of piping the file into the 'while read' because the pipe causes a fork
+  # under some shells which makes it impossible to get the variables passed
+  # back to the parent script.
   exec 3<&0 <"${ldc_tmpFile}"
   while read ldc_line; do
     ldc_key=`expr "${ldc_line}" : '\([^= ]*\) *=.*'`
