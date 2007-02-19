@@ -14,20 +14,21 @@ Introduction
 
   <para><blockquote><title>Tested Operating Systems</title>
     <itemizedlist>
-      <listitem><para>Cygwin</para></listitem>
-      <listitem><para>Linux</para></listitem>
-      <listitem><para>Mac OS X</para></listitem>
-      <listitem><para>Solaris 8+</para></listitem>
+      <listitem><para><ulink url="http://www.cygwin.com/">Cygwin</ulink></para></listitem>
+      <listitem><para><ulink url="http://www.freebsd.org/">FreeBSD</ulink> (user supported)</para></listitem>
+      <listitem><para>Linux (<ulink url="http://www.gentoo.org/">Gentoo</ulink>, <ulink url="http://www.ubuntu.com/">Ubuntu</ulink>)</para></listitem>
+      <listitem><para><ulink url="http://www.apple.com/macosx/">Mac OS X</ulink></para></listitem>
+      <listitem><para><ulink url="http://www.sun.com/software/solaris/">Solaris</ulink> 8, 9, 10</para></listitem>
     </itemizedlist>
   </blockquote></para>
 
-  <para><blockquote><title>Verified Shells</title>
+  <para><blockquote><title>Tested Shells</title>
     <itemizedlist>
-      <listitem><para>BSD Shell (<command>dash</command>)</para></listitem>
       <listitem><para>Bourne Shell (<command>sh</command>)</para></listitem>
-      <listitem><para>Bourne Again Shell (<command>bash</command>)</para></listitem>
-      <listitem><para>Korn Shell (<command>ksh</command>)</para></listitem>
-      <listitem><para>Public Domain Korn Shell (<command>pdksh</command>) -- partial functionality</para></listitem>
+      <listitem><para><ulink url="http://www.gnu.org/software/bash/">BASH</ulink> - GNU Bourne Again SHell (<command>bash</command>)</para></listitem>
+      <listitem><para><ulink url="http://gondor.apana.org.au/~herbert/dash/">DASH</ulink> (<command>dash</command>)</para></listitem>
+      <listitem><para><ulink url="http://www.kornshell.com/">Korn Shell</ulink> (<command>ksh</command>)</para></listitem>
+      <listitem><para><ulink url="http://web.cs.mun.ca/~michael/pdksh/">pdksh</ulink> - Public Domain Korn Shell (<command>pdksh</command>)</para></listitem>
     </itemizedlist>
   </blockquote></para>
 
