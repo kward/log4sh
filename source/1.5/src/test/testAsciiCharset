@@ -8,20 +8,32 @@ DEBUG=${DEBUG:+' '}
 DEBUG=${DEBUG:-':'}
 ${DEBUG} echo 'DEBUG output enabled' >&2
 
-TEST_DATA="${MY_NAME}.data"
-
 #------------------------------------------------------------------------------
 # suite tests
 #
 
 testAsciiCharset()
 {
-  # save stdin, and redirect it from a file
-  exec 9<&0 <"${TEST_DATA}"
+  # save stdin and redirect it from an in-line file
+  exec 9<&0 <<EOF
+# 20-2F (escaping the leading space)
+\ !"#$%&'()*+,-./
+# 30-3F
+0123456789:;<=>?
+# 40-4F
+@ABCDEFGHIJKLMNO
+# 50-5F (escaping the backslash)
+PQRSTUVWXYZ[\\]^_
+# 60-6F
+\`abcdefghijklmno
+# 70-7E (7F is the unprintable DEL char)
+pqrstuvwxzy{|}~
+EOF
   while read expected; do
     # ignore comment lines or blank lines
     echo "${expected}" |egrep -v '^(#|$)' >/dev/null || continue
 
+    # test the function
     actual="`logger_info \"${expected}\"`"
     ${DEBUG} echo "expected='${expected}' actual='${actual}'"
     assertEquals "'${expected}' != '${actual}'" "${expected}" "${actual}"
