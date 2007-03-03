@@ -1,6 +1,6 @@
+/* $Id$ */
 /*
-  style.css - a CSS stylesheet for use with HTML output produced by
-  tldp-xsl stylesheets.  Written by David Horton.
+  style.css
 */
 
 
@@ -21,23 +21,13 @@ body {
   margin: 6%;
 }
 
+/*
 table {
   font-size: 0.9em;
 }
-
-.programlisting, .screen {
-
-/*
-   Style the programlisting and screen classes with a light gray
-   background and a small bit of space between the object border and
-   the text inside.  The programlisting and screen classes are HTML
-   representations of the <programlisting> and <screen> DocBook tags.
 */
 
-  background: lightgray;
+.toc {
+  background: #f0f0f0;
   padding: 5px;
 }
-
-
-/* Add any desired customizations below. */
-
