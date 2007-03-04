@@ -1,23 +1,29 @@
 # $Id$
 
-DOCBOOK_SRC_DIR=$(PWD)/src/docbook
-EXAMPLES_SRC_DIR=$(PWD)/src/examples
-SHELL_SRC_DIR=$(PWD)/src/shell
-TEST_SRC_DIR=$(PWD)/src/test
+PROG=log4sh
 
 BIN_DIR=$(PWD)/bin
 BUILD_DIR=$(PWD)/build
 DIST_DIR=$(PWD)/dist
-DOCBOOK_BUILD_DIR=$(BUILD_DIR)/docbook
 LIB_DIR=$(PWD)/lib
+SHARE_DIR=$(PWD)/share
+SRC_DIR=$(PWD)/src
 TEST_DIR=$(PWD)/test
+TMP_DIR=$(PWD)/tmp
 
-HTML_XSL=$(PWD)/share/docbook/tldp-xsl/21MAR2004/html/tldp-one-page.xsl
+DOCBOOK_BUILD_DIR=$(BUILD_DIR)/docbook
+
+DOCBOOK_SRC_DIR=$(SRC_DIR)/docbook
+EXAMPLES_SRC_DIR=$(SRC_DIR)/examples
+SHELL_SRC_DIR=$(SRC_DIR)/shell
+TEST_SRC_DIR=$(SRC_DIR)/test
+
+HTML_XSL=$(SHARE_DIR)/docbook/tldp-xsl/21MAR2004/html/tldp-one-page.xsl
 
 all: build docs
 
 build: build-prep
-	cp -p $(SHELL_SRC_DIR)/log4sh $(BUILD_DIR)
+	cp -p $(SHELL_SRC_DIR)/$(PROG) $(BUILD_DIR)
 
 build-clean:
 	rm -fr $(BUILD_DIR)
@@ -39,18 +45,22 @@ docs-prep:
 
 docs-extract-shelldoc: docs-prep
 	@echo "Extracting the ShellDoc"
-	@$(BIN_DIR)/extractDocs.pl $(SHELL_SRC_DIR)/log4sh >$(BUILD_DIR)/log4sh_shelldoc.xml
+	@$(BIN_DIR)/extractDocs.pl $(SHELL_SRC_DIR)/$(PROG) >$(BUILD_DIR)/$(PROG)_shelldoc.xml
 
 docs-transform-shelldoc: docs-prep docs-extract-shelldoc
 	@echo "Parsing the extracted ShellDoc"
-	@xsltproc $(PWD)/src/resources/shelldoc.xslt $(BUILD_DIR)/log4sh_shelldoc.xml >$(DOCBOOK_BUILD_DIR)/functions.xml
+	@xsltproc $(SHARE_DIR)/resources/shelldoc.xslt $(BUILD_DIR)/$(PROG)_shelldoc.xml >$(DOCBOOK_BUILD_DIR)/functions.xml
 
 docs-transform-docbook: docs-prep
 	@echo "Parsing the documentation with DocBook"
-	@xsltproc $(HTML_XSL) $(DOCBOOK_BUILD_DIR)/log4sh.xml >$(BUILD_DIR)/log4sh.html
+	@xsltproc $(HTML_XSL) $(DOCBOOK_BUILD_DIR)/$(PROG).xml >$(BUILD_DIR)/$(PROG).html
+
+docs-docbook-prep:
+	@echo "Preparing DocBook structure"
+	@$(BIN_DIR)/docbookPrep.sh $(SHARE_DIR)/docbook
 
 test: test-prep
-	@echo "executing log4sh unit tests"
+	@echo "executing $(PROG) unit tests"
 	( cd $(TEST_DIR); $(TEST_SRC_DIR)/run-test-suite )
 
 test-clean:
@@ -63,14 +73,15 @@ test-prep: build test-clean
 	cp -p $(TEST_SRC_DIR)/run-test-suite $(TEST_DIR)
 	cp -p $(TEST_SRC_DIR)/*.data $(TEST_DIR)
 	cp -p $(LIB_DIR)/sh/shunit2 $(TEST_DIR)
-	cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
+	cp -p $(BUILD_DIR)/$(PROG) $(TEST_DIR)
 
-dist: build docs
+dist: dist-clean build docs
 	@mkdir $(DIST_DIR)
-	cp -p $(BUILD_DIR)/log4sh $(DIST_DIR)
-	cp -p $(BUILD_DIR)/log4sh.html $(DIST_DIR)
+	cp -p $(BUILD_DIR)/$(PROG) $(DIST_DIR)
+	cp -p $(BUILD_DIR)/$(PROG).html $(DIST_DIR)
 
 clean: build-clean test-clean
+	rm -fr $(TMP_DIR)
 
 distclean: clean
 	rm -fr $(DIST_DIR)
