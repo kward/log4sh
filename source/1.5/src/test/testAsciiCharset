@@ -4,9 +4,8 @@
 MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
 
-DEBUG=${DEBUG:+' '}
-DEBUG=${DEBUG:-':'}
-${DEBUG} echo 'DEBUG output enabled' >&2
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -35,7 +34,7 @@ EOF
 
     # test the function
     actual="`logger_info \"${expected}\"`"
-    ${DEBUG} echo "expected='${expected}' actual='${actual}'"
+    ${DEBUG} "expected='${expected}' actual='${actual}'"
     assertEquals "'${expected}' != '${actual}'" "${expected}" "${actual}"
   done
   # restore stdin
@@ -49,7 +48,7 @@ EOF
 oneTimeSetUp()
 {
   # source log4sh
-  ${DEBUG} echo "loading log4sh" >&2
+  ${DEBUG} 'loading log4sh'
   LOG4SH_CONFIGURATION="${MY_NAME}.log4sh" . ./log4sh
 }
 
@@ -57,6 +56,6 @@ oneTimeSetUp()
 # main
 #
 
-# load and run shUnit
-${DEBUG} echo "loading shUnit" >&2
-. ./shunit
+# load and run shUnit2
+${DEBUG} 'loading shUnit2'
+. ./shunit2

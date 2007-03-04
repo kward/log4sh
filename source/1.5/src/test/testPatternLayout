@@ -1,14 +1,13 @@
 #! /bin/sh
 # $Id$
 
-myName=`basename $0`
-myPath=`dirname $0`
-
-DEBUG=${DEBUG:+' '}
-DEBUG=${DEBUG:-':'}
-${DEBUG} echo 'DEBUG output enabled' >&2
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
 
 APP_NAME='stdout'
+
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # custom asserts
@@ -27,7 +26,7 @@ assertPattern()
   appender_setPattern ${APP_NAME} "${pattern}"
   appender_activateOptions ${APP_NAME}
   actual=`logger_info 'dummy'`
-  ${DEBUG} echo "pattern='${pattern}' expected='${expected}' actual='${actual}'"
+  ${DEBUG} "pattern='${pattern}' expected='${expected}' actual='${actual}'"
   msg=`eval "echo \"${msg}\""`
   assertEquals "${msg}" "${expected}" "${actual}"
 }
@@ -53,7 +52,7 @@ commonDatePatternAssert()
   appender_activateOptions ${APP_NAME}
   result=`logger_info 'dummy'`
   matched=`echo ${result} |sed "s/${regex}//"`
-  ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
+  ${DEBUG} "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
 
   assertNotNull \
     "date pattern '${pattern}' failed: empty result '${result}'" \
@@ -84,7 +83,7 @@ testDatePattern()
 testFileNamePattern()
 {
   pattern='%F'
-  expected="${myName}"
+  expected="${MY_NAME}"
   msg="file name '%F' pattern failed: '\${expected}' != '\${actual}'"
   assertPattern "${msg}" "${pattern}" "${expected}"
 }
@@ -125,7 +124,7 @@ testPriorityPattern()
     appender_setLevel ${APP_NAME} ${priority}
     appender_activateOptions ${APP_NAME}
     result=`log ${priority} 'dummy'`
-    ${DEBUG} echo "pattern='${pattern}' priority='${priority}' result='${result}'"
+    ${DEBUG} "pattern='${pattern}' priority='${priority}' result='${result}'"
     assertEquals \
       "priority pattern '${pattern}' failed: the requested priority of '${priority}' does not match the returned priority of '${result}'" \
       "${priority}" "${result}"
@@ -144,7 +143,7 @@ testRunningTimePattern()
   appender_activateOptions ${APP_NAME}
   result=`logger_info 'dummy'`
   matched=`echo "${result}" |egrep "${regex}"`
-  ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
+  ${DEBUG} "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
 
   assertNotNull \
     "running time pattern '${pattern}' failed: empty result '${result}'" \
@@ -202,7 +201,7 @@ testDefaultPattern()
   regex='^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} INFO - dummy'
   result=`logger_info 'dummy'`
   matched=`echo ${result} |sed "s/${regex}//"`
-  ${DEBUG} echo "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
+  ${DEBUG} "pattern='${pattern}' result='${result}' regex='${regex}' matched='${matched}'"
 
   assertNotNull \
     "default pattern '${pattern}' failed: empty result '${result}'" \
@@ -219,7 +218,7 @@ testDefaultPattern()
 oneTimeSetUp()
 {
   # source log4sh
-  ${DEBUG} echo "loading log4sh" >&2
+  ${DEBUG} 'loading log4sh'
   LOG4SH_CONFIGURATION='none' . ./log4sh
   logger_setLevel INFO
   appender_setLayout ${APP_NAME} PatternLayout
@@ -233,6 +232,6 @@ oneTimeSetUp()
 # that to the path
 PATH="/usr/xpg4/bin:${PATH}"
 
-# load and run shUnit
-${DEBUG} echo "loading shUnit" >&2
-. ./shunit
+# load and run shUnit2
+${DEBUG} 'loading shUnit2'
+. ./shunit2

@@ -4,12 +4,10 @@
 MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
 
-debug() { echo "${MY_NAME}:DEBUG $@" >&2; }
-DEBUG=${DEBUG:+'debug '}
-[ -z "${DEBUG}" ] && DEBUG=':'
-${DEBUG} 'debugging enabled'
-
 APP_NAME='stdout'
+
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -136,6 +134,6 @@ tearDown()
 # main
 #
 
-# load and run shUnit
-${DEBUG} 'loading shUnit'
-. ./shunit
+# load and run shUnit2
+${DEBUG} 'loading shUnit2'
+. ./shunit2

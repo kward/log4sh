@@ -258,6 +258,6 @@ else
   tailNumOpt='-'
 fi
 
-# load and run shUnit
-${DEBUG} 'loading shUnit'
-. ./shunit
+# load and run shUnit2
+${DEBUG} 'loading shUnit2'
+. ./shunit2

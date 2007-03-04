@@ -5,12 +5,11 @@
 MY_NAME=`basename $0`
 MY_PATH=`dirname $0`
 
-DEBUG=${DEBUG:+' '}
-DEBUG=${DEBUG:-':'}
-${DEBUG} echo 'DEBUG output enabled' >&2
-
 APP_NAME='stdout'
 TEST_DATA="priorityMatrix.data"
+
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -25,7 +24,7 @@ testPriorityMatrix()
     # ignore comment lines or blank lines
     echo "${priority}" |egrep -v '^(#|$)' >/dev/null || continue
 
-    ${DEBUG} echo "setting appender priority to '${priority}' priority"
+    ${DEBUG} "setting appender priority to '${priority}' priority"
     appender_setLevel ${APP_NAME} ${priority}
     appender_activateOptions ${APP_NAME}
 
@@ -35,9 +34,9 @@ testPriorityMatrix()
       testPriority=`echo ${PRIORITY_NAMES} |cut -d' ' -f${pos}`
       shouldOutput=`echo ${outputs} |cut -d' ' -f${pos}`
 
-      ${DEBUG} echo "generating '${testPriority}' message"
+      ${DEBUG} "generating '${testPriority}' message"
       result=`log ${testPriority} 'dummy'`
-      ${DEBUG} echo "result=${result}"
+      ${DEBUG} "result=${result}"
 
       if [ ${shouldOutput} -eq 1 ]; then
         assertTrue \
@@ -59,7 +58,7 @@ testPriorityMatrix()
 oneTimeSetUp()
 {
   # source log4sh
-  ${DEBUG} echo "loading log4sh" >&2
+  ${DEBUG} 'loading log4sh'
   LOG4SH_CONFIGURATION='none' . ./log4sh
 }
 
@@ -67,6 +66,6 @@ oneTimeSetUp()
 # main
 #
 
-# load and run shUnit
-${DEBUG} echo "loading shUnit" >&2
-. ./shunit
+# load and run shUnit2
+${DEBUG} 'loading shUnit2'
+. ./shunit2
