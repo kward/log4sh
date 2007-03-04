@@ -1,6 +1,8 @@
 ﻿RELEASE NOTES FOR 1.5.0
 
-Nothing to list.
+This release mostly focuses on cleaning up leftover issues from the 1.4.0
+release. Deprecated functions have been removed, and the directory structure
+has been cleaned up a bit.
 
 
 TESTED PLATFORMS
@@ -46,6 +48,10 @@ MAJOR CHANGES AND ENHANCEMENTS
 All deprecated functions present in the 1.4.x series have been removed.
 
 See the CHANGES-1.5.txt file for a full list of changes.
+
+The process of getting the Docbook documentation built has been greatly
+improved. A script is now included to download the appropriate Docbook sources
+with which the documentation can be built.
 
 
 BUG FIXES

@@ -1,7 +1,5 @@
 CHANGES WITH 1.5.0 (SINCE 1.4.0)
 
-updated shUnit to 1.0.4pre
-
 removed all deprecated functions
 
 remove old non-unit-test tests
@@ -20,6 +18,14 @@ _appender_setData() functions
 added return values to all functions [where it makes sense]
 
 added return value checking in *many* locations
+
+updated shUnit to 2.0.1
+
+made the Makefile much more generic so it can be used with other projects
+
+replaced the docbook archive extraction functionality with script that will
+properly download and extract the docbook sources so building the docbook
+documentation will be easier
 
 
 $Revision$
