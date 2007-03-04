@@ -4,13 +4,14 @@
 #
 #/**
 # <?xml version="1.0" encoding="UTF-8"?>
-# <s:shelldoc xmlns:s="http://www.forestent.com/2005/XSL/ShellDoc">
+# <s:shelldoc xmlns:s="http://www.forestent.com/projects/shelldoc/xsl/2005.0">
 # <s:header>
 # log4sh 1.5.0
+# Logging framework 4 SHell scripts
 #
 # http://log4sh.sourceforge.net/
 #
-# written by Kate Ward &lt;kate.ward@forestent.com>
+# written by Kate Ward &lt;kate.ward@forestent.com&gt;
 # released under the LGPL
 #
 # this module implements something like the log4j module from the Apache group
