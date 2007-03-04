@@ -83,5 +83,5 @@ dist: dist-clean build docs
 clean: build-clean test-clean
 	rm -fr $(TMP_DIR)
 
-distclean: clean
+dist-clean: clean
 	rm -fr $(DIST_DIR)
