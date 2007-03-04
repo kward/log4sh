@@ -62,7 +62,7 @@ test-prep: build test-clean
 	cp -p $(TEST_SRC_DIR)/test* $(TEST_DIR)
 	cp -p $(TEST_SRC_DIR)/run-test-suite $(TEST_DIR)
 	cp -p $(TEST_SRC_DIR)/*.data $(TEST_DIR)
-	cp -p $(LIB_DIR)/sh/shunit $(TEST_DIR)
+	cp -p $(LIB_DIR)/sh/shunit2 $(TEST_DIR)
 	cp -p $(BUILD_DIR)/log4sh $(TEST_DIR)
 
 dist: build docs
