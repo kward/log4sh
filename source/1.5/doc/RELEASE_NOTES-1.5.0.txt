@@ -47,11 +47,11 @@ MAJOR CHANGES AND ENHANCEMENTS
 
 All deprecated functions present in the 1.4.x series have been removed.
 
-See the CHANGES-1.5.txt file for a full list of changes.
-
 The process of getting the Docbook documentation built has been greatly
 improved. A script is now included to download the appropriate Docbook sources
 with which the documentation can be built.
+
+See the CHANGES-1.5.txt file for a full list of changes.
 
 
 BUG FIXES
