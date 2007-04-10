@@ -3711,7 +3711,6 @@ for _log4sh_shellFlag in ${__LOG4SH_SHELL_FLAGS}; do
     || set +${_log4sh_shellFlag}
 done
 unset _log4sh_shellFlag
-exit 0
 
 #/**
 # </s:shelldoc>
