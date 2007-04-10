@@ -1,5 +1,5 @@
 # $Id$
-# vim:syntax=sh:sts=2
+# vim:syntax=sh:sts=2:notabs
 # vim:foldmethod=marker:foldmarker=/**,*/
 #
 #/**
@@ -122,6 +122,8 @@ unset _log4sh_const
 __log4sh_filename=`basename $0`
 __log4sh_tmpDir=''
 __log4sh_trapsFile=''
+
+__log4sh_alternative_mail='mail'
 
 __log4sh_threadName=${__LOG4SH_THREAD_DEFAULT}
 __log4sh_threadStack=${__LOG4SH_THREAD_DEFAULT}
@@ -595,7 +597,8 @@ log4sh_setAlternative()
   # set the alternative
   if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
     eval __log4sh_alternative_${lsa_cmdName}="\${lsa_cmdPath}"
-    ${__LOG4SH_DEBUG} "alternative '${lsa_cmdName}' command set to '${lsa_cmdPath}'"
+    ${__LOG4SH_DEBUG} \
+        "alternative '${lsa_cmdName}' command set to '${lsa_cmdPath}'"
   fi
 
   unset lsa_cmdName lsa_cmdPath
@@ -3708,6 +3711,7 @@ for _log4sh_shellFlag in ${__LOG4SH_SHELL_FLAGS}; do
     || set +${_log4sh_shellFlag}
 done
 unset _log4sh_shellFlag
+exit 0
 
 #/**
 # </s:shelldoc>
