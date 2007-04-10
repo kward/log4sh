@@ -1,7 +1,8 @@
+Move the checking and creation of file from appender_file_setFile() function to
+activateOptions().
+
 Provide function to clean up log4sh, and that clears the traps (the first is
 there already)
-
-Stop the execution of the current unit test if an assert is encountered
 
 - check return values from functions
 
@@ -29,20 +30,13 @@ file is not renamed until the first message is logged some time after midnight.
   there. an error should be thrown at least the first time it was attempted to
   be used. same goes for mail and trap.
 
-- implement file descriptor functions allocFD and freeFD and replace the hard
-  coded FD usage in the log4sh_readProperties and _appender_source functions
+- implement file descriptor functions fdalloc and fdfree and replace the hard
+  coded fd usage in the log4sh_readProperties and _appender_source functions
 
 - validate that the return_test shell test works under cygwin and solaris. if
   so, remove the "unset" stuff before returns as they aren't needed
 
 - make logger level's case insensitive??
-
-- add more error checking on the appender_*set* functions.  see smtp_setSubject
-
-- resolve absolute filename
-D=`dirname "$relpath"`
-B=`basename "$relpath"`
-abspath="`cd \"$D\" 2>/dev/null && pwd || echo \"$D\"`/$B"
 
 - swap stdout and stderr
 cmd 3>&1 1>&2 2>&3
@@ -70,14 +64,12 @@ x not in list
 >>> "c" in li
 False
 
-- research fanout - writing to multiple locations
-http://linuxgazette.net/122/TWDT.html#smith
-
 #
 # infeasable
 #
 
 enable passing the configuration filename on the source line instead of requiring the LOG4SH_CONFIGURATION variable. -- this doesn't work because the arguments are not passed into the sourced code
+
 
 $Revision$
 
