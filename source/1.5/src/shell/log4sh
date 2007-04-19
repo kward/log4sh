@@ -1,5 +1,5 @@
 # $Id$
-# vim:syntax=sh:sts=2:notabs
+# vim:syntax=sh:sts=2
 # vim:foldmethod=marker:foldmarker=/**,*/
 #
 #/**
@@ -38,11 +38,11 @@ done
 #
 # constants
 #
-__LOG4SH_VERSION='1.5.0pre'
+LOG4SH_TRUE=0
+LOG4SH_FALSE=1
+LOG4SH_ERROR=2
 
-__LOG4SH_TRUE=0
-__LOG4SH_FALSE=1
-__LOG4SH_ERROR=2
+__LOG4SH_VERSION='1.5.0pre'
 __LOG4SH_NULL='~'
 
 __LOG4SH_APPENDER_FUNC_PREFIX='_log4sh_app_'
@@ -133,7 +133,7 @@ __log4sh_secondsLast=0
 __log4sh_secondsWrap=0
 
 # workarounds for various commands
-__log4sh_wa_strictBehavior=${__LOG4SH_FALSE}
+__log4sh_wa_strictBehavior=${LOG4SH_FALSE}
 (
   # determine if the set builtin needs to be evaluated. if the string is parsed
   # into two separate strings (common in ksh), then set needs to be evaled.
@@ -381,9 +381,9 @@ _log4sh_traceCall()
   ${__LOG4SH_TRACE} "${_ltc_funcName}()${_ltc_lineNo:+ (called from ${_ltc_lineNo})}"
   if [ ${_ltc_numArgs} ${_ltc_argsCheck} ${_ltc_wantArgs} ]; then
     _log4sh_error "${_ltc_funcName}(): invalid argument count (${_ltc_numArgs} ${_ltc_argsCheck} ${_ltc_wantArgs})"
-    return ${__LOG4SH_FALSE}
+    return ${LOG4SH_FALSE}
   fi
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #-----------------------------------------------------------------------------
@@ -416,7 +416,7 @@ _log4sh_traceCall()
 _log4sh_mktempDir()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_mktempDir \
-      $# -ne 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lmd_tmpPrefix='log4sh'
 
@@ -445,7 +445,7 @@ _log4sh_mktempDir()
   ${__LOG4SH_DEBUG} "created temporary directory (${_lmd_tmpDir})"
   echo "${_lmd_tmpDir}"
   unset _lmd_random _lmd_tmpDir _lmd_tmpPrefix
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -473,7 +473,7 @@ _log4sh_mktempDir()
 _log4sh_updateSeconds()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_updateSeconds \
-      $# -ne 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   if [ -n "${SECONDS:-}" ]; then
     __log4sh_seconds=${SECONDS}
@@ -488,7 +488,7 @@ _log4sh_updateSeconds()
     __log4sh_secondsLast=${__log4sh_seconds}
     unset _lgs__date _lgs__seconds
   fi
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -516,10 +516,10 @@ _log4sh_updateSeconds()
 log4sh_enableStrictBehavior()
 {
   ${__LOG4SH_TRACE_CALL} log4sh_enableStrictBehavior \
-      $# -ne 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
-  __log4sh_wa_strictBehavior=${__LOG4SH_TRUE}
-  return ${__LOG4SH_TRUE}
+  __log4sh_wa_strictBehavior=${LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -549,24 +549,24 @@ log4sh_enableStrictBehavior()
 log4sh_setAlternative()
 {
   ${__LOG4SH_TRACE_CALL} log4sh_setAlternative \
-      $# -lt 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -lt 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   lsa_cmdName=$1
   lsa_cmdPath=$2
   lsa_useRuntimePath=${3:-}
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   # check that the alternative command exists and is executable
   if [ ! -x "${lsa_cmdPath}" \
-      -a ${lsa_useRuntimePath:-${__LOG4SH_FALSE}} -eq ${__LOG4SH_FALSE} ]
+      -a ${lsa_useRuntimePath:-${LOG4SH_FALSE}} -eq ${LOG4SH_FALSE} ]
   then
     # the alternative command is not executable
     _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
-    __log4sh_return=${__LOG4SH_FALSE}
+    __log4sh_return=${LOG4SH_FALSE}
   fi
 
   # check for valid alternative
-  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+  if [ ${__log4sh_return} -eq ${LOG4SH_TRUE} ]; then
     case ${lsa_cmdName} in
       mail) ;;
       nc)
@@ -589,13 +589,13 @@ log4sh_setAlternative()
       *)
         # the alternative is not valid
         _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
-        __log4sh_return=${__LOG4SH_FALSE}
+        __log4sh_return=${LOG4SH_FALSE}
         ;;
     esac
   fi
 
   # set the alternative
-  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+  if [ ${__log4sh_return} -eq ${LOG4SH_TRUE} ]; then
     eval __log4sh_alternative_${lsa_cmdName}="\${lsa_cmdPath}"
     ${__LOG4SH_DEBUG} \
         "alternative '${lsa_cmdName}' command set to '${lsa_cmdPath}'"
@@ -636,18 +636,18 @@ log4sh_setAlternative()
 _log4sh_findArrayElement()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_findArrayElement \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lfae_array=$1
   _lfae_element=$2
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   _lfae_pos=`echo "${_lfae_array}" |awk '$0==e{print NR}' e="${_lfae_element}"`
   if [ -n "${_lfae_pos}" ]; then
     echo "${_lfae_pos}"
   else
     echo 0
-    __log4sh_return=${__LOG4SH_FALSE}
+    __log4sh_return=${LOG4SH_FALSE}
   fi
 
   unset _lfae_array _lfae_element _lfae_pos
@@ -681,21 +681,21 @@ _log4sh_findArrayElement()
 _log4sh_getArrayElement()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_getArrayElement \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lgae_array=$1
   _lgae_index=$2
   ${__LOG4SH_TRACE} "_lgae_array='${_lgae_array}' _lgae_index='${_lgae_index}'"
 
   _lgae_oldIFS=${IFS}
-  if [ ${__log4sh_wa_setNeedsEval} -eq ${__LOG4SH_TRUE} ]; then
-    ${__LOG4SH_TRACE} '__log4sh_wa_setNeedsEval == __LOG4SH_TRUE'
+  if [ ${__log4sh_wa_setNeedsEval} -eq ${LOG4SH_TRUE} ]; then
+    ${__LOG4SH_TRACE} '__log4sh_wa_setNeedsEval == LOG4SH_TRUE'
     IFS=${__LOG4SH_IFS_ARRAY}
     set -- junk ${_lgae_array}
     IFS=${_lgae_oldIFS}
 ${__LOG4SH_TRACE} "1='${1:-}' 2='${2:-}' 3='${3:-}' ..."
   else
-    ${__LOG4SH_TRACE} '__log4sh_wa_setNeedsEval != __LOG4SH_TRUE'
+    ${__LOG4SH_TRACE} '__log4sh_wa_setNeedsEval != LOG4SH_TRUE'
     IFS=${__LOG4SH_IFS_ARRAY}
     eval "set -- junk \"${_lgae_array}\""
     IFS=${_lgae_oldIFS}
@@ -704,8 +704,8 @@ ${__LOG4SH_TRACE} "1='${1:-}' 2='${2:-}' 3='${3:-}' ..."
     if [ ${_lgae_arraySize} -le ${__log4shAppenderCount} ]; then
       # the evaled set *didn't* work; failing back to original set command and
       # disabling the work around. (pdksh)
-      ${__LOG4SH_DEBUG} '__log4sh_wa_setNeedsEval *must* == __LOG4SH_TRUE'
-      __log4sh_wa_setNeedsEval=${__LOG4SH_FALSE}
+      ${__LOG4SH_DEBUG} '__log4sh_wa_setNeedsEval *must* == LOG4SH_TRUE'
+      __log4sh_wa_setNeedsEval=${LOG4SH_FALSE}
       IFS=${__LOG4SH_IFS_ARRAY}
       set -- junk ${_lgae_array}
       IFS=${_lgae_oldIFS}
@@ -717,7 +717,7 @@ ${__LOG4SH_TRACE} "1='${1:-}' 2='${2:-}' 3='${3:-}' ..."
   echo "$1"
 
   unset _lgae_array _lgae_arraySize _lgae_index _lgae_oldIFS
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -742,7 +742,7 @@ ${__LOG4SH_TRACE} "1='${1:-}' 2='${2:-}' 3='${3:-}' ..."
 _log4sh_getArrayLength()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_getArrayLength \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lgal_oldIFS=${IFS} IFS=${__LOG4SH_IFS_ARRAY}
   set -- $1
@@ -750,7 +750,7 @@ _log4sh_getArrayLength()
   IFS=${_lgal_oldIFS}
 
   unset _lgal_oldIFS
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -777,10 +777,10 @@ _log4sh_getArrayLength()
 _log4sh_setArrayElement()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_setArrayElement \
-      $# -ne 3 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 3 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   echo "$1" |awk '{if(NR==r){print e}else{print $0}}' r=$2 e="$3"
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -808,10 +808,10 @@ _log4sh_setArrayElement()
 _log4sh_join()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_join \
-      $# -ne 3 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 3 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   echo "${2:+$2$1}$3"
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #=============================================================================
@@ -842,18 +842,18 @@ _log4sh_join()
 _appender_getData()
 {
   ${__LOG4SH_TRACE_CALL} _appender_getData \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _agd_array=$1
   _agd_appender=$2
 
   _agd_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${_agd_appender}`
-  if [ $? -eq ${__LOG4SH_TRUE} ]; then
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
     _log4sh_getArrayElement "${_agd_array}" ${_agd_index}
     __log4sh_return=$?
   else
     _log4sh_error "invalid appender passed (${_agd_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset _agd_array _agd_appender _agd_index
@@ -885,7 +885,7 @@ _appender_getData()
 _appender_setData()
 {
   ${__LOG4SH_TRACE_CALL} _appender_setData \
-      $# -ne 3 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 3 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _asd_arrayVar=$1
   _asd_appender=$2
@@ -893,7 +893,7 @@ _appender_setData()
   ${__LOG4SH_TRACE} "_asd_arrayVar='${_asd_arrayVar}' _asd_appender='${_asd_appender}' _asd_value='${_asd_value}'"
 
   _asd_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${_asd_appender}`
-  if [ $? -eq ${__LOG4SH_TRUE} ]; then
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
     ${__LOG4SH_TRACE} "_asd_index='${_asd_index}'"
     _asd_strToEval="_asd_array=\"\${${_asd_arrayVar}}\""
     eval "${_asd_strToEval}"
@@ -901,16 +901,16 @@ _appender_setData()
     _asd_strToEval="${_asd_arrayVar}=\`_log4sh_setArrayElement \
         \"${_asd_array}\" ${_asd_index} \"${_asd_value}\"\`"
     eval "${_asd_strToEval}"
-    if [ $? -eq ${__LOG4SH_TRUE} ]; then
+    if [ $? -eq ${LOG4SH_TRUE} ]; then
       _appender_cache ${_asd_appender}
       # inheriting __log4sh_return from _appender_cache
     else
       _log4sh_error "unable to set array element for appender (${_asd_appender})"
-      __log4sh_return=${__LOG4SH_ERROR}
+      __log4sh_return=${LOG4SH_ERROR}
     fi
   else
     _log4sh_error "invalid appender passed (${_asd_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset _asd_arrayVar _asd_appender _asd_value
@@ -945,7 +945,7 @@ _appender_setData()
 appender_activateOptions()
 {
   ${__LOG4SH_TRACE_CALL} appender_activateOptions \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   ${__LOG4SH_APPENDER_FUNC_PREFIX}${1}_activateOptions
   # return value passed through
@@ -975,7 +975,7 @@ appender_activateOptions()
 appender_close()
 {
   ${__LOG4SH_TRACE_CALL} appender_close \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   appender_setLevel $1 ${__LOG4SH_LEVEL_CLOSED_STR}
   # return value passed through
@@ -1003,7 +1003,7 @@ appender_close()
 appender_exists()
 {
   ${__LOG4SH_TRACE_CALL} appender_exists \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   # the following function executed in subshell so that the __log4sh_return
   # value of calling functions will not be altered
@@ -1033,7 +1033,7 @@ appender_exists()
 appender_getLayout()
 {
   ${__LOG4SH_TRACE_CALL} appender_getLayout \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _appender_getData "${__log4shAppenderLayouts}" $1
   # return value passed through
@@ -1062,11 +1062,11 @@ appender_getLayout()
 appender_setLayout()
 {
   ${__LOG4SH_TRACE_CALL} appender_setLayout \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   asl_appender=$1
   asl_layout=$2
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   case ${asl_layout} in
     "${__LOG4SH_LAYOUT_HTML}"|\
@@ -1074,17 +1074,17 @@ appender_setLayout()
     "${__LOG4SH_LAYOUT_PATTERN}") ;;
     *)
       _log4sh_error "unknown layout: ${asl_layout}"
-      __log4sh_return=${__LOG4SH_FALSE}
+      __log4sh_return=${LOG4SH_FALSE}
       ;;
   esac
 
-  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+  if [ ${__log4sh_return} -eq ${LOG4SH_TRUE} ]; then
     _appender_setData __log4shAppenderLayouts \
         ${asl_appender} "${asl_layout}"
     # inheriting __log4sh_return from _appender_setData
-    if [ $? -ne ${__LOG4SH_TRUE} ]; then
+    if [ $? -ne ${LOG4SH_TRUE} ]; then
       _log4sh_error "unable to set the 'layout' for appender (${asl_appender})"
-      __log4sh_return=${__LOG4SH_ERROR}
+      __log4sh_return=${LOG4SH_ERROR}
     fi
   fi
 
@@ -1114,7 +1114,7 @@ appender_setLayout()
 _appender_getLayoutByIndex()
 {
   ${__LOG4SH_TRACE_CALL} _appender_getLayoutByIndex \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _log4sh_getArrayElement "${__log4shAppenderLayouts}" $1
   # return value passed through
@@ -1142,7 +1142,7 @@ _appender_getLayoutByIndex()
 appender_getLevel()
 {
   ${__LOG4SH_TRACE_CALL} appender_getLevel \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _appender_getData "${__log4shAppenderLevels}" $1
   # return value passed through
@@ -1171,7 +1171,7 @@ appender_getLevel()
 _appender_getLevelByIndex()
 {
   ${__LOG4SH_TRACE_CALL} _appender_getLevelByIndex \
-      $# -ne 1 ${BASH_LINENO:-}  || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-}  || return ${LOG4SH_FALSE}
 
   _log4sh_getArrayElement "${__log4shAppenderLevels}" $1
   # return value passed through
@@ -1200,7 +1200,7 @@ _appender_getLevelByIndex()
 appender_setLevel()
 {
   ${__LOG4SH_TRACE_CALL} appender_setLevel \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   asl_appender=$1
   asl_level=$2
@@ -1208,9 +1208,9 @@ appender_setLevel()
   _appender_setData __log4shAppenderLevels \
       ${asl_appender} "${asl_level}"
   # inheriting __log4sh_return from _appender_setData
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to set the 'level' for appender (${asl_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset asl_appender asl_level
@@ -1239,7 +1239,7 @@ appender_setLevel()
 appender_getPattern()
 {
   ${__LOG4SH_TRACE_CALL} appender_getPattern \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _appender_getData "${__log4shAppenderPatterns}" $1
   # return value passed through
@@ -1268,7 +1268,7 @@ appender_getPattern()
 appender_setPattern()
 {
   ${__LOG4SH_TRACE_CALL} appender_setPattern \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   asp_appender=$1
   asp_pattern=$2
@@ -1276,9 +1276,9 @@ appender_setPattern()
   _appender_setData __log4shAppenderPatterns \
       ${asp_appender} "${asp_pattern}"
   # inheriting __log4sh_return from _appender_setData
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to set the 'pattern' for appender (${asp_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset asp_appender asp_pattern
@@ -1307,7 +1307,7 @@ appender_setPattern()
 _appender_getPatternByIndex()
 {
   ${__LOG4SH_TRACE_CALL} _appender_getPatternByIndex \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _log4sh_getArrayElement "$__log4shAppenderPatterns" $1
   # return value passed through
@@ -1345,14 +1345,14 @@ _appender_getPatternByIndex()
 _appender_parsePattern()
 {
   ${__LOG4SH_TRACE_CALL} _appender_parsePattern \
-      $# -ne 3 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 3 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _app_pattern=$1
   _app_priority=$2
   _app_msg=$3
 
   _app_date=''
-  _app_doEval=${__LOG4SH_FALSE}
+  _app_doEval=${LOG4SH_FALSE}
   _app_oldIFS=${IFS}
 
   # determine if various commands must be run
@@ -1364,7 +1364,7 @@ _appender_parsePattern()
 
     # run the eval command?
     IFS='X'; set -- ${_app_pattern}x; IFS=${_app_oldIFS}
-    [ $# -gt 1 ] && _app_doEval=${__LOG4SH_TRUE}
+    [ $# -gt 1 ] && _app_doEval=${LOG4SH_TRUE}
   fi
 
   # escape any '\' and '&' chars in the message
@@ -1387,14 +1387,14 @@ _appender_parsePattern()
     -e 's/%X{/$\{/g' \
     -e 's/%%m/%%%m/g' -e 's/%%/%/g' \
     -e "s%m${_app_msg}" |tr '' '\n'`
-  if [ ${_app_doEval} -eq ${__LOG4SH_FALSE} ]; then
+  if [ ${_app_doEval} -eq ${LOG4SH_FALSE} ]; then
     echo "${_app_pattern}"
   else
     eval "echo \"${_app_pattern}\""
   fi
 
   unset _app_date _app_doEval _app_msg _app_oldIFS _app_pattern _app_tag
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -1419,7 +1419,7 @@ _appender_parsePattern()
 appender_getType()
 {
   ${__LOG4SH_TRACE_CALL} appender_getType \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _appender_getData "${__log4shAppenderTypes}" $1
   # return value passed through
@@ -1448,7 +1448,7 @@ appender_getType()
 appender_setType()
 {
   ${__LOG4SH_TRACE_CALL} appender_setType \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   ast_appender=$1
   ast_type=$2
@@ -1456,9 +1456,9 @@ appender_setType()
   _appender_setData __log4shAppenderTypes \
       ${ast_appender} "${ast_type}"
   # inheriting __log4sh_return from _appender_setData
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to set the 'type' for appender (${ast_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset ast_appender ast_type
@@ -1487,7 +1487,7 @@ appender_setType()
 _appender_getTypeByIndex()
 {
   ${__LOG4SH_TRACE_CALL} _appender_getTypeByIndex \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _log4sh_getArrayElement "${__log4shAppenderTypes}" $1
   # return value passed through
@@ -1520,7 +1520,7 @@ _appender_getTypeByIndex()
 _appender_cache()
 {
   ${__LOG4SH_TRACE_CALL} _appender_cache \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _ac_appender=$1
 
@@ -1530,7 +1530,7 @@ _appender_cache()
 ${__LOG4SH_APPENDER_FUNC_PREFIX}${_ac_appender}_activateOptions()
 {
   ${__LOG4SH_TRACE_CALL} ${__LOG4SH_APPENDER_FUNC_PREFIX}${_ac_appender}_activateOptions \\
-      \$# -ne 0 || return ${__LOG4SH_FALSE}
+      \$# -ne 0 || return ${LOG4SH_FALSE}
 
   _appender_activate ${_ac_appender}
 }
@@ -1570,17 +1570,17 @@ EOF
 _appender_activate()
 {
   ${__LOG4SH_TRACE_CALL} _appender_activate \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _aa_appender=$1
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
   ${__LOG4SH_TRACE} "_aa_appender='${_aa_appender}'"
 
   _aa_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${_aa_appender}`
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to activate appender (${_aa_appender})"
     unset _aa_appender _aa_index
-    return ${__LOG4SH_ERROR}
+    return ${LOG4SH_ERROR}
   fi
 
   _aa_inc="${__log4sh_tmpDir}/${_aa_appender}${__LOG4SH_APPENDER_INCLUDE_EXT}"
@@ -1596,7 +1596,7 @@ _appender_activate()
 ${__LOG4SH_APPENDER_FUNC_PREFIX}${_aa_appender}_append()
 {
   ${__LOG4SH_TRACE_CALL} ${__LOG4SH_APPENDER_FUNC_PREFIX}${_aa_appender}_append \\
-      \$# -ne 2 || return ${__LOG4SH_FALSE}
+      \$# -ne 2 || return ${LOG4SH_FALSE}
 
   _la_level=\$1
   _la_message=\$2
@@ -1673,8 +1673,8 @@ EOF
       else
         # the file "${__LOG4SH_NULL}" is closed?? Why did we get here, and why
         # did I care when I wrote this bit of code?
-	_log4sh_error "This code should never have been reached"
-	__log4sh_return=${__LOG4SH_ERROR}
+        _log4sh_error "This code should never have been reached"
+        __log4sh_return=${LOG4SH_ERROR}
         :
       fi
 
@@ -1775,7 +1775,7 @@ EOF
 
     *)
       _log4sh_error "unrecognized appender type (${_aa_type})"
-      __log4sh_return=${__LOG4SH_ERROR}
+      __log4sh_return=${LOG4SH_ERROR}
       ;;
   esac
 
@@ -1828,7 +1828,7 @@ EOF
 _appender_file_getFileByIndex()
 {
   ${__LOG4SH_TRACE_CALL} _appender_file_getFileByIndex \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _log4sh_getArrayElement "${__log4shAppender_file_files}" $1
   # return value passed through
@@ -1856,7 +1856,7 @@ _appender_file_getFileByIndex()
 appender_file_getFile()
 {
   ${__LOG4SH_TRACE_CALL} appender_file_getFile \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _appender_getData "${__log4shAppender_file_files}" $1
   # return value passed through
@@ -1888,22 +1888,22 @@ appender_file_getFile()
 appender_file_setFile()
 {
   ${__LOG4SH_TRACE_CALL} appender_file_setFile \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   afsf_appender=$1
   afsf_file=$2
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
   ${__LOG4SH_TRACE} "afsf_appender='${afsf_appender}' afsf_file='${afsf_file}'"
 
   if [ -n "${afsf_appender}" -a -n "${afsf_file}" ]; then
     # set the file
     afsf_index=`_log4sh_findArrayElement "${__log4shAppenders}" ${afsf_appender}`
-    if [ $? -eq ${__LOG4SH_TRUE} ]; then
+    if [ $? -eq ${LOG4SH_TRUE} ]; then
       __log4shAppender_file_files=`_log4sh_setArrayElement \
           "${__log4shAppender_file_files}" ${afsf_index} "${afsf_file}"`
 
       # create the file (if it isn't already)
-      if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} \
+      if [ ${__log4sh_return} -eq ${LOG4SH_TRUE} \
         -a ! "${afsf_file}" '=' "${__LOG4SH_NULL}" \
         -a ! "${afsf_file}" '=' 'STDERR' \
         -a ! -f "${afsf_file}" \
@@ -1914,12 +1914,12 @@ appender_file_setFile()
         if [ ${afsf_result} -eq 1 ]; then
           appender_setLevel ${afsf_appender} ${__LOG4SH_LEVEL_CLOSED_STR}
           _log4sh_error "appender_file_setFile(): could not create file (${afsf_file}); closing appender"
-          __log4sh_return=${__LOG4SH_ERROR}
+          __log4sh_return=${LOG4SH_ERROR}
         fi
       fi
     else
       _log4sh_error 'appender_file_setFile(): missing appender and/or file'
-      __log4sh_return=${__LOG4SH_ERROR}
+      __log4sh_return=${LOG4SH_ERROR}
     fi
 
     # resource the appender
@@ -1954,7 +1954,7 @@ appender_file_setFile()
 appender_file_getMaxBackupIndex()
 {
   ${__LOG4SH_TRACE_CALL} appender_file_getMaxBackupIndex \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _appender_getData "${__log4shAppender_rollingFile_maxBackupIndexes}" $1
   # return value passed through
@@ -1991,7 +1991,7 @@ appender_file_getMaxBackupIndex()
 appender_file_setMaxBackupIndex()
 {
   ${__LOG4SH_TRACE_CALL} appender_file_setMaxBackupIndex \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   afsmbi_appender=$1
   afsmbi_maxIndex=$2
@@ -1999,9 +1999,9 @@ appender_file_setMaxBackupIndex()
   _appender_setData __log4shAppender_rollingFile_maxBackupIndexes \
       ${afsmbi_appender} "${afsmbi_maxIndex}"
   # inheriting __log4sh_return from _appender_setData
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to set the 'maxBackupIndex' for appender (${afsmbi_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset afsmbi_appender afsmbi_maxIndex
@@ -2034,7 +2034,7 @@ appender_file_setMaxBackupIndex()
 appender_file_getMaxFileSize()
 {
   ${__LOG4SH_TRACE_CALL} appender_file_getMaxFileSize \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _appender_getData "${__log4shAppender_rollingFile_maxFileSizes}" $1
   # return value passed through
@@ -2074,18 +2074,18 @@ appender_file_getMaxFileSize()
 appender_file_setMaxFileSize()
 {
   ${__LOG4SH_TRACE_CALL} appender_file_setMaxFileSize \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   afsmfs_appender=$1
   afsmfs_size=$2
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   # split the file size into parts
   afsmfs_value=`expr ${afsmfs_size} : '\([0-9]*\)'`
   afsmfs_unit=`expr ${afsmfs_size} : '[0-9]* *\([A-Za-z]\{2,3\}\)'`
 
   # determine multiplier
-  if [ ${__log4sh_wa_strictBehavior} -eq ${__LOG4SH_TRUE} ]; then
+  if [ ${__log4sh_wa_strictBehavior} -eq ${LOG4SH_TRUE} ]; then
     case "${afsmfs_unit}" in
       KB) afsmfs_unit='KiB' ;;
       MB) afsmfs_unit='MiB' ;;
@@ -2109,27 +2109,27 @@ appender_file_setMaxFileSize()
       ;;
     *)
       _log4sh_error "unrecognized file size unit '${afsmfs_unit}'"
-      __log4sh_return=${__LOG4SH_FALSE}
+      __log4sh_return=${LOG4SH_FALSE}
       ;;
   esac
 
   # calculate maximum file size
-  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+  if [ ${__log4sh_return} -eq ${LOG4SH_TRUE} ]; then
     afsmfs_maxFileSize=`(expr ${afsmfs_value} \* ${afsmfs_mul} 2>&1)`
     if [ $? -gt 0 ]; then
       _log4sh_error "problem calculating maximum file size: '${afsmfs_maxFileSize}'"
-      __log4sh_return=${__LOG4SH_FALSE}
+      __log4sh_return=${LOG4SH_FALSE}
     fi
   fi
 
   # store the maximum file size
-  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+  if [ ${__log4sh_return} -eq ${LOG4SH_TRUE} ]; then
     _appender_setData __log4shAppender_rollingFile_maxFileSizes \
         ${afsmfs_appender} "${afsmfs_maxFileSize}"
     # inheriting __log4sh_return from _appender_setData
-    if [ $? -ne ${__LOG4SH_TRUE} ]; then
+    if [ $? -ne ${LOG4SH_TRUE} ]; then
       _log4sh_error "unable to set the 'maxFileSize' for appender (${afsmfs_appender})"
-      __log4sh_return=${__LOG4SH_ERROR}
+      __log4sh_return=${LOG4SH_ERROR}
     fi
   fi
 
@@ -2164,7 +2164,7 @@ appender_file_setMaxFileSize()
 appender_smtp_getTo()
 {
   ${__LOG4SH_TRACE_CALL} appender_smtp_getTo \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   asgt_to=`_appender_getData "${__log4shAppender_smtp_tos}" $1`
   __log4sh_return=$?
@@ -2199,7 +2199,7 @@ appender_smtp_getTo()
 appender_smtp_setTo()
 {
   ${__LOG4SH_TRACE_CALL} appender_smtp_setTo \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   asst_appender=$1
   asst_email=$2
@@ -2207,9 +2207,9 @@ appender_smtp_setTo()
   _appender_setData __log4shAppender_smtp_tos \
       ${asst_appender} "${asst_email}"
   # inheriting __log4sh_return from _appender_setData
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to set the 'to' for appender (${asst_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset asst_appender asst_email
@@ -2238,7 +2238,7 @@ appender_smtp_setTo()
 appender_smtp_getSubject()
 {
   ${__LOG4SH_TRACE_CALL} appender_smtp_getSubject \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   asgs_subject=`_appender_getData "${__log4shAppender_smtp_subjects}" $1`
   __log4sh_return=$?
@@ -2273,7 +2273,7 @@ appender_smtp_getSubject()
 appender_smtp_setSubject()
 {
   ${__LOG4SH_TRACE_CALL} appender_smtp_setSubject \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   asss_appender=$1
   asss_subject=$2
@@ -2281,9 +2281,9 @@ appender_smtp_setSubject()
   _appender_setData __log4shAppender_smtp_subjects \
       ${asss_appender} "${asss_subject}"
   # inheriting __log4sh_return from _appender_setData
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to set the 'subject' for appender (${asss_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset asss_appender asss_subject
@@ -2320,7 +2320,7 @@ appender_smtp_setSubject()
 _appender_syslog_getFacilityByIndex()
 {
   ${__LOG4SH_TRACE_CALL} _appender_syslog_getFacilityByIndex \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _log4sh_getArrayElement "$__log4shAppender_syslog_facilities" $1
   # return value passed through
@@ -2350,7 +2350,7 @@ _appender_syslog_getFacilityByIndex()
 appender_syslog_getFacility()
 {
   ${__LOG4SH_TRACE_CALL} appender_syslog_getFacility \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _appender_getData "${__log4shAppender_syslog_facilities}" $1
   # return value passed through
@@ -2379,7 +2379,7 @@ appender_syslog_getFacility()
 appender_syslog_setFacility()
 {
   ${__LOG4SH_TRACE_CALL} appender_syslog_setFacility \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   assf_appender=$1
   assf_facility=$2
@@ -2397,9 +2397,9 @@ appender_syslog_setFacility()
   _appender_setData __log4shAppender_syslog_facilities \
       ${assf_appender} "${assf_facility}"
   # inheriting __log4sh_return from _appender_setData
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to set syslog facility for appender (${assf_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset assf_appender assf_facility
@@ -2429,7 +2429,7 @@ appender_syslog_setFacility()
 appender_syslog_getHost()
 {
   ${__LOG4SH_TRACE_CALL} appender_syslog_getHost \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   asgh_host=`_appender_getData "${__log4shAppender_syslog_hosts}" $1`
   __log4sh_return=$?
@@ -2471,7 +2471,7 @@ appender_syslog_getHost()
 appender_syslog_setHost()
 {
   ${__LOG4SH_TRACE_CALL} appender_syslog_setHost \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   assh_appender=$1
   assh_host=$2
@@ -2482,9 +2482,9 @@ appender_syslog_setHost()
   _appender_setData __log4shAppender_syslog_hosts \
       ${assh_appender} "${assh_host}"
   # inheriting __log4sh_return from _appender_setData
-  if [ $? -ne ${__LOG4SH_TRUE} ]; then
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
     _log4sh_error "unable to set the 'syslog host' for appender (${assh_appender})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset assh_appender assh_host
@@ -2519,12 +2519,12 @@ appender_syslog_setHost()
 logger_level_toLevel()
 {
   ${__LOG4SH_TRACE_CALL} logger_level_toLevel \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   ltl_val=$1
 
   ltl_level=''
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   case ${ltl_val} in
     ${__LOG4SH_LEVEL_TRACE}) ltl_level=${__LOG4SH_LEVEL_TRACE_STR} ;;
@@ -2535,7 +2535,7 @@ logger_level_toLevel()
     ${__LOG4SH_LEVEL_FATAL}) ltl_level=${__LOG4SH_LEVEL_FATAL_STR} ;;
     ${__LOG4SH_LEVEL_OFF}) ltl_level=${__LOG4SH_LEVEL_OFF_STR} ;;
     ${__LOG4SH_LEVEL_CLOSED}) ltl_level=${__LOG4SH_LEVEL_CLOSED_STR} ;;
-    *) __log4sh_return=${__LOG4SH_FALSE} ;;
+    *) __log4sh_return=${LOG4SH_FALSE} ;;
   esac
 
   echo ${ltl_level}
@@ -2566,12 +2566,12 @@ logger_level_toLevel()
 logger_level_toInt()
 {
   ${__LOG4SH_TRACE_CALL} logger_level_toInt \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   lti_level=$1
 
   lti_int=0
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   case ${lti_level} in
     ${__LOG4SH_LEVEL_TRACE_STR}) lti_int=${__LOG4SH_LEVEL_TRACE} ;;
@@ -2582,7 +2582,7 @@ logger_level_toInt()
     ${__LOG4SH_LEVEL_FATAL_STR}) lti_int=${__LOG4SH_LEVEL_FATAL} ;;
     ${__LOG4SH_LEVEL_OFF_STR}) lti_int=${__LOG4SH_LEVEL_OFF} ;;
     ${__LOG4SH_LEVEL_CLOSED_STR}) lti_int=${__LOG4SH_LEVEL_CLOSED} ;;
-    *) __log4sh_return=${__LOG4SH_FALSE} ;;
+    *) __log4sh_return=${LOG4SH_FALSE} ;;
   esac
 
   echo ${lti_int}
@@ -2616,7 +2616,7 @@ logger_level_toInt()
 logger_addAppender()
 {
   ${__LOG4SH_TRACE_CALL} logger_addAppender \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   laa_appender=$1
 
@@ -2684,10 +2684,10 @@ logger_addAppender()
 logger_getFilename()
 {
   ${__LOG4SH_TRACE_CALL} logger_getFilename \
-      $# -ne 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   echo "${__log4sh_filename}"
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -2713,10 +2713,10 @@ logger_getFilename()
 logger_setFilename()
 {
   ${__LOG4SH_TRACE_CALL} logger_setFilename \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   __log4sh_filename=$1
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -2741,7 +2741,7 @@ logger_setFilename()
 logger_getLevel()
 {
   ${__LOG4SH_TRACE_CALL} logger_getLevel \
-      $# -ne 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   logger_level_toLevel ${__log4shLevel}
   # return value passed through
@@ -2769,17 +2769,17 @@ logger_getLevel()
 logger_setLevel()
 {
   ${__LOG4SH_TRACE_CALL} logger_setLevel \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   lsl_level=$1
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   lsl_int=`logger_level_toInt ${lsl_level}`
-  if [ $? -eq ${__LOG4SH_TRUE} ]; then
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
     __log4shLevel=${lsl_int}
   else
     _log4sh_error "attempt to set invalid log level '${lsl_level}'"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset lsl_int lsl_level
@@ -2810,16 +2810,16 @@ logger_setLevel()
 log()
 {
   ${__LOG4SH_TRACE_CALL} log \
-      $# -lt 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -lt 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   l_level=$1
   shift
   # if no message was passed, read it from STDIN
   [ $# -ne 0 ] && l_msg="$@" || l_msg=`cat`
 
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
   l_levelInt=`logger_level_toInt ${l_level}`
-  if [ $? -eq ${__LOG4SH_TRUE} ]; then
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
     # update seconds elapsed
     _log4sh_updateSeconds
 
@@ -2847,11 +2847,12 @@ log()
     IFS=${l_oldIFS}
   else
     _log4sh_error "invalid logging level requested (${l_level})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset l_msg l_oldIFS l_level l_levelInt
   unset l_appenderIndex l_appenderLevel l_appenderLevelInt l_appenderName
+  return ${__log4sh_return}
 }
 
 #/**
@@ -3040,14 +3041,14 @@ logger_fatal()
 _log4sh_getPropPrefix()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_getPropPrefix \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lgpp_oldIFS=${IFS}
   IFS='.'; set -- $1; IFS=${_lgpp_oldIFS}
 
   echo $1
   unset _lgpp_oldIFS
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -3074,10 +3075,10 @@ _log4sh_getPropPrefix()
 _log4sh_stripPropPrefix()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_stripPropPrefix \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   expr "$1" : '[^.]*\.\(.*\)'
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -3103,7 +3104,7 @@ _log4sh_stripPropPrefix()
 _log4sh_propAlternative()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_propAlternative \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lpa_key=$1
   _lpa_value=$2
@@ -3143,7 +3144,7 @@ _log4sh_propAlternative()
 _log4sh_propAppender()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_propAppender \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lpa_key=$1
   _lpa_value=$2
@@ -3162,10 +3163,10 @@ _log4sh_propAppender()
 
   # does the appender exist?
   appender_exists ${_lpa_appender}
-  if [ $? -eq ${__LOG4SH_FALSE} ]; then
+  if [ $? -eq ${LOG4SH_FALSE} ]; then
     _log4sh_error "attempt to configure the non-existant appender (${_lpa_appender})"
     unset _lpa_appender _lpa_key _lpa_value
-    return ${__LOG4SH_ERROR}
+    return ${LOG4SH_ERROR}
   fi
 
   # handle the appender type
@@ -3185,7 +3186,7 @@ _log4sh_propAppender()
         appender_setType ${_lpa_appender} ${_lpa_value} ;;
       *)
         _log4sh_error "appender type ($_lpa_value) unrecognized"
-        __log4sh_return=${__LOG4SH_ERROR}
+        __log4sh_return=${LOG4SH_ERROR}
         ;;
     esac
     unset _lpa_appender _lpa_key _lpa_value
@@ -3223,7 +3224,7 @@ _log4sh_propAppender()
       # catch unrecognized
       *)
         _log4sh_error "appender value/method ($_lpa_key) unrecognized"
-        __log4sh_return=${__LOG4SH_ERROR}
+        __log4sh_return=${LOG4SH_ERROR}
         ;;
     esac
     unset _lpa_appender _lpa_key _lpa_value
@@ -3237,7 +3238,7 @@ _log4sh_propAppender()
     ConversionPattern) appender_setPattern $_lpa_appender "$_lpa_value" ;;
     *)
       _log4sh_error "layout value/method ($_lpa_key) unrecognized"
-      __log4sh_return=${__LOG4SH_ERROR}
+      __log4sh_return=${LOG4SH_ERROR}
       ;;
   esac
   unset _lpa_appender _lpa_key _lpa_value
@@ -3269,19 +3270,19 @@ _log4sh_propAppender()
 _log4sh_propLogger()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_propLogger \
-      $# -ne 2 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lpl_property=$1
   _lpl_value=$2
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   _lpl_stripped=`_log4sh_stripPropPrefix ${_lpl_property}`
-  if [ $? -eq ${__LOG4SH_TRUE} ]; then
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
     echo "logger: ${_lpl_stripped} ${_lpl_value}"
   else
     echo ''
     _log4sh_error "problem stripping prefix from property (${_lpl_property})"
-    __log4sh_return=${__LOG4SH_ERROR}
+    __log4sh_return=${LOG4SH_ERROR}
   fi
 
   unset _lpl_property _lpl_value _lpl_stripped
@@ -3316,10 +3317,10 @@ _log4sh_propLogger()
 _log4sh_propRootLogger()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_propRootLogger \
-      $# -eq 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -eq 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lprl_rootLogger=`echo "$@" |sed 's/ *, */,/g'`
-  __log4sh_return=${__LOG4SH_TRUE}
+  __log4sh_return=${LOG4SH_TRUE}
 
   _lprl_count=`echo "${_lprl_rootLogger}" |sed 's/,/ /g' |wc -w`
   _lprl_index=1
@@ -3329,11 +3330,11 @@ _log4sh_propRootLogger()
       logger_setLevel "${_lprl_operand}"
     else
       appender_exists "${_lprl_operand}"
-      if [ $? -eq ${__LOG4SH_FALSE} ]; then
+      if [ $? -eq ${LOG4SH_FALSE} ]; then
         logger_addAppender "${_lprl_operand}"
       else
         _log4sh_error "attempt to add already existing appender of name (${_lprl_operand})"
-        __log4sh_return=${__LOG4SH_ERROR}
+        __log4sh_return=${LOG4SH_ERROR}
         break
       fi
     fi
@@ -3371,7 +3372,7 @@ _log4sh_propRootLogger()
 log4sh_doConfigure()
 {
   ${__LOG4SH_TRACE_CALL} log4sh_doConfigure \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   ldc_file=$1
 
@@ -3415,7 +3416,7 @@ log4sh_doConfigure()
 
   unset ldc_appender ldc_file ldc_tmpFile ldc_line ldc_key ldc_keyword
   unset ldc_value
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -3443,7 +3444,7 @@ log4sh_doConfigure()
 log4sh_resetConfiguration()
 {
   ${__LOG4SH_TRACE_CALL} log4sh_resetConfiguration \
-      $# -ne 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   __log4shAppenders=''
   __log4shAppenderCount=0
@@ -3461,7 +3462,7 @@ log4sh_resetConfiguration()
   __log4shAppender_syslog_hosts=''
 
   logger_setLevel ERROR
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #==============================================================================
@@ -3490,10 +3491,10 @@ log4sh_resetConfiguration()
 logger_getThreadName()
 {
   ${__LOG4SH_TRACE_CALL} logger_getThreadName \
-      $# -ne 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   echo ${__log4sh_threadName}
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #/**
@@ -3522,7 +3523,7 @@ logger_getThreadName()
 logger_setThreadName()
 {
   ${__LOG4SH_TRACE_CALL} logger_setThreadName \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   lstn_thread=$1
 
@@ -3532,7 +3533,7 @@ logger_setThreadName()
   __log4sh_threadName=${lstn_thread}
 
   unset lstn_thread lstn_length
-  return ${__LOG4SH_TRUE}
+  return ${LOG4SH_TRUE}
 }
 
 #==============================================================================
@@ -3564,7 +3565,7 @@ logger_setThreadName()
 log4sh_cleanup()
 {
   ${__LOG4SH_TRACE_CALL} log4sh_cleanup \
-      $# -ne 0 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 0 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _log4sh_cleanup 'EXIT'
 }
@@ -3596,12 +3597,12 @@ log4sh_cleanup()
 _log4sh_cleanup()
 {
   ${__LOG4SH_TRACE_CALL} _log4sh_cleanup \
-      $# -ne 1 ${BASH_LINENO:-} || return ${__LOG4SH_FALSE}
+      $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
   _lc__trap=$1
   ${__LOG4SH_INFO} "_log4sh_cleanup(): the ${_lc__trap} signal was caught"
 
-  _lc__restoreTrap=${__LOG4SH_FALSE}
+  _lc__restoreTrap=${LOG4SH_FALSE}
   _lc__oldTrap=''
 
   # match trap to signal value
@@ -3618,14 +3619,14 @@ _log4sh_cleanup()
     then
       # newer trap command
       ${__LOG4SH_DEBUG} 'newer POSIX trap command'
-      _lc__restoreTrap=${__LOG4SH_TRUE}
+      _lc__restoreTrap=${LOG4SH_TRUE}
       _lc__oldTrap=`egrep "(${_lc__trap}|${_lc__signal})$" "${__log4sh_trapsFile}" |\
         sed "s/^trap -- '\(.*\)' [A-Z]*$/\1/"`
     elif [ `grep "[0-9]*: " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
     then
       # older trap command
       ${__LOG4SH_DEBUG} 'older style trap command'
-      _lc__restoreTrap=${__LOG4SH_TRUE}
+      _lc__restoreTrap=${LOG4SH_TRUE}
       _lc__oldTrap=`grep "^${_lc__signal}: " "${__log4sh_trapsFile}" |\
         sed 's/^[0-9]*: //'`
     else
@@ -3638,7 +3639,7 @@ _log4sh_cleanup()
   rm -fr "${__log4sh_tmpDir}"
 
   # execute the old trap
-  if [ ${_lc__restoreTrap} -eq ${__LOG4SH_TRUE} -a -n "${_lc__oldTrap}" ]; then
+  if [ ${_lc__restoreTrap} -eq ${LOG4SH_TRUE} -a -n "${_lc__oldTrap}" ]; then
     ${__LOG4SH_INFO} 'restoring previous trap of same type'
     eval "${_lc__oldTrap}"
   fi
@@ -3676,7 +3677,7 @@ trap '_log4sh_cleanup INT' 2
 trap '_log4sh_cleanup TERM' 15
 
 # alternative commands
-log4sh_setAlternative mail "${LOG4SH_ALTERNATIVE_MAIL:-mail}" ${__LOG4SH_TRUE}
+log4sh_setAlternative mail "${LOG4SH_ALTERNATIVE_MAIL:-mail}" ${LOG4SH_TRUE}
 [ -n "${LOG4SH_ALTERNATIVE_NC:-}" ] \
     && log4sh_setAlternative nc "${LOG4SH_ALTERNATIVE_NC}"
 
