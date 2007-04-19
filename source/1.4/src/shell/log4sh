@@ -120,6 +120,8 @@ __log4sh_filename=`basename $0`
 __log4sh_tmpDir=''
 __log4sh_trapsFile=''
 
+__log4sh_alternative_mail='mail'
+
 __log4sh_threadName=${__LOG4SH_THREAD_DEFAULT}
 __log4sh_threadStack=${__LOG4SH_THREAD_DEFAULT}
 
@@ -2871,35 +2873,41 @@ log()
   # if no message was passed, read it from STDIN
   [ $# -ne 0 ] && _l_msg="$@" || _l_msg=`cat`
 
+  __log4sh_return=${__LOG4SH_TRUE}
   _l_levelInt=`logger_level_toInt ${_l_level}`
+  if [ $? -eq ${__LOG4SH_TRUE} ]; then
+    # update seconds elapsed
+    _log4sh_updateSeconds
 
-  # update seconds elapsed
-  _log4sh_updateSeconds
+    _l_oldIFS=${IFS} IFS=${__LOG4SH_IFS_DEFAULT}
+    for _l_appenderIndex in ${__log4shAppenderCounts}; do
+      ${__LOG4SH_TRACE} "_l_appenderIndex='${_l_appenderIndex}'"
+      # determine appender level
+      _l_appenderLevel=`_appender_getLevelByIndex ${_l_appenderIndex}`
+      if [ "${_l_appenderLevel}" = "${__LOG4SH_NULL}" ]; then
+        # continue if requested is level less than general level
+        [ ! ${__log4shLevel} -le ${_l_levelInt} ] && continue
+      else
+        _l_appenderLevelInt=`logger_level_toInt ${_l_appenderLevel}`
+        # continue if requested level is less than specific appender level
+        ${__LOG4SH_TRACE} "_l_levelInt='${_l_levelInt}' _l_appenderLevelInt='${_l_appenderLevelInt}'"
+        [ ! ${_l_appenderLevelInt} -le ${_l_levelInt} ] && continue
+      fi
 
-  _l_oldIFS=${IFS} IFS=${__LOG4SH_IFS_DEFAULT}
-  for _l_appenderIndex in ${__log4shAppenderCounts}; do
-    ${__LOG4SH_TRACE} "_l_appenderIndex='${_l_appenderIndex}'"
-    # determine appender level
-    _l_appenderLevel=`_appender_getLevelByIndex ${_l_appenderIndex}`
-    if [ "${_l_appenderLevel}" = "${__LOG4SH_NULL}" ]; then
-      # continue if requested is level less than general level
-      [ ! ${__log4shLevel} -le ${_l_levelInt} ] && continue
-    else
-      _l_appenderLevelInt=`logger_level_toInt ${_l_appenderLevel}`
-      # continue if requested level is less than specific appender level
-      ${__LOG4SH_TRACE} "_l_levelInt='${_l_levelInt}' _l_appenderLevelInt='${_l_appenderLevelInt}'"
-      [ ! ${_l_appenderLevelInt} -le ${_l_levelInt} ] && continue
-    fi
-
-    # execute dynamic appender function
-    _l_appenderName=`_log4sh_getArrayElement \
-      "${__log4shAppenders}" ${_l_appenderIndex}`
-    ${__LOG4SH_APPENDER_FUNC_PREFIX}${_l_appenderName}_append ${_l_level} "${_l_msg}"
-  done
-  IFS=${_l_oldIFS}
+      # execute dynamic appender function
+      _l_appenderName=`_log4sh_getArrayElement \
+        "${__log4shAppenders}" ${_l_appenderIndex}`
+      ${__LOG4SH_APPENDER_FUNC_PREFIX}${_l_appenderName}_append ${_l_level} "${_l_msg}"
+    done
+    IFS=${_l_oldIFS}
+  else
+    _log4sh_error "invalid logging level requested (${_l_level})"
+    __log4sh_return=${__LOG4SH_ERROR}
+  fi
 
   unset _l_msg _l_oldIFS _l_level _l_levelInt
   unset _l_appenderIndex _l_appenderLevel _l_appenderLevelInt _l_appenderName
+  return ${__log4sh_return}
 }
 
 #/**
