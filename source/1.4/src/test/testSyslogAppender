@@ -31,7 +31,7 @@ MY_PATH=`dirname $0`
 APP_NAME='mySyslog'
 APP_SYSLOG_FACILITY='local4'
 
-BACKOFF_TIMES='1 2 4'
+BACKOFF_TIMES='0 1 2 4'
 TAIL_SAMPLE_SIZE=25
 TEST_PRIORITY_DATA='priorityMatrix.data'
 TEST_SYSLOG_DATA="${MY_NAME}.data"
@@ -57,7 +57,7 @@ testFacilityGetterSetter()
     appender_activateOptions ${APP_NAME}
     currFacility=`appender_syslog_getFacility ${APP_NAME}`
     assertEquals \
-        'the syslog facility does not match the one set' \
+        "the syslog facility (${currFacility}) does not match the one set (${facility})" \
         "${facility}" "${currFacility}"
   done
 
@@ -66,8 +66,8 @@ testFacilityGetterSetter()
   appender_syslog_setFacility ${APP_NAME} "${testFacility}"
   appender_activateOptions ${APP_NAME}
   currFacility=`appender_syslog_getFacility ${APP_NAME}`
-  failNotEquals \
-      'the syslog facility does not match the one set' \
+  failSame \
+      "the returned syslog facility (${currFacility}) matches the invalid one set (${testFacility})" \
       "${testFacility}" "${currFacility}"
 
   # TODO: test the passing of invalid params
