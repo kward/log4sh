@@ -12,5 +12,8 @@ added missing command alternative for the 'mail' command
 fixed bug when attempting to log a message at an invalid logging level with the
 log() function. it should have returned an error, but it didn't.
 
+fixed bug where the 'B' unit was not recognized for the MaxFileSize of a
+RollingFileAppender
+
 
 $Revision$

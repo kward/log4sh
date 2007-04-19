@@ -1977,16 +1977,16 @@ appender_file_setMaxFileSize()
 {
   if [ $# -ne 2 ]; then
     _log4sh_error "appender_file_setMaxFileSize(): invalid number of parameters ($#)"
-    return ${__LOG4SH_FALSE}
+    return ${__LOG4SH_ERROR}
   fi
 
   afsmfs_appender=$1
   afsmfs_size=$2
-  __log4sh_return=${__LOG4SH_TRUE}
+  afsmfs_return=${__LOG4SH_TRUE}
 
   # split the file size into parts
   afsmfs_value=`expr ${afsmfs_size} : '\([0-9]*\)'`
-  afsmfs_unit=`expr ${afsmfs_size} : '[0-9]* *\([A-Za-z]\{2,3\}\)'`
+  afsmfs_unit=`expr ${afsmfs_size} : '[0-9]* *\([A-Za-z]\{1,3\}\)'`
 
   # determine multiplier
   if [ ${__log4sh_wa_strictBehavior} -eq ${__LOG4SH_TRUE} ]; then
@@ -2013,21 +2013,21 @@ appender_file_setMaxFileSize()
       ;;
     *)
       _log4sh_error "unrecognized file size unit '${afsmfs_unit}'"
-      __log4sh_return=${__LOG4SH_FALSE}
+      afsmfs_return=${__LOG4SH_ERROR}
       ;;
   esac
 
   # calculate maximum file size
-  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+  if [ ${afsmfs_return} -eq ${__LOG4SH_TRUE} ]; then
     afsmfs_maxFileSize=`(expr ${afsmfs_value} \* ${afsmfs_mul} 2>&1)`
     if [ $? -gt 0 ]; then
       _log4sh_error "problem calculating maximum file size: '${afsmfs_maxFileSize}'"
-      __log4sh_return=${__LOG4SH_FALSE}
+      afsmfs_return=${__LOG4SH_FALSE}
     fi
   fi
 
   # store the maximum file size
-  if [ ${__log4sh_return} -eq ${__LOG4SH_TRUE} ]; then
+  if [ ${afsmfs_return} -eq ${__LOG4SH_TRUE} ]; then
     afsmfs_index=`_log4sh_findArrayElement \
         "${__log4shAppenders}" ${afsmfs_appender}`
     # TODO: put check for valid index here
@@ -2037,10 +2037,12 @@ appender_file_setMaxFileSize()
   fi
 
   # re-source the appender
-  _appender_cache ${afsmfs_appender}
+  [ ${afsmfs_return} -eq ${__LOG4SH_TRUE} ] \
+      && _appender_cache ${afsmfs_appender}
 
+  __log4sh_return=${afsmfs_return}
   unset afsmfs_appender afsmfs_size afsmfs_value afsmfs_unit afsmfs_mul \
-      afsmfs_maxFileSize afsmfs_index
+      afsmfs_maxFileSize afsmfs_index afsmfs_return
   return ${__log4sh_return}
 }
 

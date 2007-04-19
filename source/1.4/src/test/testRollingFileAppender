@@ -232,7 +232,6 @@ testMaxBackupIndexOf2()
   ${DEBUG} 'testing a maximum backup index of 2'
 
   # configure log4sh
-  log4sh_resetConfiguration
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} RollingFileAppender
   appender_file_setFile ${APP_NAME} "${appFile}"
@@ -325,7 +324,6 @@ testMaxBackupIndexOf1()
   ${DEBUG} 'testing a maximum backup index of 1'
 
   # configure log4sh
-  log4sh_resetConfiguration
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} RollingFileAppender
   appender_file_setFile ${APP_NAME} "${appFile}"
@@ -410,7 +408,6 @@ testMaxBackupIndexOf0()
   ${DEBUG} 'testing a maximum backup index of 0'
 
   # configure log4sh
-  log4sh_resetConfiguration
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} RollingFileAppender
   appender_file_setFile ${APP_NAME} "${appFile}"
@@ -463,6 +460,47 @@ testMaxBackupIndexOf0()
       "${appFile}"
 }
 
+testMaxFileSizeGetterSetter()
+{
+  # setup
+  logger_addAppender ${APP_NAME}
+  appender_setType ${APP_NAME} RollingFileAppender
+  appender_file_setFile ${APP_NAME} "${appFile}"
+  appender_activateOptions ${APP_NAME}
+
+  ### getter
+
+  # check that the default size equals the default of log4sh
+  size=`appender_file_getMaxFileSize ${APP_NAME}`
+  assertEquals \
+      "the returned MaxFileSize (${size}) did not equal the log4sh default" \
+      "${size}" ${__LOG4SH_TYPE_ROLLING_FILE_MAX_FILE_SIZE}
+
+  ### setter
+
+  # test passing valid units; there should be no warnings or errors
+  for unit in B KB KiB MB MiB GB GiB TB TiB; do
+    appender_file_setMaxFileSize ${APP_NAME} 1${unit}
+    assertTrue \
+        "setter failed with the '${unit}' unit" \
+        "[ $? -eq ${__LOG4SH_TRUE} ]"
+  done
+
+  # test passing an empty unit
+  echo '- expecting one warning'
+  appender_file_setMaxFileSize ${APP_NAME} 1
+  assertTrue \
+      "setter failed with an empty unit" \
+      "[ $? -eq ${__LOG4SH_TRUE} ]"
+
+  # test passing an invalid unit
+  echo '- expecting one error'
+  appender_file_setMaxFileSize ${APP_NAME} 1foo
+  assertTrue \
+      "setter succeeded with an invalid unit" \
+      "[ $? -eq ${__LOG4SH_ERROR} ]"
+}
+
 #------------------------------------------------------------------------------
 # suite functions
 #
@@ -509,6 +547,8 @@ suite()
   suite_addTest testMaxBackupIndexOf2
   suite_addTest testMaxBackupIndexOf1
   suite_addTest testMaxBackupIndexOf0
+
+  suite_addTest testMaxFileSizeGetterSetter
 }
 
 # load and run shUnit
