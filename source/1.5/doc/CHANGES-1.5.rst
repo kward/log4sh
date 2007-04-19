@@ -23,7 +23,7 @@ Added return values to all functions [where it makes sense]
 
 Added return value checking in *many* locations
 
-Updated shUnit to 2.0.1
+Updated shUnit to 2.1.0pre
 
 Made the ``Makefile`` much more generic so it can be used with other projects
 
@@ -33,6 +33,16 @@ documentation will be easier.
 
 Moving to use `reStructured Text <http://docutils.sourceforge.net/rst.html>`_
 for documentation.
+
+Fixed the ``Makefile`` so that calling ``make docs`` will properly download the
+appropriate DocBook XML and XSLT files before attempting to build the docs.
+
+Renamed the ``__LOG4SH_TRUE``, ``__LOG4SH_FALSE``, and ``__LOG4SH_ERROR}``
+variables to the same without the leading underscores (e.g. ``LOG4SH_TRUE``).
+Scripts using log4sh should have access to these.
+
+Fixed bug when attempting to log a message at an invalid logging level with the
+log() function. It should have returned an error, but it didn't.
 
 
 $Revision$
