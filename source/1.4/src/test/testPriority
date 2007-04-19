@@ -56,6 +56,15 @@ testPriorityMatrix()
   exec 0<&9 9<&-
 }
 
+testInvalidPriority()
+{
+  # validate that requesting an invalid logging level (i.e. priority) will fail
+  log INVALID 'some message'
+  assertTrue \
+      "logging with an invalid logging level did not properly fail" \
+      "[ $? -eq ${__LOG4SH_ERROR} ]"
+}
+
 #------------------------------------------------------------------------------
 # suite functions
 #
@@ -74,6 +83,7 @@ oneTimeSetUp()
 suite()
 {
   suite_addTest testPriorityMatrix
+  suite_addTest testInvalidPriority
 }
 
 # load and run shUnit
