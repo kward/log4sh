@@ -44,6 +44,9 @@ Scripts using log4sh should have access to these.
 Fixed bug when attempting to log a message at an invalid logging level with the
 log() function. It should have returned an error, but it didn't.
 
+Fixed bug where the 'B' unit was not recognized for the MaxFileSize of a
+RollingFileAppender
+
 
 $Revision$
 vim:spell

@@ -2074,7 +2074,7 @@ appender_file_getMaxFileSize()
 appender_file_setMaxFileSize()
 {
   ${__LOG4SH_TRACE_CALL} appender_file_setMaxFileSize \
-      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
+      $# -ne 2 ${BASH_LINENO:-} || return ${LOG4SH_ERROR}
 
   afsmfs_appender=$1
   afsmfs_size=$2
@@ -2082,7 +2082,7 @@ appender_file_setMaxFileSize()
 
   # split the file size into parts
   afsmfs_value=`expr ${afsmfs_size} : '\([0-9]*\)'`
-  afsmfs_unit=`expr ${afsmfs_size} : '[0-9]* *\([A-Za-z]\{2,3\}\)'`
+  afsmfs_unit=`expr ${afsmfs_size} : '[0-9]* *\([A-Za-z]\{1,3\}\)'`
 
   # determine multiplier
   if [ ${__log4sh_wa_strictBehavior} -eq ${LOG4SH_TRUE} ]; then
@@ -2109,7 +2109,7 @@ appender_file_setMaxFileSize()
       ;;
     *)
       _log4sh_error "unrecognized file size unit '${afsmfs_unit}'"
-      __log4sh_return=${LOG4SH_FALSE}
+      __log4sh_return=${LOG4SH_ERROR}
       ;;
   esac
 
