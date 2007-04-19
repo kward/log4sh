@@ -31,7 +31,7 @@ MY_PATH=`dirname $0`
 APP_NAME='mySyslog'
 APP_SYSLOG_FACILITY='local4'
 
-BACKOFF_TIMES='1 2 4'
+BACKOFF_TIMES='0 1 2 4'
 TAIL_SAMPLE_SIZE=25
 TEST_PRIORITY_DATA='priorityMatrix.data'
 TEST_SYSLOG_DATA="${MY_NAME}.data"
@@ -57,7 +57,7 @@ testFacilityGetterSetter()
     appender_activateOptions ${APP_NAME}
     currFacility=`appender_syslog_getFacility ${APP_NAME}`
     assertEquals \
-        'the syslog facility does not match the one set' \
+        "the syslog facility (${currFacility}) does not match the one set (${facility})" \
         "${facility}" "${currFacility}"
   done
 
@@ -66,8 +66,8 @@ testFacilityGetterSetter()
   appender_syslog_setFacility ${APP_NAME} "${testFacility}"
   appender_activateOptions ${APP_NAME}
   currFacility=`appender_syslog_getFacility ${APP_NAME}`
-  failNotEquals \
-      'the syslog facility does not match the one set' \
+  failSame \
+      "the returned syslog facility (${currFacility}) matches the invalid one set (${testFacility})" \
       "${testFacility}" "${currFacility}"
 
   # TODO: test the passing of invalid params
@@ -122,6 +122,9 @@ testPriorityMatrix()
   appender_setType ${APP_NAME} SyslogAppender
   appender_syslog_setFacility ${APP_NAME} ${APP_SYSLOG_FACILITY}
 
+  # if the test logfile doesn't exist, we want to skip the tests
+  [ ! -r "${TEST_LOGFILE}" ] && startSkipping
+
   # save stdin, and redirect it from a file
   exec 9<&0 <"${PRIORITY_DATA}"
   while read priority outputs; do
@@ -144,22 +147,18 @@ testPriorityMatrix()
       random=${tf_RANDOM}
       log ${testPriority} "${MY_NAME} test message - ${random}"
 
-      # skip the actual test if there is no logfile to tail at
-      if [ ! -r "${TEST_LOGFILE}" ]; then
-        fail
-        continue
-      fi
-
       # do a timed backoff to wait for the result -- syslog might take a bit
-      for backoff in ${BACKOFF_TIMES}; do
-        [ ${backoff} -eq 2 ] \
-            && echo "    waiting for possible '${testPriority}' message..."
-        sleep ${backoff}
-        result=`tail ${tailNumOpt}${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |\
-	    grep "${random}"`
-        [ -n "${result}" ] && break
-      done
-      ${DEBUG} "result=${result}"
+      if ! isSkipping; then
+        for backoff in ${BACKOFF_TIMES}; do
+          [ ${backoff} -eq 2 ] \
+              && echo "    waiting for possible '${testPriority}' message..."
+          sleep ${backoff}
+          result=`tail ${tailNumOpt}${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |\
+              grep "${random}"`
+          [ -n "${result}" ] && break
+        done
+        ${DEBUG} "result=${result}"
+      fi
 
       if [ ${shouldOutput} -eq 1 ]; then
         assertNotNull \
