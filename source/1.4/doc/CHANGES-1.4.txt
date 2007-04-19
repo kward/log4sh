@@ -7,5 +7,10 @@ and appender_setLayout functions
 
 fixed the unsetting of variables in several locations
 
+added missing command alternative for the 'mail' command
+
+fixed bug when attempting to log a message at an invalid logging level with the
+log() function. it should have returned an error, but it didn't.
+
 
 $Revision$
