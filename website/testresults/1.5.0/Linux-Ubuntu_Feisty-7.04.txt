@@ -1,0 +1,1023 @@
+#------------------------------------------------------------------------------
+# System data
+#
+
+# test run info
+shells="/bin/sh /bin/bash /bin/dash /bin/ksh /bin/pdksh"
+tests="testAsciiCharset testCustomMDCPatterns testFileAppender testMultipleAppenders testPatternLayout testPriority testRollingFileAppender testSMTPAppender testSyslogAppender"
+
+# system info
+$ date
+Thu Apr 12 17:53:29 IST 2007
+$ uname -mprsv
+Linux 2.6.20-14-generic #2 SMP Mon Apr 2 20:37:49 UTC 2007 i686 unknown
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/sh
+#
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed:    10 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     10 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed:     2 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      2 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+testDefaultPattern
+ASSERT: default pattern '%d %p - %m%n' failed: result '%' did not match the regex '^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} INFO - dummy'
+
+#
+# Test report
+#
+tests passed:    25  96%
+tests failed:     1   4%
+tests skipped:    0   0%
+tests total:     26 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+testInvalidPriority
+log4sh:ERROR invalid logging level requested (INVALID)
+
+#
+# Test report
+#
+tests passed:    43 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     43 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed:    32 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     32 100%
+
+--- Executing the 'SMTPAppender' test suite ---
+#
+# Performing tests
+#
+testSubjectGetterSetter
+testToGetterSetter
+testAppenderSetupFromConfig
+
+#
+# Test report
+#
+tests passed:     7 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      7 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:WARN [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+testPriorityMatrix
+  testing appender priority 'TRACE'
+  testing appender priority 'DEBUG'
+    waiting for possible 'TRACE' message...
+  testing appender priority 'INFO'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+  testing appender priority 'WARN'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+  testing appender priority 'ERROR'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+  testing appender priority 'FATAL'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+  testing appender priority 'OFF'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+    waiting for possible 'FATAL' message...
+testRemoteLogging
+
+#
+# Test report
+#
+tests passed:    68 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     68 100%
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/bash
+#
+
+GNU bash, version 3.2.10(1)-release (i486-pc-linux-gnu)
+Copyright (C) 2005 Free Software Foundation, Inc.
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed:    10 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     10 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed:     2 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      2 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+testDefaultPattern
+ASSERT: default pattern '%d %p - %m%n' failed: result '%' did not match the regex '^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} INFO - dummy'
+
+#
+# Test report
+#
+tests passed:    25  96%
+tests failed:     1   4%
+tests skipped:    0   0%
+tests total:     26 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+testInvalidPriority
+log4sh:ERROR invalid logging level requested (INVALID)
+
+#
+# Test report
+#
+tests passed:    43 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     43 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed:    32 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     32 100%
+
+--- Executing the 'SMTPAppender' test suite ---
+#
+# Performing tests
+#
+testSubjectGetterSetter
+testToGetterSetter
+testAppenderSetupFromConfig
+
+#
+# Test report
+#
+tests passed:     7 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      7 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:WARN [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+testPriorityMatrix
+  testing appender priority 'TRACE'
+  testing appender priority 'DEBUG'
+    waiting for possible 'TRACE' message...
+  testing appender priority 'INFO'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+  testing appender priority 'WARN'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+  testing appender priority 'ERROR'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+  testing appender priority 'FATAL'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+  testing appender priority 'OFF'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+    waiting for possible 'FATAL' message...
+testRemoteLogging
+
+#
+# Test report
+#
+tests passed:    68 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     68 100%
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/dash
+#
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed:    10 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     10 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed:     2 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      2 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+testDefaultPattern
+ASSERT: default pattern '%d %p - %m%n' failed: result '%' did not match the regex '^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} INFO - dummy'
+
+#
+# Test report
+#
+tests passed:    25  96%
+tests failed:     1   4%
+tests skipped:    0   0%
+tests total:     26 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+testInvalidPriority
+log4sh:ERROR invalid logging level requested (INVALID)
+
+#
+# Test report
+#
+tests passed:    43 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     43 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed:    32 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     32 100%
+
+--- Executing the 'SMTPAppender' test suite ---
+#
+# Performing tests
+#
+testSubjectGetterSetter
+testToGetterSetter
+testAppenderSetupFromConfig
+
+#
+# Test report
+#
+tests passed:     7 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      7 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:WARN [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+testPriorityMatrix
+  testing appender priority 'TRACE'
+  testing appender priority 'DEBUG'
+    waiting for possible 'TRACE' message...
+  testing appender priority 'INFO'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+  testing appender priority 'WARN'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+  testing appender priority 'ERROR'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+  testing appender priority 'FATAL'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+  testing appender priority 'OFF'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+    waiting for possible 'FATAL' message...
+testRemoteLogging
+
+#
+# Test report
+#
+tests passed:    68 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     68 100%
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/ksh
+#
+
+  version         sh (AT&T Labs Research) 1993-12-28 r
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed:    10 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     10 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed:     2 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      2 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+testDefaultPattern
+ASSERT: default pattern '%d %p - %m%n' failed: result '%' did not match the regex '^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} INFO - dummy'
+
+#
+# Test report
+#
+tests passed:    25  96%
+tests failed:     1   4%
+tests skipped:    0   0%
+tests total:     26 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+testInvalidPriority
+log4sh:ERROR invalid logging level requested (INVALID)
+
+#
+# Test report
+#
+tests passed:    43 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     43 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed:    32 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     32 100%
+
+--- Executing the 'SMTPAppender' test suite ---
+#
+# Performing tests
+#
+testSubjectGetterSetter
+testToGetterSetter
+testAppenderSetupFromConfig
+
+#
+# Test report
+#
+tests passed:     7 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      7 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:WARN [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+testPriorityMatrix
+  testing appender priority 'TRACE'
+  testing appender priority 'DEBUG'
+    waiting for possible 'TRACE' message...
+  testing appender priority 'INFO'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+  testing appender priority 'WARN'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+  testing appender priority 'ERROR'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+  testing appender priority 'FATAL'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+  testing appender priority 'OFF'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+    waiting for possible 'FATAL' message...
+testRemoteLogging
+
+#
+# Test report
+#
+tests passed:    68 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     68 100%
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/pdksh
+#
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed:    10 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     10 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed:     2 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      2 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+testDefaultPattern
+ASSERT: default pattern '%d %p - %m%n' failed: result '%' did not match the regex '^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\} INFO - dummy'
+
+#
+# Test report
+#
+tests passed:    25  96%
+tests failed:     1   4%
+tests skipped:    0   0%
+tests total:     26 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+testInvalidPriority
+log4sh:ERROR invalid logging level requested (INVALID)
+
+#
+# Test report
+#
+tests passed:    43 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     43 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+
+#
+# Test report
+#
+tests passed:    32 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     32 100%
+
+--- Executing the 'SMTPAppender' test suite ---
+#
+# Performing tests
+#
+testSubjectGetterSetter
+testToGetterSetter
+testAppenderSetupFromConfig
+
+#
+# Test report
+#
+tests passed:     7 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      7 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:WARN [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testSyslogLogfilePresent
+testPriorityMatrix
+  testing appender priority 'TRACE'
+  testing appender priority 'DEBUG'
+    waiting for possible 'TRACE' message...
+  testing appender priority 'INFO'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+  testing appender priority 'WARN'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+  testing appender priority 'ERROR'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+  testing appender priority 'FATAL'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+  testing appender priority 'OFF'
+    waiting for possible 'TRACE' message...
+    waiting for possible 'DEBUG' message...
+    waiting for possible 'INFO' message...
+    waiting for possible 'WARN' message...
+    waiting for possible 'ERROR' message...
+    waiting for possible 'FATAL' message...
+testRemoteLogging
+
+#
+# Test report
+#
+tests passed:    68 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     68 100%
