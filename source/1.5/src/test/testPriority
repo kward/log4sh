@@ -51,6 +51,15 @@ testPriorityMatrix()
   done <"${TEST_DATA}"
 }
 
+testInvalidPriority()
+{
+  # validate that requesting an invalid logging level (i.e. priority) will fail
+  log INVALID 'some message'
+  assertTrue \
+      "logging with an invalid logging level did not properly fail" \
+      "[ $? -eq ${LOG4SH_ERROR} ]"
+}
+
 #------------------------------------------------------------------------------
 # suite functions
 #
