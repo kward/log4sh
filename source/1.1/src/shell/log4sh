@@ -1,0 +1,523 @@
+# $Id: log4sh,v 1.10 2004/06/21 22:59:50 kward Exp $
+#
+# log4sh
+# 
+# written by Kate Ward <kate.ward@forestent.com>
+# released under the GPL 
+#
+# this module implements something like the log4j module from the Apache group
+#
+# notes:
+# *) the default appender is STDERR with a level of ERROR and a layout of
+#    Simple
+# *) the appender levels are as follows (decreasing order of output):
+#    DEBUG, INFO, WARN, ERROR, FATAL, OFF
+# *) the pattern separator is the ~ char, so inherantly, that character cannot
+#    be used in patterns...
+#
+# usage:
+# *) source the log4sh functions:
+#    . log4sh
+# *) set the global logging level (default is ERROR):
+#    logger_setLevel INFO
+# *) add an appender (STDOUT, STDERR, filename):
+#    logger_addAppender /tmp/log4sh.log
+# *) set an appender's logging level:
+#    appender_setLevel /tmp/log4sh.log DEBUG
+# *) disable default appender
+#    appender_setLevel STDERR OFF
+# *) set an appender to use a pattern layout:
+#    appender_setLayout Pattern
+#
+
+# treat unset variables as an error when substituting
+set -u
+
+#
+# constants
+#
+__LOG4SH_RELEASE='$Name:  $'
+
+__LOG4SH_LEVEL_ALL=0
+__LOG4SH_LEVEL_DEBUG=1
+__LOG4SH_LEVEL_INFO=2
+__LOG4SH_LEVEL_WARN=3
+__LOG4SH_LEVEL_ERROR=4
+__LOG4SH_LEVEL_FATAL=5
+__LOG4SH_LEVEL_OFF=6
+
+__LOG4SH_PATTERN_DEFAULT='%d %p - %m%n'
+
+#
+# variables
+#
+__log4sh_filename=''
+__log4sh_numAppenders=0
+__log4sh_threadName=''
+__log4shAppenders=''
+__log4shAppenderLayouts=''
+__log4shAppenderLevels=''
+__log4shAppenderPatterns=''
+
+#
+# private functions
+#
+
+_log4sh_level2tag()
+{
+   _level=$1
+
+   _result=0
+   _tag=''
+
+   case $_level in
+   $__LOG4SH_LEVEL_ALL) _tag='ALL' ;;
+   $__LOG4SH_LEVEL_DEBUG) _tag='DEBUG' ;;
+   $__LOG4SH_LEVEL_INFO) _tag='INFO' ;;
+   $__LOG4SH_LEVEL_WARN) _tag='WARN' ;;
+   $__LOG4SH_LEVEL_ERROR) _tag='ERROR' ;;
+   $__LOG4SH_LEVEL_FATAL) _tag='FATAL' ;;
+   $__LOG4SH_LEVEL_OFF) _tag='OFF' ;;
+   *) _result=1 ;;
+   esac
+
+   echo $_tag
+   unset _level _tag
+   return $_result
+}
+
+_log4sh_tag2level()
+{
+   _tag=$1
+
+   _level=''
+   _result=0
+
+   case $_tag in
+   ALL) _level=$__LOG4SH_LEVEL_ALL ;;
+   DEBUG) _level=$__LOG4SH_LEVEL_DEBUG ;;
+   INFO) _level=$__LOG4SH_LEVEL_INFO ;;
+   WARN) _level=$__LOG4SH_LEVEL_WARN ;;
+   ERROR) _level=$__LOG4SH_LEVEL_ERROR ;;
+   FATAL) _level=$__LOG4SH_LEVEL_FATAL ;;
+   OFF) _level=$__LOG4SH_LEVEL_OFF ;;
+   *) _result=1 ;;
+   esac
+
+   echo $_level
+   unset _level _tag
+   return $_result
+}
+
+_parsePattern()
+{
+   _pattern=$1
+   _priority=$2
+   _msg=$3
+
+   _date=`date '+%Y-%m-%d %H:%M:%S'`
+   echo "$_pattern" |sed \
+-e "s/%c/shell/" \
+-e "s/%d/$_date/" \
+-e "s/%F/$__log4sh_filename/" \
+-e "s/%n//" \
+-e "s/%p/$_priority/" \
+-e "s/%t/$__log4sh_threadName/" \
+-e "s/%m/$_msg/"
+   unset _pattern _tag _msg
+}
+
+#
+# Logger
+#
+
+#
+# This function sets the filename to be shown when the %F conversion character
+# is used in a pattern layout.
+#
+# @param filename
+# @return (none)
+#
+logger_setFilename()
+{
+   __log4sh_filename=$1
+}
+
+logger_getLevel()
+{
+   _log4sh_level2tag $__log4shLevel
+}
+
+logger_setLevel()
+{
+   _tag=$1
+
+   _level=`_log4sh_tag2level $_tag`
+   if [ $? -eq 0 ]; then
+      __log4shLevel=$_level
+   else
+      echo "log4sh error: attempt to set invalid log level '$_tag'" >&2
+   fi
+
+   unset _level _tag
+}
+
+#
+# This function sets the thread name (aka the name of the script).  This thread
+# name can be used with the %t conversion character within a pattern layout.
+#
+# @param thread_name
+# @return (none)
+#
+logger_setThreadName()
+{
+   __log4sh_threadName=$1
+}
+
+#
+# Appender
+#
+
+logger_addAppender()
+{
+   _appender=$1
+   _layout=$2
+
+   _level=`logger_getLevel`
+   __log4shAppenders="$__log4shAppenders $_appender"
+   __log4shAppenderLevels="$__log4shAppenderLevels -"
+   __log4shAppenderLayouts="$__log4shAppenderLayouts $_layout"
+   __log4shAppenderPatterns="${__log4shAppenderPatterns:+$__log4shAppenderPatterns~}$__LOG4SH_PATTERN_DEFAULT"
+   __log4sh_numAppenders=`expr $__log4sh_numAppenders + 1`
+
+   # create the file (if it doesn't exist)
+   case $_appender in
+   STDOUT|STDERR) ;;
+   *) touch $_appender ;;
+   esac
+
+   unset _appender _layout
+}
+
+#
+# Determines the index position of an appender in the appender array.
+#
+# @param  _appender  the name of the appender
+# @return index  the position of the appender in the appender array
+#         0      if the appender is not found
+#
+_appender_getIndex()
+{
+   _appender=$1
+
+   _index=1
+   while [ $_index -le $__log4sh_numAppenders ]; do
+      _a=`echo $__log4shAppenders |awk "{print \\$$_index}"`
+      [ "$_a" = "$_appender" ] && break
+      _index=`expr $_index + 1`
+   done
+   [ $_index -gt $__log4sh_numAppenders ] && _index=0
+
+   _result=$_index
+   unset _a _appender _index
+   return $_result
+}
+
+appender_getLayout()
+{
+   _appender=$1
+
+   _index=`_appender_getIndex $_appender`
+   if [ $_index -ne 0 ]; then
+      _layout=`echo $__log4shAppenderLayouts |awk "{print \\$$_index}"`
+   else
+      _layout="unknown"
+   fi
+
+   echo $_layout
+   unset _appender _index _layout
+}
+
+appender_setLayout()
+{
+   _appender=$1
+   _layout=$2
+   
+   case $_layout in
+   '') _layout='None' ;;
+   Pattern|Simple|None) ;;
+   *)
+      echo "log4sh error: unknown layout $_layout" >&2
+      return 1
+      ;;
+   esac
+
+   _index=1
+   _newAppenderLayouts=''
+   _found=0
+
+   while [ $_index -le $__log4sh_numAppenders ]; do
+      _a=`echo $__log4shAppenders |awk "{print \\$$_index}"`
+      _l=`echo $__log4shAppenderLayouts |awk "{print \\$$_index}"`
+
+      if [ ! "$_a" = "$_appender" ]; then
+	 _newAppenderLayouts="$_newAppenderLayouts $_l"
+      else
+	 _newAppenderLayouts="$_newAppenderLayouts $_layout"
+	 _found=1
+      fi
+
+      _index=`expr $_index + 1`
+   done
+   __log4shAppenderLayouts="$_newAppenderLayouts"
+
+   _result=$_found
+   unset _a _appender _found _index _l _layout _newAppenderLayouts
+   return $_result
+}
+
+appender_getLevel()
+{
+   _appender=$1
+
+   _index=`_appender_getIndex $_appender`
+   if [ $_index -gt 0 ]; then
+      _level=`echo $__log4shAppenderLevels |awk "{print \\$$_index}"`
+   else
+      _level="unknown"
+   fi
+
+   echo $_level
+   unset _appender _index _level
+}
+
+appender_setLevel()
+{
+   _appender=$1
+   _level=$2
+
+   _index=1
+   _newAppenderLevels=''
+   _found=0
+
+   while [ $_index -le $__log4sh_numAppenders ]; do
+      _a=`echo $__log4shAppenders |awk "{print \\$$_index}"`
+      _l=`echo $__log4shAppenderLevels |awk "{print \\$$_index}"`
+
+      if [ ! "$_a" = "$_appender" ]; then
+	 _newAppenderLevels="$_newAppenderLevels $_l"
+      else
+	 _newAppenderLevels="$_newAppenderLevels $_level"
+	 _found=1
+      fi
+
+      _index=`expr $_index + 1`
+   done
+   __log4shAppenderLevels="$_newAppenderLevels"
+
+   _result=$_found
+   unset _a _appender _found _index _l _level _newAppenderLevels
+   return $_result
+}
+
+appender_getPatternAtIndex()
+{
+   _index=$1
+
+   _pattern=`echo "$__log4shAppenderPatterns" |awk -F~ "{print \\$$_index}"`
+
+   echo "$_pattern"
+   unset _index _pattern
+}
+
+appender_setPattern()
+{
+   _appender=$1
+   _pattern=$2
+
+   _index=1
+   _newPatterns=''
+   _found=0
+
+   while [ $_index -le $__log4sh_numAppenders ]; do
+      _a=`echo $__log4shAppenders |awk "{print \\$$_index}"`
+      _p=`echo $__log4shAppenderPatterns |awk -F~ "{print \\$$_index}"`
+
+      if [ ! "$_a" = "$_appender" ]; then
+	 _newPatterns="${_newPatterns:+$_newPatterns~}$_p"
+      else
+	 _newPatterns="${_newPatterns:+$_newPatterns~}$_pattern"
+	 _found=1
+      fi
+
+      _index=`expr $_index + 1`
+   done
+   __log4shAppenderPatterns="$_newPatterns"
+
+   _result=$_found
+   unset _a _appender _found _index _newPatterns _p _pattern
+   return $_result
+}
+
+appender_setAppend()
+{
+   _appender=$1
+   _append=$2
+
+   # useless for the standard files
+   case $_appender in
+   STDOUT|STDERR) return 0 ;;
+   *) ;;
+   esac
+
+   # verify the appender passed is valid
+   _found=0
+   for _a in $__log4shAppenders; do
+      if [ "$_a" = "$_appender" ]; then
+	 _found=1
+	 break
+      fi
+   done
+   if [ $_found -eq 0 ]; then
+      echo "log4sh:ERROR invalid appender" >&2
+      return 1
+   fi
+   
+   # truncate the file 
+   case $_append in
+   false|False|FALSE)
+      if [ -f $_appender ]; then
+	 rm $_appender
+	 touch $_appender
+      fi
+      ;;
+   true|True|TRUE) ;;
+   *) echo "log4sh:ERROR invalid appender append setting" >&2 ;;
+   esac
+
+   unset _a _append _appender _found
+   return 0
+}
+
+#
+# Log
+#
+
+log()
+{
+   _tag=$1
+   _msg=$2
+
+   _level=`_log4sh_tag2level $_tag`
+   _newIndex=1
+   _l=0
+
+   while [ $_newIndex -le $__log4sh_numAppenders ]; do
+      _index=$_newIndex
+      _newIndex=`expr $_newIndex + 1`  # must come before continue statements :)
+
+      # determine appender level
+      _tmpLevel=`echo $__log4shAppenderLevels |awk "{print \\$$_index}"`
+      if [ "$_tmpLevel" = "-" ]; then
+	 # continue if requested is level less than general level
+	 [ ! $__log4shLevel -le $_level ] && continue
+      else
+	 _l=`_log4sh_tag2level $_tmpLevel`
+	 # continue if requested level is less than specific appender level
+	 [ ! $_l -le $_level ] && continue
+      fi
+
+      # determine appender layout
+      _tmpLayout=`echo $__log4shAppenderLayouts |awk "{print \\$$_index}"`
+      case $_tmpLayout in
+      None) _thisLayout="$_msg" ;;
+      Simple) _thisLayout="$_tag - $_msg" ;;
+      Pattern) 
+	 _tmpPattern=`appender_getPatternAtIndex $_index`
+	 _thisLayout=`_parsePattern "$_tmpPattern" $_tag "$_msg"`
+	 ;;
+      esac
+
+      # log to appender
+      _tmpAppender=`echo $__log4shAppenders |awk "{print \\$$_index}"`
+      case $_tmpAppender in
+      STDOUT) echo "$_thisLayout" ;;
+      STDERR) echo "$_thisLayout" >&2 ;;
+      *)
+	 echo "$_thisLayout" >>$_tmpAppender
+	 ;;
+      esac
+   done
+
+   unset _index _l _level _msg _oldIndex _tag
+   unset _tmpAppender _tmpLayout _tmpLevel _tmpPattern
+}
+
+#
+# This is a helper function for log function in the DEBUG priority mode.
+#
+# @param  msg  message to be logged
+# @return (none)
+# @see    log
+#
+logger_debug()
+{
+   log DEBUG "$1"
+}
+
+#
+# This is a helper function for log function in the INFO priority mode.
+#
+# @param  msg  message to be logged
+# @return (none)
+# @see    log
+#
+logger_info()
+{
+   log INFO "$1"
+}
+
+#
+# This is a helper function for log function in the WARN priority mode.
+#
+# @param  msg  message to be logged
+# @return (none)
+# @see    log
+#
+logger_warn()
+{
+   log WARN "$1"
+}
+
+#
+# This is a helper function for log function in the ERROR priority mode.
+#
+# @param  msg  message to be logged
+# @return (none)
+# @see    log
+#
+logger_error()
+{
+   log ERROR "$1"
+}
+
+#
+# This is a helper function for log function in the FATAL priority mode.
+#
+# @param  msg  message to be logged
+# @return (none)
+# @see    log
+#
+logger_fatal()
+{
+   log FATAL "$1"
+}
+
+# set default level
+logger_setLevel ERROR
+
+# add the default appender
+logger_addAppender STDERR Simple
+
+# treat unset variables as an error when substituting (disable)
+set +u
