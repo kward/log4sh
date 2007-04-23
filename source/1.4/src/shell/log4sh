@@ -1976,8 +1976,7 @@ appender_file_getMaxFileSize()
 appender_file_setMaxFileSize()
 {
   if [ $# -ne 2 ]; then
-    _log4sh_error \
-        "appender_file_setMaxFileSize(): invalid number of parameters ($#)"
+    _log4sh_error "appender_file_setMaxFileSize(): invalid number of parameters ($#)"
     return ${__LOG4SH_ERROR}
   fi
 
