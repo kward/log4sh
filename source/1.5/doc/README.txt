@@ -26,7 +26,7 @@ Steps:
 * tag the release
 * export the release
 * create tarball
-* md5sum the tarball
+* md5sum the tarball and sign with gpg
 * update website
 * post to SourceForge and Freshmeat
 
@@ -115,10 +115,11 @@ CREATE TARBALL
 
 $ tar cfz ../releases/log4sh-1.3.6.tgz log4sh-1.3.6
 
-MD5SUM THE TARBALL
+MD5SUM THE TARBALL AND SIGN WITH GPG
 
 $ cd ../releases
 $ md5sum log4sh-1.3.6.tgz >log4sh-1.3.6.tgz.md5
+$ gpg --default-key kate.ward@forestent.com --detach-sign log4sh-1.3.6.tgz
 
 UPDATE WEBSITE
 

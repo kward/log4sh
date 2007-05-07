@@ -13,45 +13,26 @@ Tested Platforms
 
 Cygwin
 
-? bash 3.2.9(10)
-? pdksh 5.2.14
+- bash 3.2.15(13)
+- pdksh 5.2.14
 
 Linux (Ubuntu Feisty)
 
-? bash 3.1.17(1)
-? dash 0.5.3
-? ksh 1993-12-28
-? pdksh 5.2.14
-? zsh 4.3.2 (does not work)
+- bash 3.2.10(1)
+- dash 0.5.3
+- ksh 1993-12-28
+- pdksh 5.2.14
+- zsh 4.3.2 (does not work)
 
-Mac OS X 1.4.8 (Darwin 8.8)
+Mac OS X 1.4.8 (Darwin 8.8) -- not tested
 
-? bash 2.05b.0(1)
-? ksh 1993-12-28
+Solaris 8 U3 (x86) -- not tested
 
-Solaris 8 U3 (x86)
+Solaris 9 ?? (x86) -- not tested
 
-? /bin/sh
-? bash 2.03.0(1)
-? ksh M-11/16/88i
+Solaris 10 U2 (x86) -- not tested
 
-Solaris 9 ?? (x86)
-
-? /bin/sh
-? bash 2.03.0(1)
-? ksh M-11/16/88i
-
-Solaris 10 U2 (x86)
-
-? /bin/sh
-? bash 3.00.16(1)
-? ksh M-11/16/88i
-
-Solaris 11 [nv b61] (sparc)
-
-? /bin/sh
-? bash 3.00.16(1)
-? ksh M-11/16/88i
+Solaris 11 [nv b61] (sparc) -- not tested
 
 
 New Features

@@ -59,7 +59,7 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
     <revhistory>
       <revision>
         <revnumber>1.5.0</revnumber>
-        <date>unreleased</date>
+        <date>2007-05-07</date>
         <authorinitials>kwd</authorinitials>
       </revision>
     </revhistory>
