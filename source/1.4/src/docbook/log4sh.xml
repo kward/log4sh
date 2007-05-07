@@ -38,7 +38,7 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
 
 <book id="log4sh" lang="en-US"><title>log4sh</title>
   <bookinfo>
-    <title>log4sh version 1.4.0</title>
+    <title>log4sh version 1.4.1</title>
     <authorgroup>
       <author>
         <firstname>Kate</firstname><surname>Ward</surname>
@@ -57,6 +57,12 @@ $ xsltproc tldp-one-page.xsl log4sh.xml |xmllint -noblanks -
 
     <!-- Most recent revision goes at the top; list in descending order -->
     <revhistory>
+      <revision>
+        <revnumber>1.4.1</revnumber>
+        <date>2007-05-06</date>
+        <authorinitials>kwd</authorinitials>
+      </revision>
+
       <revision>
         <revnumber>1.4.0</revnumber>
         <date>2007-01-05</date>
