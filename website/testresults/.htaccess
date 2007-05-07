@@ -1,3 +1,4 @@
 # $Id$
 
 Options +Indexes
+IndexOptions NameWidth=*
