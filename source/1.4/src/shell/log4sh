@@ -37,7 +37,7 @@ done
 #
 # constants
 #
-__LOG4SH_VERSION='1.4.1pre'
+__LOG4SH_VERSION='1.4.1'
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
