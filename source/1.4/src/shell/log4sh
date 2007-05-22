@@ -37,7 +37,7 @@ done
 #
 # constants
 #
-__LOG4SH_VERSION='1.4.1'
+__LOG4SH_VERSION='1.4.2pre'
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
@@ -84,6 +84,7 @@ __LOG4SH_THREAD_DEFAULT='main'
 
 __LOG4SH_CONFIGURATION="${LOG4SH_CONFIGURATION:-log4sh.properties}"
 __LOG4SH_CONFIG_PREFIX="${LOG4SH_CONFIG_PREFIX:-log4sh}"
+__LOG4SH_CONFIG_LOG4J_CP='org.apache.log4j'
 
 # the following IFS is *supposed* to be on two lines!!
 __LOG4SH_IFS_ARRAY="
@@ -916,10 +917,20 @@ appender_setLayout()
 
   case ${_asl_layout} in
     ${__LOG4SH_LAYOUT_HTML}|\
-    ${__LOG4SH_LAYOUT_SIMPLE}|\
-    ${__LOG4SH_LAYOUT_PATTERN})
-      :
+    ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_LAYOUT_HTML})
+      _asl_layout=${__LOG4SH_LAYOUT_HTML}
       ;;
+
+    ${__LOG4SH_LAYOUT_SIMPLE}|\
+    ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_LAYOUT_SIMPLE})
+      _asl_layout=${__LOG4SH_LAYOUT_SIMPLE}
+      ;;
+
+    ${__LOG4SH_LAYOUT_PATTERN}|\
+    ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_LAYOUT_PATTERN})
+      _asl_layout=${__LOG4SH_LAYOUT_PATTERN}
+      ;;
+
     *)
       _log4sh_error "unknown layout: ${_asl_layout}"
       return ${__LOG4SH_FALSE}
@@ -928,7 +939,7 @@ appender_setLayout()
 
   _asl_index=`_log4sh_findArrayElement "${__log4shAppenders}" $1`
   __log4shAppenderLayouts=`_log4sh_setArrayElement \
-    "${__log4shAppenderLayouts}" ${_asl_index} "${_asl_layout}"`
+      "${__log4shAppenderLayouts}" ${_asl_index} "${_asl_layout}"`
 
   # resource the appender
   _appender_cache ${_asl_appender}
@@ -2733,7 +2744,7 @@ logger_addAppenderWithPattern()
   _myPattern=$2
 
   logger_addAppender ${_myAppender}
-  appender_setLayout ${_myAppender} "${__LOG4SH_LAYOUT_PATTERN}"
+  appender_setLayout ${_myAppender} ${__LOG4SH_LAYOUT_PATTERN}
   appender_setPattern ${_myAppender} "${_myPattern}"
 
   unset _myAppender _myPattern
@@ -3194,7 +3205,7 @@ _log4sh_propAppender()
   if [ "${_lpa_key}" '=' "`expr \"${_lpa_key}\" : '\([^.]*\)'`" ]; then
     _lpa_appender="${_lpa_key}"
   else
-    _lpa_appender=`_log4sh_getPropPrefix $_lpa_key`
+    _lpa_appender=`_log4sh_getPropPrefix ${_lpa_key}`
   fi
 
   # does the appender exist?
@@ -3207,33 +3218,39 @@ _log4sh_propAppender()
 
   # handle the appender type
   if [ "${_lpa_appender}" = "${_lpa_key}" ]; then
-    case $_lpa_value in
-      $__LOG4SH_TYPE_CONSOLE)
-        appender_setType $_lpa_appender $_lpa_value ;;
-      $__LOG4SH_TYPE_FILE)
-        appender_setType $_lpa_appender $_lpa_value ;;
-      $__LOG4SH_TYPE_DAILY_ROLLING_FILE)
-        appender_setType $_lpa_appender $_lpa_value ;;
-      $__LOG4SH_TYPE_ROLLING_FILE)
-        appender_setType $_lpa_appender $_lpa_value ;;
-      $__LOG4SH_TYPE_SMTP)
-        appender_setType $_lpa_appender $_lpa_value ;;
-      $__LOG4SH_TYPE_SYSLOG)
-        appender_setType $_lpa_appender $_lpa_value ;;
+    case ${_lpa_value} in
+      ${__LOG4SH_TYPE_CONSOLE}|\
+      ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_TYPE_CONSOLE})
+        appender_setType ${_lpa_appender} ${__LOG4SH_TYPE_CONSOLE} ;;
+      ${__LOG4SH_TYPE_FILE}|\
+      ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_TYPE_FILE})
+        appender_setType ${_lpa_appender} ${__LOG4SH_TYPE_FILE} ;;
+      $__LOG4SH_TYPE_DAILY_ROLLING_FILE|\
+      ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_TYPE_DAILY_ROLLING_FILE})
+        appender_setType ${_lpa_appender} ${__LOG4SH_TYPE_DAILY_ROLLING_FILE} ;;
+      ${__LOG4SH_TYPE_ROLLING_FILE}|\
+      ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_TYPE_ROLLING_FILE})
+        appender_setType ${_lpa_appender} ${__LOG4SH_TYPE_ROLLING_FILE} ;;
+      ${__LOG4SH_TYPE_SMTP}|\
+      ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_TYPE_SMTP})
+        appender_setType $_lpa_appender ${__LOG4SH_TYPE_SMTP} ;;
+      ${__LOG4SH_TYPE_SYSLOG}|\
+      ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_TYPE_SYSLOG})
+        appender_setType $_lpa_appender ${__LOG4SH_TYPE_SYSLOG} ;;
       *)
-        _log4sh_error "appender type ($_lpa_value) unrecognized" ;;
+        _log4sh_error "appender type (${_lpa_value}) unrecognized" ;;
     esac
     unset _lpa_appender _lpa_key _lpa_value
     return ${__LOG4SH_TRUE}
   fi
 
   # handle appender values and methods
-  _lpa_key=`_log4sh_stripPropPrefix $_lpa_key`
-  if [ "$_lpa_key" '=' "`expr \"${_lpa_key}\" : '\([^.]*\)'`" ]; then
-    case $_lpa_key in
+  _lpa_key=`_log4sh_stripPropPrefix ${_lpa_key}`
+  if [ "${_lpa_key}" '=' "`expr \"${_lpa_key}\" : '\([^.]*\)'`" ]; then
+    case ${_lpa_key} in
       # General
-      Threshold) appender_setLevel $_lpa_appender "$_lpa_value" ;;
-      layout) appender_setLayout $_lpa_appender "$_lpa_value" ;;
+      Threshold) appender_setLevel ${_lpa_appender} "${_lpa_value}" ;;
+      layout) appender_setLayout ${_lpa_appender} "${_lpa_value}" ;;
 
       # FileAppender
       DatePattern) ;;  # unsupported
@@ -3255,17 +3272,17 @@ _log4sh_propAppender()
       Facility) appender_syslog_setFacility ${_lpa_appender} "${_lpa_value}" ;;
 
       # catch unrecognized
-      *) _log4sh_error "appender value/method ($_lpa_key) unrecognized" ;;
+      *) _log4sh_error "appender value/method (${_lpa_key}) unrecognized" ;;
     esac
     unset _lpa_appender _lpa_key _lpa_value
     return ${__LOG4SH_TRUE}
   fi
 
   # handle appender layout values and methods
-  _lpa_key=`_log4sh_stripPropPrefix $_lpa_key`
-  case $_lpa_key in
-    ConversionPattern) appender_setPattern $_lpa_appender "$_lpa_value" ;;
-    *) _log4sh_error "layout value/method ($_lpa_key) unrecognized" ;;
+  _lpa_key=`_log4sh_stripPropPrefix ${_lpa_key}`
+  case ${_lpa_key} in
+    ConversionPattern) appender_setPattern ${_lpa_appender} "${_lpa_value}" ;;
+    *) _log4sh_error "layout value/method (${_lpa_key}) unrecognized" ;;
   esac
   unset _lpa_appender _lpa_key _lpa_value
   return ${__LOG4SH_TRUE}
