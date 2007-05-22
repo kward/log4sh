@@ -1,0 +1,65 @@
+﻿RELEASE NOTES FOR 1.4.2
+
+This release of log4sh is primarily a bugfix release. See the CHANGES-1.4.txt
+for a full list of changes.
+
+
+TESTED PLATFORMS
+
+Cygwin
+? bash 3.2.15(13)
+? pdksh 5.2.14
+
+Linux (Ubuntu Feisty 7.04)
+? bash 3.2.13(1)
+? dash 0.5.3
+? ksh 1993-12-28
+? pdksh 5.2.14
+
+Mac OS X 1.4.8 (Darwin 8.8) -- untested
+
+Solaris 8 U3 (x86) -- untested
+
+Solaris 10 U2 (sparc) -- untested
+
+Solaris 10 U2 (x86)
+? /bin/sh
+? bash 3.00.16(1)
+? ksh M-11/16/88i
+
+
+NEW FEATURES
+
+None.
+
+
+CHANGES AND ENHANCEMENTS
+
+Upgraded shUnit to shUnit2-2.0.2
+
+
+BUG FIXES
+
+log4j support wasn't working when a fully qualified class name (e.g.
+org.apache.logging.PatternLayout) was used.
+
+
+DEPRECATED FEATURES
+
+None.
+
+
+KNOWN BUGS AND ISSUES
+
+Passing of the '\' character in an logging message does not work under the
+standard Solaris Bourne shell [/bin/sh], under the dash shell [/bin/dash], or
+under Cygwin with ksh [/bin/ksh].
+
+The DailyRollingFileAppender appender do not roll files.
+
+Trap handling is not yet absolutely 100% fool-proof.
+
+Performance is prohibitively slow under Cygwin
+
+More error checking/reporting needs to be added; this includes validating input
+to public functions.
