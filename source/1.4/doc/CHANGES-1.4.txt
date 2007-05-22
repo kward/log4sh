@@ -1,6 +1,6 @@
 CHANGES WITH 1.4.2
 
-updated shUnit to 2.0.2
+updated shUnit to shUnit2-2.0.2
 
 added support for the fully qualified class name when using a log4j
 configuration file.
