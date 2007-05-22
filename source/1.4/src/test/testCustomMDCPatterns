@@ -145,4 +145,4 @@ suite()
 
 # load and run shUnit
 ${DEBUG} 'loading shUnit'
-. ./shunit
+. ./shunit2

@@ -256,4 +256,4 @@ PATH="/usr/xpg4/bin:${PATH}"
 
 # load and run shUnit
 ${DEBUG} echo "loading shUnit" >&2
-. ./shunit
+. ./shunit2
