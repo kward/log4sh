@@ -3374,10 +3374,10 @@ log4sh_doConfigure()
   ${__LOG4SH_TRACE_CALL} log4sh_doConfigure \
       $# -ne 1 ${BASH_LINENO:-} || return ${LOG4SH_FALSE}
 
-  ldc_file=$1
-
   # prepare the environment for configuration
   log4sh_resetConfiguration
+
+  ldc_file=$1
 
   # strip the config prefix and dump output to a temporary file
   ldc_tmpFile="${__log4sh_tmpDir}/properties"
@@ -3406,13 +3406,13 @@ log4sh_doConfigure()
   done
   exec 0<&3 3<&-
 
+  # remove the temporary file
+  rm -f "${ldc_tmpFile}"
+
   # activate all of the appenders
   for ldc_appender in ${__log4shAppenders}; do
     ${__LOG4SH_APPENDER_FUNC_PREFIX}${ldc_appender}_activateOptions
   done
-
-  # remove the temporary file
-  rm -f "${ldc_tmpFile}"
 
   unset ldc_appender ldc_file ldc_tmpFile ldc_line ldc_key ldc_keyword
   unset ldc_value
