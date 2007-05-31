@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: testPriority 550 2007-05-22 16:45:22Z sfsetse $
+# $Id$
 # vim:sts=2
 
 MY_NAME=`basename $0`
