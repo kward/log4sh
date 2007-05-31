@@ -1,0 +1,101 @@
+#! /bin/sh
+# $Id: testPriority 550 2007-05-22 16:45:22Z sfsetse $
+# vim:sts=2
+
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
+
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+testAppenders()
+{
+  #
+  # invalid appender
+  #
+  cat <<EOF >${propFile}
+log4sh.rootLogger = INFO, A
+log4sh.appender.A = InvalidAppender
+EOF
+  echo '- expecting one error'
+  log4sh_doConfigure ${propFile}
+  rtrn=$?
+  assertTrue \
+      'the InvalidAppender was not caught' \
+      "[ ${rtrn} -ne ${LOG4SH_TRUE} ]"
+}
+
+testLayouts()
+{
+  #
+  # invalid layout
+  #
+  cat <<EOF >${propFile}
+log4sh.rootLogger = INFO, A
+log4sh.appender.A = ConsoleAppender
+log4sh.appender.A.layout = InvalidLayout
+EOF
+  echo '- expecting one error'
+  log4sh_doConfigure ${propFile}
+  rtrn=$?
+  assertTrue \
+      'the InvalidLayout was not caught' \
+      "[ ${rtrn} -ne ${LOG4SH_TRUE} ]"
+}
+
+testLayoutTypes()
+{
+  #
+  # invalid layout type
+  #
+  cat <<EOF >${propFile}
+log4sh.rootLogger = INFO, A
+log4sh.appender.A = ConsoleAppender
+log4sh.appender.A.layout = SimpleLayout
+log4sh.appender.A.layout.InvalidType = blah
+EOF
+  echo '- expecting one error'
+  log4sh_doConfigure ${propFile}
+  rtrn=$?
+  assertTrue \
+      'the invalid layout type was not caught' \
+      "[ ${rtrn} -ne ${LOG4SH_TRUE} ]"
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  # source log4sh
+  ${DEBUG} echo 'loading log4sh' >&2
+  LOG4SH_CONFIGURATION='none' . ./log4sh
+
+  # declare the properties file
+  propFile="${__shunit_tmpDir}/properties.log4sh"
+}
+
+setUp()
+{
+  # reset log4sh
+  log4sh_resetConfiguration
+}
+
+tearDown()
+{
+  # remove the properties file
+  rm -f "${propFile}"
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+# load and run shUnit
+${DEBUG} echo 'loading shUnit' >&2
+. ./shunit2
