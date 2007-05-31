@@ -43,6 +43,9 @@ BUG FIXES
 log4j support wasn't working when a fully qualified class name (e.g.
 org.apache.logging.PatternLayout) was used.
 
+The log4sh_readProperties() function was not properly calling
+log4sh_doConfigure().
+
 
 DEPRECATED FEATURES
 

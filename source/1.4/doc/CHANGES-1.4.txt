@@ -7,6 +7,14 @@ configuration file.
 
 fixed some variable use standardization (i.e. wrapping in {} chars)
 
+fixed bug in log4sh_readProperties() -- it was not calling log4sh_doConfigure()
+like it was supposed to.
+
+added some error checking to log4sh_doConfigure and _log4sh_propAppender() so
+that a useful unit test could be written to verify propert log4j compatibility.
+
+added testPropertyConfig and testLog4jCompatibility unit tests.
+
 
 CHANGES WITH 1.4.1
 
