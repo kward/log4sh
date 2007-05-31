@@ -1,0 +1,91 @@
+#! /bin/sh
+# $Id: testPriority 550 2007-05-22 16:45:22Z sfsetse $
+# vim:sts=2
+
+MY_NAME=`basename $0`
+MY_PATH=`dirname $0`
+
+# load common unit test functions
+. "${MY_PATH}/test-functions.inc"
+
+#------------------------------------------------------------------------------
+# suite tests
+#
+
+testAppenders()
+{
+  for appender in \
+    ConsoleAppender \
+    FileAppender \
+    RollingFileAppender \
+    DailyRollingFileAppender \
+    SMTPAppender \
+    SyslogAppender
+  do
+    cat <<EOF >${propFile}
+log4j.rootLogger = INFO, A
+log4j.appender.A = org.apache.log4j.${appender}
+EOF
+    log4sh_doConfigure ${propFile}
+    rtrn=$?
+    assertTrue \
+        "compatibility problems with the log4j ${appender}" \
+        "[ ${rtrn} -eq ${__LOG4SH_TRUE} ]"
+  done
+}
+
+testLayouts()
+{
+  for layout in \
+    SimpleLayout \
+    PatternLayout \
+    HTMLLayout
+  do
+    cat <<EOF >${propFile}
+log4j.rootLogger = INFO, A
+log4j.appender.A = org.apache.log4j.ConsoleAppender
+log4j.appender.A.layout = org.apache.log4j.${layout}
+EOF
+    log4sh_doConfigure ${propFile}
+    rtrn=$?
+    assertTrue \
+        "compatibility problems with the log4j ${layout}" \
+        "[ ${rtrn} -eq ${__LOG4SH_TRUE} ]"
+  done
+}
+
+#------------------------------------------------------------------------------
+# suite functions
+#
+
+oneTimeSetUp()
+{
+  # source log4sh
+  ${DEBUG} echo 'loading log4sh' >&2
+  LOG4SH_CONFIGURATION='none' \
+  LOG4SH_CONFIG_PREFIX='log4j' \
+  . ./log4sh
+
+  # declare the properties file
+  propFile="${__shunit_tmpDir}/properties.log4sh"
+}
+
+setUp()
+{
+  # reset log4sh
+  log4sh_resetConfiguration
+}
+
+tearDown()
+{
+  # remove the properties file
+  rm -f "${propFile}"
+}
+
+#------------------------------------------------------------------------------
+# main
+#
+
+# load and run shUnit
+${DEBUG} echo 'loading shUnit' >&2
+. ./shunit2

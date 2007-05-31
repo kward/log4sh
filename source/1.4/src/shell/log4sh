@@ -3174,7 +3174,7 @@ _log4sh_propAlternative()
 #/**
 # <s:function group="Property" modifier="private">
 # <entry align="right">
-#   <emphasis>void</emphasis>
+#   <emphasis>void</emphasis>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -3197,6 +3197,7 @@ _log4sh_propAppender()
   _lpa_value=$2
 
   _lpa_appender=''
+  _lpa_rtrn=${__LOG4SH_TRUE}
 
   # strip the leading 'appender' keyword prefix
   _lpa_key=`_log4sh_stripPropPrefix ${_lpa_key}`
@@ -3238,10 +3239,14 @@ _log4sh_propAppender()
       ${__LOG4SH_CONFIG_LOG4J_CP}.${__LOG4SH_TYPE_SYSLOG})
         appender_setType $_lpa_appender ${__LOG4SH_TYPE_SYSLOG} ;;
       *)
-        _log4sh_error "appender type (${_lpa_value}) unrecognized" ;;
+        _log4sh_error "appender type (${_lpa_value}) unrecognized"
+        false
+        ;;
     esac
-    unset _lpa_appender _lpa_key _lpa_value
-    return ${__LOG4SH_TRUE}
+    [ $? -ne ${__LOG4SH_TRUE} ] && _lpa_rtrn=${__LOG4SH_ERROR}
+    __log4sh_return=${_lpa_rtrn}
+    unset _lpa_appender _lpa_key _lpa_rtrn _lpa_value
+    return ${__log4sh_return}
   fi
 
   # handle appender values and methods
@@ -3272,20 +3277,30 @@ _log4sh_propAppender()
       Facility) appender_syslog_setFacility ${_lpa_appender} "${_lpa_value}" ;;
 
       # catch unrecognized
-      *) _log4sh_error "appender value/method (${_lpa_key}) unrecognized" ;;
+      *)
+        _log4sh_error "appender value/method (${_lpa_key}) unrecognized"
+        false
+        ;;
     esac
-    unset _lpa_appender _lpa_key _lpa_value
-    return ${__LOG4SH_TRUE}
+    [ $? -ne ${__LOG4SH_TRUE} ] && _lpa_rtrn=${__LOG4SH_ERROR}
+    __log4sh_return=${_lpa_rtrn}
+    unset _lpa_appender _lpa_key _lpa_rtrn _lpa_value
+    return ${__log4sh_return}
   fi
 
   # handle appender layout values and methods
   _lpa_key=`_log4sh_stripPropPrefix ${_lpa_key}`
   case ${_lpa_key} in
     ConversionPattern) appender_setPattern ${_lpa_appender} "${_lpa_value}" ;;
-    *) _log4sh_error "layout value/method (${_lpa_key}) unrecognized" ;;
+    *)
+      _log4sh_error "layout value/method (${_lpa_key}) unrecognized"
+      false
+      ;;
   esac
-  unset _lpa_appender _lpa_key _lpa_value
-  return ${__LOG4SH_TRUE}
+  [ $? -ne ${__LOG4SH_TRUE} ] && _lpa_rtrn=${__LOG4SH_ERROR}
+  __log4sh_return=${_lpa_rtrn}
+  unset _lpa_appender _lpa_key _lpa_rtrn _lpa_value
+  return ${__log4sh_return}
 }
 
 #/**
@@ -3373,7 +3388,7 @@ _log4sh_propRootLogger()
 #/**
 # <s:function group="Property" modifier="public">
 # <entry align="right">
-#   <emphasis>void</emphasis>
+#   <emphasis>void</emphasis>/boolean
 # </entry>
 # <entry>
 #   <funcsynopsis>
@@ -3396,21 +3411,24 @@ _log4sh_propRootLogger()
 #*/
 log4sh_doConfigure()
 {
-  [ -n "${FUNCNAME:-}" ] && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
-  ldc_file=$1
+  [ -n "${FUNCNAME:-}" ] \
+      && ${__LOG4SH_TRACE} "${FUNCNAME}()${BASH_LINENO:+'(called from ${BASH_LINENO})'}"
 
   # prepare the environment for configuration
   log4sh_resetConfiguration
+
+  ldc_file=$1
+  ldc_rtrn=${__LOG4SH_TRUE}
 
   # strip the config prefix and dump output to a temporary file
   ldc_tmpFile="${__log4sh_tmpDir}/properties"
   ${__LOG4SH_TRACE} "__LOG4SH_CONFIG_PREFIX='${__LOG4SH_CONFIG_PREFIX}'"
   grep "^${__LOG4SH_CONFIG_PREFIX}\." "${ldc_file}" >"${ldc_tmpFile}"
 
-  # read the file in. using awk here instead of piping the file into 'while'
-  # and then reading with 'read' as the pipe causes a fork under the Solaris
-  # shell which makes it impossible to get the variables passed back to the
-  # parent script.
+  # read the file in. using a temporary file and a file descriptor here instead
+  # of piping the file into the 'while read' because the pipe causes a fork
+  # under some shells which makes it impossible to get the variables passed
+  # back to the parent script.
   exec 3<&0 <"${ldc_tmpFile}"
   while read ldc_line; do
     ldc_key=`expr "${ldc_line}" : '\([^= ]*\) *=.*'`
@@ -3424,21 +3442,27 @@ log4sh_doConfigure()
       appender) _log4sh_propAppender ${ldc_key} "${ldc_value}" ;;
       logger) _log4sh_propLogger ${ldc_key} "${ldc_value}" ;;
       rootLogger) _log4sh_propRootLogger "${ldc_value}" ;;
-      *) _log4sh_error "unrecognized properties keyword (${ldc_keyword})" ;;
+      *)
+        _log4sh_error "unrecognized properties keyword (${ldc_keyword})"
+        false
+        ;;
     esac
+    [ $? -ne ${__LOG4SH_TRUE} ] && ldc_rtrn=${__LOG4SH_ERROR}
   done
   exec 0<&3 3<&-
+
+  # remove the temporary file
+  rm -f "${ldc_tmpFile}"
 
   # activate all of the appenders
   for ldc_appender in ${__log4shAppenders}; do
     ${__LOG4SH_APPENDER_FUNC_PREFIX}${ldc_appender}_activateOptions
   done
 
-  # remove the temporary file
-  rm -f "${ldc_tmpFile}"
-
+  __log4sh_return=${ldc_rtrn}
   unset ldc_appender ldc_file ldc_tmpFile ldc_line ldc_key ldc_keyword
-  unset ldc_value
+  unset ldc_value ldc_rtrn
+  return ${__log4sh_return}
 }
 
 #/**
@@ -3465,7 +3489,7 @@ log4sh_doConfigure()
 #*/
 log4sh_readProperties()
 {
-  log4sh_doConfiguration "$@"
+  log4sh_doConfigure "$@"
 }
 
 #/**
