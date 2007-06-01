@@ -156,6 +156,11 @@ $ make test-prep
 $ cd test
 $ ./run-test-suite
 
+To determine what release an OS is running, try the following:
+
+:Mac OS X:     $ /usr/bin/sw_vers |grep ProductVersion |cut -f2
+:Linux Ubuntu: $ ( . /etc/lsb-release; echo ${DISTRIB_DESCRIPTION} ${DISTRIB_CODENAME} )
+
 #------------------------------------------------------------------------------
 # Related documentation
 #
