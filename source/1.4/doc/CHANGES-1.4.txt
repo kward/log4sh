@@ -17,8 +17,8 @@ added testPropertyConfig and testLog4jCompatibility unit tests.
 
 backported the testSyslogAppender unit test from 1.5.0
 
-fixed error message in log4sh_setAlternative() when commmand not found. it now
-makes more sense.
+fixed error message in log4sh_setAlternative() when the alternative commmand
+not found. it now makes more sense.
 
 
 CHANGES WITH 1.4.1

@@ -7,14 +7,19 @@ for a full list of changes.
 TESTED PLATFORMS
 
 Cygwin
-? bash 3.2.15(13)
-? pdksh 5.2.14
+- bash 3.2.15(13)
+- pdksh 5.2.14
+
+Linux (Ubuntu Dapper 6.06)
+- bash 3.1.17(1)
+- ksh 1993-12-28
+- pdksh 5.2.14
 
 Linux (Ubuntu Feisty 7.04)
-? bash 3.2.13(1)
-? dash 0.5.3
-? ksh 1993-12-28
-? pdksh 5.2.14
+- bash 3.2.13(1)
+- dash 0.5.3
+- ksh 1993-12-28
+- pdksh 5.2.14
 
 Mac OS X 1.4.9 (Darwin 8.9.1)
 - bash 2.05b.0(1)
@@ -25,9 +30,9 @@ Solaris 8 U3 (x86) -- untested
 Solaris 10 U2 (sparc) -- untested
 
 Solaris 10 U2 (x86)
-? /bin/sh
-? bash 3.00.16(1)
-? ksh M-11/16/88i
+- /bin/sh
+- bash 3.00.16(1)
+- ksh M-11/16/88i
 
 
 NEW FEATURES
@@ -37,7 +42,8 @@ None.
 
 CHANGES AND ENHANCEMENTS
 
-Upgraded shUnit to shUnit2-2.1.1pre
+Upgraded shUnit to shUnit2-2.1.1pre as it supports skipping and has a needed
+bugfix not present in the latest release version.
 
 
 BUG FIXES
