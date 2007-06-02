@@ -109,13 +109,13 @@ testPriorityMatrix()
   PRIORITY_POS='1 2 3 4 5 6'
   PRIORITY_DATA="priorityMatrix.data"
 
+  # if the test logfile doesn't exist, we want to skip the tests
+  [ -r "${TEST_LOGFILE}" ] || startSkipping
+
   # configure log4sh (appender_activateOptions called later)
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} SyslogAppender
   appender_syslog_setFacility ${APP_NAME} ${APP_SYSLOG_FACILITY}
-
-  # if the test logfile doesn't exist, we want to skip the tests
-  [ -r "${TEST_LOGFILE}" ] || startSkipping
 
   # save stdin, and redirect it from a file
   exec 9<&0 <"${PRIORITY_DATA}"
@@ -182,6 +182,9 @@ testRemoteLogging()
   # define the netcat alternative command (required!)
   log4sh_setAlternative 'nc' "${LOG4SH_ALTERNATIVE_NC:-/bin/nc}"
   [ $? -eq ${__LOG4SH_TRUE} ] || startSkipping
+
+  # if the test logfile doesn't exist, we want to skip the tests
+  [ -r "${TEST_LOGFILE}" ] || startSkipping
 
   # configure log4sh
   ${DEBUG} 'configuring log4sh'
