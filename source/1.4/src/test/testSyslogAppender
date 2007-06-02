@@ -103,14 +103,6 @@ testHostGetterSetter()
   unset currHost testHost
 }
 
-testSyslogLogfilePresent()
-{
-  # check for logfile presence
-  assertTrue \
-      "unable to read from the test syslog output file (${TEST_LOGFILE})." \
-      "[ -r \"${TEST_LOGFILE}\" ]"
-}
-
 testPriorityMatrix()
 {
   PRIORITY_NAMES='TRACE DEBUG INFO WARN ERROR FATAL'
@@ -121,6 +113,9 @@ testPriorityMatrix()
   logger_addAppender ${APP_NAME}
   appender_setType ${APP_NAME} SyslogAppender
   appender_syslog_setFacility ${APP_NAME} ${APP_SYSLOG_FACILITY}
+
+  # if the test logfile doesn't exist, we want to skip the tests
+  [ -r "${TEST_LOGFILE}" ] || startSkipping
 
   # save stdin, and redirect it from a file
   exec 9<&0 <"${PRIORITY_DATA}"
@@ -144,22 +139,18 @@ testPriorityMatrix()
       random=${tf_RANDOM}
       log ${testPriority} "${MY_NAME} test message - ${random}"
 
-      # skip the actual test if there is no logfile to tail at
-      if [ ! -r "${TEST_LOGFILE}" ]; then
-        fail
-        continue
-      fi
-
       # do a timed backoff to wait for the result -- syslog might take a bit
-      for backoff in ${BACKOFF_TIMES}; do
-        [ ${backoff} -eq 2 ] \
-            && echo "    waiting for possible '${testPriority}' message..."
-        sleep ${backoff}
-        result=`tail ${tailNumOpt}${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |\
-	    grep "${random}"`
-        [ -n "${result}" ] && break
-      done
-      ${DEBUG} "result=${result}"
+      if ! isSkipping; then
+        for backoff in ${BACKOFF_TIMES}; do
+          [ ${backoff} -eq 2 ] \
+              && echo "    waiting for possible '${testPriority}' message..."
+          sleep ${backoff}
+          result=`tail ${tailNumOpt}${TAIL_SAMPLE_SIZE} "${TEST_LOGFILE}" |\
+              grep "${random}"`
+          [ -n "${result}" ] && break
+        done
+        ${DEBUG} "result=${result}"
+      fi
 
       if [ ${shouldOutput} -eq 1 ]; then
         assertNotNull \
@@ -190,6 +181,7 @@ testRemoteLogging()
 {
   # define the netcat alternative command (required!)
   log4sh_setAlternative 'nc' "${LOG4SH_ALTERNATIVE_NC:-/bin/nc}"
+  [ $? -eq ${__LOG4SH_TRUE} ] || startSkipping
 
   # configure log4sh
   ${DEBUG} 'configuring log4sh'
@@ -249,16 +241,6 @@ setUp()
 # main
 #
 
-suite()
-{
-  suite_addTest testFacilityGetterSetter
-  suite_addTest testHostGetterSetter
-
-  suite_addTest testSyslogLogfilePresent
-  suite_addTest testPriorityMatrix
-  suite_addTest testRemoteLogging
-}
-
 # check options on tail command
 result=`echo '' |tail -n 1 >/dev/null 2>&1`
 if [ $? -eq 0 ]; then
@@ -268,6 +250,6 @@ else
   tailNumOpt='-'
 fi
 
-# load and run shUnit
-${DEBUG} 'loading shUnit'
+# load and run shUnit2
+${DEBUG} 'loading shUnit2'
 . ./shunit2
