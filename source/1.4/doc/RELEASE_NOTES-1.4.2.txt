@@ -16,7 +16,9 @@ Linux (Ubuntu Feisty 7.04)
 ? ksh 1993-12-28
 ? pdksh 5.2.14
 
-Mac OS X 1.4.8 (Darwin 8.8) -- untested
+Mac OS X 1.4.9 (Darwin 8.9.1)
+- bash 2.05b.0(1)
+- ksh 1993-12-28
 
 Solaris 8 U3 (x86) -- untested
 
@@ -35,7 +37,7 @@ None.
 
 CHANGES AND ENHANCEMENTS
 
-Upgraded shUnit to shUnit2-2.0.2
+Upgraded shUnit to shUnit2-2.1.1pre
 
 
 BUG FIXES

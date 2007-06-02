@@ -1,6 +1,6 @@
 CHANGES WITH 1.4.2
 
-updated shUnit to shUnit2-2.0.2
+updated shUnit to shUnit2-2.1.1pre
 
 added support for the fully qualified class name when using a log4j
 configuration file.
@@ -14,6 +14,11 @@ added some error checking to log4sh_doConfigure and _log4sh_propAppender() so
 that a useful unit test could be written to verify propert log4j compatibility.
 
 added testPropertyConfig and testLog4jCompatibility unit tests.
+
+backported the testSyslogAppender unit test from 1.5.0
+
+fixed error message in log4sh_setAlternative() when commmand not found. it now
+makes more sense.
 
 
 CHANGES WITH 1.4.1
