@@ -511,8 +511,8 @@ log4sh_setAlternative()
     -a ${lsa_useRuntimePath:-${__LOG4SH_FALSE}} -eq ${__LOG4SH_FALSE} \
   ]; then
     # the alternative command is not executable
-    _log4sh_error "unrecognized command alternative '${lsa_cmdName}'"
-    __log4sh_return=${__LOG4SH_FALSE}
+    _log4sh_error "log4sh_setAlternative(): ${lsa_cmdName}: command not found"
+    __log4sh_return=${__LOG4SH_ERROR}
   fi
 
   # check for valid alternative
