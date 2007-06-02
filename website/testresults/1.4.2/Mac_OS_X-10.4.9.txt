@@ -1,0 +1,685 @@
+#------------------------------------------------------------------------------
+# System data
+#
+
+# test run info
+shells="/bin/sh /bin/bash /bin/dash /bin/ksh /bin/pdksh"
+tests="testAsciiCharset testCustomMDCPatterns testFileAppender testLog4jCompatibility testMultipleAppenders testPatternLayout testPriority testPropertyConfig testRollingFileAppender testSMTPAppender testSyslogAppender"
+
+# system info
+$ date
+Sat Jun  2 19:49:57 IST 2007
+$ uname -mprsv
+Darwin 8.9.1 Darwin Kernel Version 8.9.1: Thu Feb 22 20:55:00 PST 2007; root:xnu-792.18.15~1/RELEASE_I386 i386 i386
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/sh
+#
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed:    10 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     10 100%
+
+--- Executing the 'Log4jCompatibility' test suite ---
+#
+# Performing tests
+#
+testAppenders
+testLayouts
+
+#
+# Test report
+#
+tests passed:     9 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      9 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed:     2 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      2 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+
+#
+# Test report
+#
+tests passed:    24 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     24 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+testInvalidPriority
+log4sh:ERROR invalid logging level requested (INVALID)
+
+#
+# Test report
+#
+tests passed:    43 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     43 100%
+
+--- Executing the 'PropertyConfig' test suite ---
+#
+# Performing tests
+#
+testAppenders
+- expecting one error
+log4sh:ERROR appender type (InvalidAppender) unrecognized
+testLayouts
+- expecting one error
+log4sh:ERROR unknown layout: InvalidLayout
+testLayoutTypes
+- expecting one error
+log4sh:ERROR layout value/method (InvalidType) unrecognized
+
+#
+# Test report
+#
+tests passed:     3 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      3 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+testMaxFileSizeGetterSetter
+- expecting one warning
+log4sh:WARN missing file size unit; assuming bytes
+- expecting one error
+log4sh:ERROR unrecognized file size unit 'foo'
+
+#
+# Test report
+#
+tests passed:    44 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     44 100%
+
+--- Executing the 'SMTPAppender' test suite ---
+#
+# Performing tests
+#
+testSubjectGetterSetter
+testToGetterSetter
+testAppenderSetupFromConfig
+
+#
+# Test report
+#
+tests passed:     7 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      7 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:ERROR [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testPriorityMatrix
+  testing appender priority 'TRACE'
+  testing appender priority 'DEBUG'
+  testing appender priority 'INFO'
+  testing appender priority 'WARN'
+  testing appender priority 'ERROR'
+  testing appender priority 'FATAL'
+  testing appender priority 'OFF'
+testRemoteLogging
+log4sh:ERROR log4sh_setAlternative(): nc: command not found
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+
+#
+# Test report
+#
+tests passed:    24  36%
+tests failed:     0   0%
+tests skipped:   43  64%
+tests total:     67 100%
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/bash
+#
+
+GNU bash, version 2.05b.0(1)-release (powerpc-apple-darwin8.0)
+Copyright (C) 2002 Free Software Foundation, Inc.
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed:    10 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     10 100%
+
+--- Executing the 'Log4jCompatibility' test suite ---
+#
+# Performing tests
+#
+testAppenders
+testLayouts
+
+#
+# Test report
+#
+tests passed:     9 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      9 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed:     2 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      2 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+
+#
+# Test report
+#
+tests passed:    24 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     24 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+testInvalidPriority
+log4sh:ERROR invalid logging level requested (INVALID)
+
+#
+# Test report
+#
+tests passed:    43 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     43 100%
+
+--- Executing the 'PropertyConfig' test suite ---
+#
+# Performing tests
+#
+testAppenders
+- expecting one error
+log4sh:ERROR appender type (InvalidAppender) unrecognized
+testLayouts
+- expecting one error
+log4sh:ERROR unknown layout: InvalidLayout
+testLayoutTypes
+- expecting one error
+log4sh:ERROR layout value/method (InvalidType) unrecognized
+
+#
+# Test report
+#
+tests passed:     3 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      3 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+testMaxFileSizeGetterSetter
+- expecting one warning
+log4sh:WARN missing file size unit; assuming bytes
+- expecting one error
+log4sh:ERROR unrecognized file size unit 'foo'
+
+#
+# Test report
+#
+tests passed:    44 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     44 100%
+
+--- Executing the 'SMTPAppender' test suite ---
+#
+# Performing tests
+#
+testSubjectGetterSetter
+testToGetterSetter
+testAppenderSetupFromConfig
+
+#
+# Test report
+#
+tests passed:     7 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      7 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:ERROR [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testPriorityMatrix
+  testing appender priority 'TRACE'
+  testing appender priority 'DEBUG'
+  testing appender priority 'INFO'
+  testing appender priority 'WARN'
+  testing appender priority 'ERROR'
+  testing appender priority 'FATAL'
+  testing appender priority 'OFF'
+testRemoteLogging
+log4sh:ERROR log4sh_setAlternative(): nc: command not found
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+
+#
+# Test report
+#
+tests passed:    24  36%
+tests failed:     0   0%
+tests skipped:   43  64%
+tests total:     67 100%
+
+run-test-suite:WARN unable to run tests with the /bin/dash shell
+
+
+#------------------------------------------------------------------------------
+# Running the test suite with /bin/ksh
+#
+
+  version         sh (AT&T Labs Research) 1993-12-28 p
+
+--- Executing the 'AsciiCharset' test suite ---
+#
+# Performing tests
+#
+testAsciiCharset
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'CustomMDCPatterns' test suite ---
+#
+# Performing tests
+#
+testCustomDateMDC
+testCustomTimeMDC
+testCustomUserHostMDC
+
+#
+# Test report
+#
+tests passed:     6 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      6 100%
+
+--- Executing the 'FileAppender' test suite ---
+#
+# Performing tests
+#
+testSTDERR_runtime
+testSTDERR_config
+testSimple_runtime
+testSimple_config
+testAccessors_getFilename
+testAccessors_setgetFilename
+
+#
+# Test report
+#
+tests passed:    10 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     10 100%
+
+--- Executing the 'Log4jCompatibility' test suite ---
+#
+# Performing tests
+#
+testAppenders
+testLayouts
+
+#
+# Test report
+#
+tests passed:     9 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      9 100%
+
+--- Executing the 'MultipleAppenders' test suite ---
+#
+# Performing tests
+#
+testTwoSimilarFileAppenders
+
+#
+# Test report
+#
+tests passed:     2 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      2 100%
+
+--- Executing the 'PatternLayout' test suite ---
+#
+# Performing tests
+#
+testCategoryPattern
+testDatePattern
+testFileNamePattern
+testLineNumberPattern
+testLineSeparatorPattern
+testMessagePattern
+testPriorityPattern
+testRunningTimePattern
+testThreadNamePattern
+testNDCPattern
+testMDCPattern
+testPercentPattern
+
+#
+# Test report
+#
+tests passed:    24 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     24 100%
+
+--- Executing the 'Priority' test suite ---
+#
+# Performing tests
+#
+testPriorityMatrix
+testInvalidPriority
+log4sh:ERROR invalid logging level requested (INVALID)
+
+#
+# Test report
+#
+tests passed:    43 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     43 100%
+
+--- Executing the 'PropertyConfig' test suite ---
+#
+# Performing tests
+#
+testAppenders
+- expecting one error
+log4sh:ERROR appender type (InvalidAppender) unrecognized
+testLayouts
+- expecting one error
+log4sh:ERROR unknown layout: InvalidLayout
+testLayoutTypes
+- expecting one error
+log4sh:ERROR layout value/method (InvalidType) unrecognized
+
+#
+# Test report
+#
+tests passed:     3 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      3 100%
+
+--- Executing the 'RollingFileAppender' test suite ---
+#
+# Performing tests
+#
+testEmptyFile_runtime
+testOneByteUnderSize_runtime
+testExactlyRightSize_runtime
+testOneByteOverSize_runtime
+testOrderOfMagnitudeLarger_runtime
+testEmptyFile_config
+testOneByteUnderSize_config
+testExactlyRightSize_config
+testOneByteOverSize_config
+testOrderOfMagnitudeLarger_config
+testMaxBackupIndexOf2
+testMaxBackupIndexOf1
+testMaxBackupIndexOf0
+testMaxFileSizeGetterSetter
+- expecting one warning
+log4sh:WARN missing file size unit; assuming bytes
+- expecting one error
+log4sh:ERROR unrecognized file size unit 'foo'
+
+#
+# Test report
+#
+tests passed:    44 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:     44 100%
+
+--- Executing the 'SMTPAppender' test suite ---
+#
+# Performing tests
+#
+testSubjectGetterSetter
+testToGetterSetter
+testAppenderSetupFromConfig
+
+#
+# Test report
+#
+tests passed:     7 100%
+tests failed:     0   0%
+tests skipped:    0   0%
+tests total:      7 100%
+
+--- Executing the 'SyslogAppender' test suite ---
+#
+# Performing tests
+#
+testFacilityGetterSetter
+log4sh:ERROR [invalid] is an unknown syslog facility. Defaulting to [user].
+testHostGetterSetter
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+testPriorityMatrix
+  testing appender priority 'TRACE'
+  testing appender priority 'DEBUG'
+  testing appender priority 'INFO'
+  testing appender priority 'WARN'
+  testing appender priority 'ERROR'
+  testing appender priority 'FATAL'
+  testing appender priority 'OFF'
+testRemoteLogging
+log4sh:ERROR log4sh_setAlternative(): nc: command not found
+log4sh:WARN the nc (netcat) command alternative is required for remote syslog logging. see log4sh_setAlternative().
+
+#
+# Test report
+#
+tests passed:    24  36%
+tests failed:     0   0%
+tests skipped:   43  64%
+tests total:     67 100%
+
+run-test-suite:WARN unable to run tests with the /bin/pdksh shell
