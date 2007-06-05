@@ -1,3 +1,9 @@
+Test log4sh_setAlternative
+
+Look into using xargs to execuate a command once per input word (-n 1) and such
+
+Write test to check that the default pattern is properly set for a new appender
+
 Move the checking and creation of file from appender_file_setFile() function to
 activateOptions().
 
