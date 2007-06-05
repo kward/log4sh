@@ -25,7 +25,10 @@ Mac OS X 1.4.9 (Darwin 8.9.1)
 - bash 2.05b.0(1)
 - ksh 1993-12-28
 
-Solaris 8 U3 (x86) -- untested
+Solaris 8 U3 (x86)
+- /bin/sh
+- bash 2.03.0(1)
+- ksh M-11/16/88i
 
 Solaris 10 U2 (sparc) -- untested
 
