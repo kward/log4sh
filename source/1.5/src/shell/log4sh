@@ -3704,6 +3704,7 @@ else
   appender_setType stdout ConsoleAppender
   appender_setLayout stdout PatternLayout
   appender_setPattern stdout '%-4r [%t] %-5p %c %x - %m%n'
+  appender_activateOptions stdout
 fi
 
 # restore the previous set of shell flags
