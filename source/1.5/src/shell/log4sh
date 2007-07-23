@@ -6,7 +6,7 @@
 # <?xml version="1.0" encoding="UTF-8"?>
 # <s:shelldoc xmlns:s="http://www.forestent.com/projects/shelldoc/xsl/2005.0">
 # <s:header>
-# log4sh 1.5.0
+# log4sh 1.5.1
 # Logging framework 4 SHell scripts
 #
 # http://log4sh.sourceforge.net/
@@ -42,7 +42,7 @@ LOG4SH_TRUE=0
 LOG4SH_FALSE=1
 LOG4SH_ERROR=2
 
-__LOG4SH_VERSION='1.5.0'
+__LOG4SH_VERSION='1.5.1pre'
 __LOG4SH_NULL='~'
 
 __LOG4SH_APPENDER_FUNC_PREFIX='_log4sh_app_'
