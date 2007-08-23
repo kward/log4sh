@@ -6,7 +6,7 @@
 # <?xml version="1.0" encoding="UTF-8"?>
 # <s:shelldoc xmlns:s="http://www.forestent.com/2005/XSL/ShellDoc">
 # <s:header>
-# log4sh 1.4.2
+# log4sh 1.4.3
 #
 # http://log4sh.sourceforge.net/
 #
@@ -33,11 +33,12 @@ for _log4sh_shellFlag in `echo "${__LOG4SH_SHELL_FLAGS}" |sed 's/\(.\)/\1 /g'`
 do
   set -${_log4sh_shellFlag}
 done
+unset _log4sh_shellFlag
 
 #
 # constants
 #
-__LOG4SH_VERSION='1.4.2'
+__LOG4SH_VERSION='1.4.3pre'
 
 __LOG4SH_TRUE=0
 __LOG4SH_FALSE=1
