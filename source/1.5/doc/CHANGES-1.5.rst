@@ -1,6 +1,15 @@
 Changes in log4sh 1.5.X
 =======================
 
+Changes with 1.5.1
+------------------
+
+Fixed brown-bag error which prevented the default stdout appender from printing
+anything.
+
+Unset additional variables that were missed.
+
+
 Changes with 1.5.0 (since 1.4.0)
 --------------------------------
 

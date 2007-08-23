@@ -34,6 +34,7 @@ for _log4sh_shellFlag in `echo "${__LOG4SH_SHELL_FLAGS}" |sed 's/\(.\)/\1 /g'`
 do
   set -${_log4sh_shellFlag}
 done
+unset _log4sh_shellFlag
 
 #
 # constants
