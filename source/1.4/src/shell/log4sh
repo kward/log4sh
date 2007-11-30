@@ -10,7 +10,7 @@
 #
 # http://log4sh.sourceforge.net/
 #
-# written by Kate Ward &lt;kate.ward@forestent.com>
+# written by Kate Ward &lt;kate.ward@forestent.com&gt;
 # released under the LGPL
 #
 # this module implements something like the log4j module from the Apache group
