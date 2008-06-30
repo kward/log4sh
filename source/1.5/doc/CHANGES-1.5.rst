@@ -9,6 +9,8 @@ anything.
 
 Unset additional variables that were missed.
 
+Fixed off-by-one in exit value for scripts exits caught with trap.
+
 
 Changes with 1.5.0 (since 1.4.0)
 --------------------------------

@@ -2,6 +2,8 @@ CHANGES WITH 1.4.3
 
 Unset additional variables that were missed.
 
+Fixed off-by-one in exit value for scripts exits caught with trap.
+
 
 CHANGES WITH 1.4.2
 

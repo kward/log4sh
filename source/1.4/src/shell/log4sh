@@ -3772,8 +3772,8 @@ _log4sh_cleanup()
     # disable the EXIT trap
     trap 0
 
-    # add 127 to signal value and exit
-    _lc__signal=`expr ${_lc__signal} + 127`
+    # add 128 to signal value and exit
+    _lc__signal=`expr ${_lc__signal} + 128`
     exit ${_lc__signal}
   fi
 
