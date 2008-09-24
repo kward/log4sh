@@ -1,3 +1,6 @@
+Improve the documentation. An example of setting the logging level in the
+configuration file (for example) is missing.
+
 Test log4sh_setAlternative
 
 Look into using xargs to execuate a command once per input word (-n 1) and such
