@@ -1,0 +1,123 @@
+# $Id$
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test common functions.
+
+# treat unset variables as an error
+set -u
+
+# set shwordsplit for zsh
+#[ -n "${ZSH_VERSION:-}" ] && setopt shwordsplit
+
+# name of script
+TH_ARGV0=`basename "$0"`
+
+# path to log4sh library. can be overridden by setting LOG4SH_INC.
+TH_LOG4SH=${LOG4SH_INC:-./log4sh}
+
+# path to shUnit2 library. can be overridden by setting SHUNIT_INC.
+TH_SHUNIT=${SHUNIT_INC:-../lib/shunit2}
+
+# path to testdata
+TH_TESTDATA_DIR='testdata'
+
+# temporary directory (overridden in th_oneTimeSetUp())
+TH_TMPDIR=''
+
+#
+# constants
+#
+
+# configure debugging. set the DEBUG environment variable to any
+# non-empty value to enable debug output, or TRACE to enable trace
+# output.
+TRACE=${TRACE:+'tf_trace '}
+[ -n "${TRACE}" ] && DEBUG=1
+[ -z "${TRACE}" ] && TRACE=':'
+
+DEBUG=${DEBUG:+'tf_debug '}
+[ -z "${DEBUG}" ] && DEBUG=':'
+
+#
+# variables
+#
+
+th_RANDOM=0
+
+#
+# test helper functions
+#
+
+# message functions
+th_trace() { echo "test:TRACE $@" >&2; }
+th_debug() { echo "test:DEBUG $@" >&2; }
+th_info() { echo "test:INFO $@" >&2; }
+th_warn() { echo "test:WARN $@" >&2; }
+th_error() { echo "test:ERROR $@" >&2; }
+th_fatal() { echo "test:FATAL $@" >&2; }
+
+# generate a random number
+th_generateRandom()
+{
+  th_random_=${th_RANDOM}
+
+  while [ "${th_random_}" = "${th_RANDOM}" ]; do
+    if [ -n "${RANDOM:-}" ]; then
+      # $RANDOM works
+      th_random_=${RANDOM}${RANDOM}${RANDOM}$$
+    elif [ -r '/dev/urandom' ]; then
+      th_random_=`od -vAn -N4 -tu4 </dev/urandom |sed 's/^[^0-9]*//'`
+    else
+      th_date_=`date '+%H%M%S'`
+      th_random_=`expr ${th_date_} \* $$`
+      unset th_date_
+    fi
+    [ "${th_random_}" = "${th_RANDOM}" ] && sleep 1
+  done
+
+  th_RANDOM=${th_random_}
+  unset th_random_
+}
+
+# this section returns the data section from the specified section of a file. a
+# datasection is defined by a [header], one or more lines of data, and then a
+# blank line.
+th_getDataSect()
+{
+  th_sgrep "\\[$1\\]" "$2" |sed '1d'
+}
+
+th_oneTimeSetUp()
+{
+  # load log4sh (expects LOG4SH_CONFIGURATION to be predefined)
+  . ${TH_LOG4SH}
+
+  # these will be cleaned up automatically by shunit2
+  TH_TMPDIR=${shunit_tmpDir}
+  stdoutF="${TH_TMPDIR}/stdout"
+  stderrF="${TH_TMPDIR}/stderr"
+  expectedF="${TH_TMPDIR}/expected"
+}
+
+# this function greps a section from a file. a section is defined as a group of
+# lines preceeded and followed by blank lines.
+th_sgrep()
+{
+  th_pattern_=$1
+  shift
+
+  sed -e '/./{H;$!d;}' -e "x;/${th_pattern_}/"'!d;' $@ |sed '1d'
+
+  unset th_pattern_
+}
+
+#
+# main
+#
+
+${TRACE} 'trace output enabled'
+${DEBUG} 'debug output enabled'

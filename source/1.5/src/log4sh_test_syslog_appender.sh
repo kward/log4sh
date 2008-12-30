@@ -1,6 +1,12 @@
 #! /bin/sh
 # $Id$
-# vim:sts=2
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for the SyslogAppender.
 #
 # This unit test tests the general logging functionality of Syslog. It sends
 # all logging to only a single facility to prevent spamming of system logs
@@ -25,20 +31,17 @@
 #   message can be tracked individually.
 #
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
+# load test helpers
+. ./log4sh_test_helpers
 
 APP_NAME='mySyslog'
 APP_SYSLOG_FACILITY='local4'
 
 BACKOFF_TIMES='0 1 2 4'
 TAIL_SAMPLE_SIZE=25
-TEST_PRIORITY_DATA='priorityMatrix.data'
-TEST_SYSLOG_DATA="${MY_NAME}.data"
+TEST_PRIORITY_DATA="${TH_TESTDATA_DIR}/priority_matrix.dat"
+TEST_SYSLOG_DATA="${TH_TESTDATA_DIR}/syslog_appender.dat"
 TEST_LOGFILE='/var/log/log4sh.log'
-
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -52,7 +55,7 @@ testFacilityGetterSetter()
   appender_activateOptions ${APP_NAME}
 
   ${DEBUG} 'testing the setting and getting of the valid syslog facilities'
-  for facility in `tf_getDataSect facilities "${TEST_SYSLOG_DATA}"`; do
+  for facility in `th_getDataSect facilities "${TEST_SYSLOG_DATA}"`; do
     appender_syslog_setFacility ${APP_NAME} "${facility}"
     appender_activateOptions ${APP_NAME}
     currFacility=`appender_syslog_getFacility ${APP_NAME}`
@@ -115,7 +118,6 @@ testPriorityMatrix()
 {
   PRIORITY_NAMES='TRACE DEBUG INFO WARN ERROR FATAL'
   PRIORITY_POS='1 2 3 4 5 6'
-  PRIORITY_DATA="priorityMatrix.data"
 
   # configure log4sh (appender_activateOptions called later)
   logger_addAppender ${APP_NAME}
@@ -126,7 +128,7 @@ testPriorityMatrix()
   [ ! -r "${TEST_LOGFILE}" ] && startSkipping
 
   # save stdin, and redirect it from a file
-  exec 9<&0 <"${PRIORITY_DATA}"
+  exec 9<&0 <"${TEST_PRIORITY_DATA}"
   while read priority outputs; do
     # ignore comment lines or blank lines
     echo "${priority}" |egrep -v '^(#|$)' >/dev/null || continue
@@ -143,9 +145,9 @@ testPriorityMatrix()
       result=''
 
       ${DEBUG} "generating '${testPriority}' message"
-      tf_generateRandom
-      random=${tf_RANDOM}
-      log ${testPriority} "${MY_NAME} test message - ${random}"
+      th_generateRandom
+      random=${th_RANDOM}
+      log ${testPriority} "${TH_ARGV0} test message - ${random}"
 
       # do a timed backoff to wait for the result -- syslog might take a bit
       if ! isSkipping; then
@@ -200,9 +202,9 @@ testRemoteLogging()
 
   # send a logging message
   ${DEBUG} 'generating message'
-  tf_generateRandom
-  random=${tf_RANDOM}
-  logger_error "${MY_NAME} test message - ${random}"
+  th_generateRandom
+  random=${th_RANDOM}
+  logger_error "${TH_ARGV0} test message - ${random}"
 
   # skip the actual test if there is no logfile to tail at
   if [ ! -r "${TEST_LOGFILE}" ]; then
@@ -233,9 +235,8 @@ testRemoteLogging()
 
 oneTimeSetUp()
 {
-  # source log4sh
-  ${DEBUG} 'loading log4sh'
-  LOG4SH_CONFIGURATION='none' . ./log4sh
+  LOG4SH_CONFIGURATION='none'
+  th_oneTimeSetUp
 }
 
 setUp()
@@ -243,10 +244,6 @@ setUp()
   # reset log4sh
   log4sh_resetConfiguration
 }
-
-#------------------------------------------------------------------------------
-# main
-#
 
 # check options on tail command
 result=`echo '' |tail -n 1 >/dev/null 2>&1`
@@ -258,5 +255,5 @@ else
 fi
 
 # load and run shUnit2
-${DEBUG} 'loading shUnit2'
-. ./shunit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}

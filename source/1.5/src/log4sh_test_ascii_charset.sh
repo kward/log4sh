@@ -1,11 +1,15 @@
 #! /bin/sh
 # $Id$
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for standard ASCII character set support.
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
-
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
+# load test helpers
+. ./log4sh_test_helpers
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -47,15 +51,10 @@ EOF
 
 oneTimeSetUp()
 {
-  # source log4sh
-  ${DEBUG} 'loading log4sh'
-  LOG4SH_CONFIGURATION="${MY_NAME}.log4sh" . ./log4sh
+  LOG4SH_CONFIGURATION="${TH_TESTDATA_DIR}/ascii_charset.log4sh"
+  th_oneTimeSetUp
 }
 
-#------------------------------------------------------------------------------
-# main
-#
-
 # load and run shUnit2
-${DEBUG} 'loading shUnit2'
-. ./shunit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}

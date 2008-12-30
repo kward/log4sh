@@ -1,21 +1,22 @@
 #! /bin/sh
 # $Id$
-# vim:sts=2
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for standard ASCII character set support.
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
-MY_LOG4SH="${MY_NAME}.log4sh"
+# load test helpers
+. ./log4sh_test_helpers
+
+MY_LOG4SH="${TH_TESTDATA_DIR}/rolling_file_appender.log4sh"
 
 APP_NAME='R'
 APP_MAX_FILE_SIZE='10KiB'
 APP_MAX_FILE_SIZE_REAL=10240
 APP_MAX_BACKUP_INDEX='1'
-
-appFile=''
-resultFile=''
-
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # custom asserts
@@ -507,12 +508,11 @@ testMaxFileSizeGetterSetter()
 
 oneTimeSetUp()
 {
-  appFile="${__shunit_tmpDir}/rfa.log"
-  resultFile="${__shunit_tmpDir}/result.dat"
+  LOG4SH_CONFIGURATION='none'
+  th_oneTimeSetUp
 
-  # load log4sh
-  ${DEBUG} 'loading log4sh'
-  LOG4SH_CONFIGURATION='none' . ${MY_PATH}/log4sh
+  appFile="${TH_TMPDIR}/rfa.log"
+  resultFile="${TH_TMPDIR}/result.dat"
 }
 
 setUp()
@@ -525,10 +525,6 @@ tearDown()
 {
   rm -f "${appFile}" "${appFile}".*
 }
-
-#------------------------------------------------------------------------------
-# main
-#
 
 suite()
 {
@@ -550,5 +546,5 @@ suite()
 }
 
 # load and run shUnit2
-${DEBUG} 'loading shUnit2'
-. ./shunit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}

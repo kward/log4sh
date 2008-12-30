@@ -11,6 +11,9 @@ Unset additional variables that were missed.
 
 Fixed off-by-one in exit value for scripts exits caught with trap.
 
+Major directory restructuring. Simplifying to match that of shUnit2 and
+shFlags.
+
 
 Changes with 1.5.0 (since 1.4.0)
 --------------------------------

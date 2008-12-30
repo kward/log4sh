@@ -1,12 +1,15 @@
 #! /bin/sh
 # $Id$
-# vim:sts=2
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for log4j compatibility support.
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
-
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
+# load test helpers
+. ./log4sh_test_helpers
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -22,11 +25,11 @@ testAppenders()
     SMTPAppender \
     SyslogAppender
   do
-    cat <<EOF >${propFile}
+    cat <<EOF >${propertiesF}
 log4j.rootLogger = INFO, A
 log4j.appender.A = org.apache.log4j.${appender}
 EOF
-    log4sh_doConfigure ${propFile}
+    log4sh_doConfigure ${propertiesF}
     rtrn=$?
     assertTrue \
         "compatibility problems with the log4j ${appender}" \
@@ -41,12 +44,12 @@ testLayouts()
     PatternLayout \
     HTMLLayout
   do
-    cat <<EOF >${propFile}
+    cat <<EOF >${propertiesF}
 log4j.rootLogger = INFO, A
 log4j.appender.A = org.apache.log4j.ConsoleAppender
 log4j.appender.A.layout = org.apache.log4j.${layout}
 EOF
-    log4sh_doConfigure ${propFile}
+    log4sh_doConfigure ${propertiesF}
     rtrn=$?
     assertTrue \
         "compatibility problems with the log4j ${layout}" \
@@ -60,14 +63,12 @@ EOF
 
 oneTimeSetUp()
 {
-  # source log4sh
-  ${DEBUG} echo 'loading log4sh' >&2
-  LOG4SH_CONFIGURATION='none' \
-  LOG4SH_CONFIG_PREFIX='log4j' \
-  . ./log4sh
+  LOG4SH_CONFIGURATION='none'
+  LOG4SH_CONFIG_PREFIX='log4j'
+  th_oneTimeSetUp
 
   # declare the properties file
-  propFile="${__shunit_tmpDir}/properties.log4sh"
+  propertiesF="${TH_TMPDIR}/properties.log4sh"
 }
 
 setUp()
@@ -79,13 +80,9 @@ setUp()
 tearDown()
 {
   # remove the properties file
-  rm -f "${propFile}"
+  rm -f "${propertiesF}"
 }
 
-#------------------------------------------------------------------------------
-# main
-#
-
-# load and run shUnit
-${DEBUG} echo 'loading shUnit' >&2
-. ./shunit2
+# load and run shUnit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}

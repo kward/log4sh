@@ -1,16 +1,15 @@
 #! /bin/sh
 # $Id$
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for simultaneous appender definitions.
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
-
-APP_ONE_NAME="appenderOne"
-APP_ONE_FILE="${MY_NAME}-one.log"
-APP_TWO_NAME="appenderTwo"
-APP_TWO_FILE="${MY_NAME}-two.log"
-
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
+# load test helpers
+. ./log4sh_test_helpers
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -34,8 +33,8 @@ testTwoSimilarFileAppenders()
   appender_activateOptions ${APP_TWO_NAME}
 
   # log a message
-  tf_generateRandom
-  random=${tf_RANDOM}
+  th_generateRandom
+  random=${th_RANDOM}
   logger_info "dummy message ${random}"
 
   # verify first appender
@@ -57,9 +56,14 @@ testTwoSimilarFileAppenders()
 
 oneTimeSetUp()
 {
-  # source log4sh
-  ${DEBUG} 'loading log4sh'
-  LOG4SH_CONFIGURATION='none' . ./log4sh
+  LOG4SH_CONFIGURATION='none'
+  th_oneTimeSetUp
+
+  # the logfiles will be cleaned up automatically by shunit2
+  APP_ONE_NAME='appenderOne'
+  APP_ONE_FILE="${TH_TMPDIR}/appender_one.log"
+  APP_TWO_NAME='appenderTwo'
+  APP_TWO_FILE="${TH_TMPDIR}/appender_two.log"
 }
 
 setUp()
@@ -67,15 +71,6 @@ setUp()
   log4sh_resetConfiguration
 }
 
-oneTimeTearDown()
-{
-  rm "${APP_ONE_FILE}" "${APP_TWO_FILE}"
-}
-
-#------------------------------------------------------------------------------
-# main
-#
-
 # load and run shUnit2
-${DEBUG} 'loading shUnit2'
-. ./shunit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}

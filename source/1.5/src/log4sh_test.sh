@@ -1,26 +1,40 @@
 #! /bin/sh
 # $Id$
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# shUnit2 unit test suite runner.
+#
+# This script runs all the unit tests that can be found, and generates a nice
+# report of the tests.
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
+ARGV0=`basename "$0"`
+PREFIX='log4sh_test_'
+SHELLS='/bin/sh /bin/bash /bin/dash /bin/ksh /bin/pdksh /bin/zsh'
+TESTS=''
 
-SHELLS='/bin/sh /bin/bash /bin/dash /bin/ksh /bin/pdksh'
-for f in test[A-Z]*; do
-  [ -x "${f}" ] && TESTS="${TESTS:+${TESTS} }${f}"
+for test in ${PREFIX}[a-z]*.sh; do
+  TESTS="${TESTS} ${test}"
 done
 
 # load common unit test functions
-. "${MY_PATH}/test-functions.inc"
+. ../lib/versions
+. ./log4sh_test_helpers
 
 usage()
 {
-  echo "usage: ${MY_NAME} [-e key=val ...] [-s shell(s)] [-t test(s)]"
+  echo "usage: ${ARGV0} [-e key=val ...] [-s shell(s)] [-t test(s)]"
 }
+
+env=''
 
 # process command line flags
 while getopts 'e:hs:t:' opt; do
   case ${opt} in
-    e)
+    e)  # set an environment variable
       key=`expr "${OPTARG}" : '\([^=]*\)='`
       val=`expr "${OPTARG}" : '[^=]*=\(.*\)'`
       if [ -z "${key}" -o -z "${val}" ]; then
@@ -31,9 +45,9 @@ while getopts 'e:hs:t:' opt; do
       export ${key}
       env="${env:+${env} }${key}"
       ;;
-    h) usage; exit 0 ;;
-    s) shells=${OPTARG} ;;
-    t) tests=${OPTARG} ;;
+    h) usage; exit 0 ;;  # output help
+    s) shells=${OPTARG} ;;  # list of shells to run
+    t) tests=${OPTARG} ;;  # list of tests to run
     *) usage; exit 1 ;;
   esac
 done
@@ -45,7 +59,7 @@ tests=${tests:-${TESTS}}
 
 # error checking
 if [ -z "${tests}" ]; then
-  tf_error 'no tests found to run; exiting'
+  th_error 'no tests found to run; exiting'
   exit 1
 fi
 
@@ -80,7 +94,7 @@ for shell in ${shells}; do
 
   # check for existance of shell
   if [ ! -x ${shell} ]; then
-    tf_warn "unable to run tests with the ${shell} shell"
+    th_warn "unable to run tests with the ${shell} shell"
     continue
   fi
 
@@ -91,26 +105,17 @@ for shell in ${shells}; do
 #
 EOF
 
-  case `basename ${shell}` in
-    bash) echo; ${shell} --version; ;;
-    dash) ;;
-    ksh)
-      version=`${shell} --version exit 2>&1`
-      exitVal=$?
-      if [ ${exitVal} -eq 2 ]; then
-        echo
-        echo "${version}"
-      fi
-      ;;
-    pdksh) ;;
-    zsh) ;;
-  esac
+  shell_name=`basename ${shell}`
+  shell_version=`versions_shellVersion "${shell}"`
+
+  echo "shell name: ${shell_name}"
+  echo "shell version: ${shell_version}"
 
   # execute the tests
   for suite in ${tests}; do
-    suiteName=`expr "${suite}" : 'test\(.*\)'`
+    suiteName=`expr "${suite}" : "${PREFIX}\(.*\).sh"`
     echo
-    echo "--- Executing the '${suiteName}' test suite ---" >&2
-    ( exec ${shell} ./${suite}; )
+    echo "--- Executing the '${suiteName}' test suite ---"
+    ( exec ${shell} ./${suite} 2>&1; )
   done
 done

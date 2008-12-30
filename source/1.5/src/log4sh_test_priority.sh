@@ -1,15 +1,18 @@
 #! /bin/sh
 # $Id$
-# vim:sts=2
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for output of messages based on priority.
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
+# load test helpers
+. ./log4sh_test_helpers
 
 APP_NAME='stdout'
-TEST_DATA="priorityMatrix.data"
-
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
+TESTDATA="${TH_TESTDATA_DIR}/priority_matrix.dat"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -48,7 +51,7 @@ testPriorityMatrix()
           "[ -n \"${result}\" ]"
       fi
     done
-  done <"${TEST_DATA}"
+  done <"${TESTDATA}"
 }
 
 testInvalidPriority()
@@ -66,15 +69,10 @@ testInvalidPriority()
 
 oneTimeSetUp()
 {
-  # source log4sh
-  ${DEBUG} 'loading log4sh'
-  LOG4SH_CONFIGURATION='none' . ./log4sh
+  LOG4SH_CONFIGURATION='none'
+  th_oneTimeSetUp
 }
 
-#------------------------------------------------------------------------------
-# main
-#
-
 # load and run shUnit2
-${DEBUG} 'loading shUnit2'
-. ./shunit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}

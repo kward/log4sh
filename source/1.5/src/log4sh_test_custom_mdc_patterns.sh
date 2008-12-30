@@ -1,13 +1,17 @@
 #! /bin/sh
 # $Id$
-
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for custom MDC patterns.
 
 APP_NAME='stdout'
 
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
+# load test helpers
+. ./log4sh_test_helpers
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -107,11 +111,10 @@ testCustomUserHostMDC()
 
 oneTimeSetUp()
 {
-  resultFile="${__shunit_tmpDir}/result.dat"
+  LOG4SH_CONFIGURATION='none'
+  th_oneTimeSetUp
 
-  # load log4sh
-  ${DEBUG} 'loading log4sh'
-  LOG4SH_CONFIGURATION='none' . ./log4sh
+  resultF="${TH_TMPDIR}/result"
 }
 
 setUp()
@@ -127,7 +130,7 @@ setUp()
 
 tearDown()
 {
-  rm -f "${resultFile}"
+  rm -f "${resultF}"
 }
 
 #------------------------------------------------------------------------------
@@ -135,5 +138,5 @@ tearDown()
 #
 
 # load and run shUnit2
-${DEBUG} 'loading shUnit2'
-. ./shunit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}

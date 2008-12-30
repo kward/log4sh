@@ -1,22 +1,26 @@
 #! /bin/sh
 # $Id$
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for the FileAppender.
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
+# load test helpers
+. ./log4sh_test_helpers
 
 APP_ACCESSORS='accessors'
 APP_ACCESSORS_FILE=''
-APP_ACCESSORS_LOG4SH="${MY_NAME}-${APP_ACCESSORS}.log4sh"
+APP_ACCESSORS_LOG4SH="${TH_TESTDATA_DIR}/file_appender_accessors.log4sh"
 
 APP_SIMPLE='mySimple'
 APP_SIMPLE_FILE=''
-APP_SIMPLE_LOG4SH="${MY_NAME}-${APP_SIMPLE}.log4sh"
+APP_SIMPLE_LOG4SH="${TH_TESTDATA_DIR}/file_appender_simple.log4sh"
 
 APP_STDERR='mySTDERR'
-APP_STDERR_LOG4SH="${MY_NAME}-${APP_STDERR}.log4sh"
-
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
+APP_STDERR_LOG4SH="${TH_TESTDATA_DIR}/file_appender_stderr.log4sh"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -165,12 +169,11 @@ testAccessors_setgetFilename()
 
 oneTimeSetUp()
 {
-  APP_ACCESSORS_FILE="${__shunit_tmpDir}/myAccessors.out"
-  APP_SIMPLE_FILE="${__shunit_tmpDir}/mySimple.out"
+  LOG4SH_CONFIGURATION='none'
+  th_oneTimeSetUp
 
-  # load log4sh
-  ${DEBUG} 'loading log4sh'
-  LOG4SH_CONFIGURATION='none' . ./log4sh
+  APP_ACCESSORS_FILE="${TH_TMPDIR}/myAccessors.out"
+  APP_SIMPLE_FILE="${TH_TMPDIR}/mySimple.out"
 }
 
 setUp()
@@ -184,10 +187,6 @@ tearDown()
   rm -f "${APP_ACCESSORS_FILE}" "${APP_SIMPLE_FILE}"
 }
 
-#------------------------------------------------------------------------------
-# main
-#
-
 # load and run shUnit2
-${DEBUG} 'loading shUnit2'
-. ./shunit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}

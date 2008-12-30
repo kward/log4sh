@@ -1,17 +1,21 @@
 #! /bin/sh
 # $Id$
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh unit test for the SMTPAppender.
 
-MY_NAME=`basename $0`
-MY_PATH=`dirname $0`
+# load test helpers
+. ./log4sh_test_helpers
 
 APP_NAME='mySMTP'
-APP_CONFIG="${MY_NAME}.log4sh"
+APP_CONFIG="${TH_TESTDATA_DIR}/smtp_appender.log4sh"
 
 TEST_SUBJECT='This is a Subject worth testing'
 TEST_TO='some.user@some.host'
-
-# load common unit test functions
-. "${MY_PATH}/test-functions.inc"
 
 #------------------------------------------------------------------------------
 # suite tests
@@ -110,23 +114,15 @@ testAppenderSetupFromConfig()
 
 oneTimeSetUp()
 {
-  ${TRACE} 'oneTimeSetUp()'
-
-  # source log4sh
-  ${DEBUG} 'loading log4sh'
-  LOG4SH_CONFIGURATION='none' . ./log4sh
+  LOG4SH_CONFIGURATION='none'
+  th_oneTimeSetUp
 }
 
 setUp()
 {
-  ${TRACE} 'setUp()'
   log4sh_resetConfiguration
 }
 
-#------------------------------------------------------------------------------
-# main
-#
-
 # load and run shUnit2
-${DEBUG} 'loading shUnit2'
-. ./shunit2
+[ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
+. ${TH_SHUNIT}
