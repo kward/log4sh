@@ -35,11 +35,11 @@ TH_TMPDIR=''
 # configure debugging. set the DEBUG environment variable to any
 # non-empty value to enable debug output, or TRACE to enable trace
 # output.
-TRACE=${TRACE:+'tf_trace '}
+TRACE=${TRACE:+'th_trace '}
 [ -n "${TRACE}" ] && DEBUG=1
 [ -z "${TRACE}" ] && TRACE=':'
 
-DEBUG=${DEBUG:+'tf_debug '}
+DEBUG=${DEBUG:+'th_debug '}
 [ -z "${DEBUG}" ] && DEBUG=':'
 
 #
@@ -93,9 +93,6 @@ th_getDataSect()
 
 th_oneTimeSetUp()
 {
-  # load log4sh (expects LOG4SH_CONFIGURATION to be predefined)
-  . ${TH_LOG4SH}
-
   # these will be cleaned up automatically by shunit2
   TH_TMPDIR=${shunit_tmpDir}
   stdoutF="${TH_TMPDIR}/stdout"
@@ -115,9 +112,25 @@ th_sgrep()
   unset th_pattern_
 }
 
-#
-# main
-#
+assertSuccess()
+{
+  th_result_=$1
 
-${TRACE} 'trace output enabled'
-${DEBUG} 'debug output enabled'
+  assertEquals ${SHUNIT_TRUE} ${th_result_}
+  [ ${th_result_} -eq ${SHUNIT_TRUE} ] || cat "${stderrF}"
+
+  unset th_result_
+}
+
+assertError()
+{
+  th_message_=$1
+
+  th_file_=${stderrF}
+  grep "^log4sh:ERROR.*${th_message_}" "${th_file_}" >/dev/null
+  th_result_=$?
+  assertTrue "missing '${th_message_}' error" ${th_result_}
+  [ ${th_result_} -eq 0 ] || cat "${th_file_}"
+
+  unset th_file_ th_message_ th_result_
+}

@@ -1,0 +1,374 @@
+# $Id: log4sh 589 2008-12-30 14:50:53Z sfsetse $
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# Logging framework 4 SHell scripts
+# http://log4sh.sourceforge.net/
+#
+# This module implements something like the log4j module from the Apache group.
+
+# return if log4sh already loaded
+[ -z "${LOG4SH_VERSION:-}" ] || return
+LOG4SH_VERSION='1.5.1pre'
+
+#
+# constants
+#
+LOG4SH_TRUE=0
+LOG4SH_FALSE=1
+LOG4SH_ERROR=2
+
+[ -z "${LOG4SH_LOG_FILE:-}" ] && LOG4SH_LOG_FILE=''
+
+__LOG4SH_LOGGER_ROOT='root'
+
+__LOG4SH_LEVEL_TRACE='TRACE'
+__LOG4SH_LEVEL_DEBUG='DEBUG'
+__LOG4SH_LEVEL_INFO='INFO'
+__LOG4SH_LEVEL_WARN='WARN'
+__LOG4SH_LEVEL_ERROR='ERROR'
+__LOG4SH_LEVEL_FATAL='FATAL'
+
+#
+# variables -- see log4sh_resetConfiguration()
+#
+
+__log4sh_appenders=''
+
+#
+# macros
+#
+
+_LOG4SH_LINENO_='eval log4sh_lineno_=""; if [ "${1:-}" = "--lineno" ]; then [ -n "$2" ] && log4sh_lineno_="$2"; shift 2; fi'
+
+# wrappers for interal logging to include line numbers
+_LOG4SH_DEBUG_='eval _log4sh_debug --lineno "${LINENO:-}"'
+_LOG4SH_INFO_='eval _log4sh_info --lineno "${LINENO:-}"'
+_LOG4SH_ERROR_='eval _log4sh_error --lineno "${LINENO:-}"'
+
+# Split fully qualified [logger.]appender string and set local variables.
+#
+# This function sets the following variables:
+#   log4sh_logger_: string: logger name; empty if none
+#   log4sh_appender_: string: appender name
+#
+# Args:
+#    fqla: string: fully qualified [logger.]appender
+_LOG4SH_SPLIT_LOGGER_APPENDER_='eval expr "$1" : ".*\..*" >/dev/null; if [ $? -eq 0 ]; then log4sh_logger_=`expr "$1" : "\(.*\)\..*"`; log4sh_appender_=`expr "$1" : ".*\.\(.*\)"`; else log4sh_logger_=${__LOG4SH_LOGGER_ROOT}; log4sh_appender_=$1; fi; log4sh_fqla_=$1; shift'
+_LOG4SH_CLEANUP_LOGGER_APPENDER_='eval unset log4sh_appender_ log4sh_fqla_ log4sh_logger_'
+
+#-----------------------------------------------------------------------------
+# private log4sh functions
+#
+
+# Common logging function for log4sh itself.
+#
+# Args:
+#   level: string: logging level (e.g. INFO)
+#   message: string: message to log
+_log4sh_log()
+{
+  _log4sh_lineno_=$1
+  _log4sh_level_=$2
+  shift 2
+
+  [ -n "${_log4sh_lineno_:-}" ] && _log4sh_lineno_="[${_log4sh_lineno_}]"
+  _log4sh_message_="${_log4sh_level_}${_log4sh_lineno_} $@"
+  if [ -z "${LOG4SH_LOG_FILE}" ]; then
+    echo "log4sh:${_log4sh_message_}" >&2
+  else
+    echo "${_log4sh_message_}" >>"${LOG4SH_LOG_FILE}"
+  fi
+
+  unset _log4sh_level_ _log4sh_lineno_ _log4sh_message_
+}
+
+# DEBUG level logging function for log4sh.
+#
+# Args:
+#   message: string: message to log
+_log4sh_debug()
+{
+  ${_LOG4SH_LINENO_}
+  _log4sh_log "${log4sh_lineno_}" ${__LOG4SH_LEVEL_DEBUG} "$@"
+  unset log4sh_lineno_
+}
+
+# INFO level logging function for log4sh.
+#
+# Args:
+#   message: string: message to log
+_log4sh_info()
+{
+  ${_LOG4SH_LINENO_}
+  _log4sh_log "${log4sh_lineno_}" ${__LOG4SH_LEVEL_INFO} "$@"
+  unset log4sh_lineno_
+}
+
+# ERROR level logging function for log4sh.
+#
+# Args:
+#   message: string: message to log
+_log4sh_error()
+{
+  ${_LOG4SH_LINENO_}
+  _log4sh_log "${log4sh_lineno_}" ${__LOG4SH_LEVEL_ERROR} "$@"
+  unset log4sh_lineno_
+}
+
+# Common appender registration.
+#
+# This function must be called to register an appender with the log4sh
+# framework so that appender specific functionality can be used.
+#
+# Args:
+#   appender: string: name of the appender type
+_log4sh_register_appender()
+{
+  _log4sh_appender_=$1
+
+  __log4sh_appenders="${__log4sh_appenders} ${_log4sh_appender_}"
+  _log4sh_register_${_log4sh_appender_}
+
+  unset _log4sh_appender_
+}
+
+# Append an element to end of list stored in a variable.
+#
+# As this function is used only internally, it expects the variable to be
+# present. No error checking is done.
+#
+# Args:
+#  varname: string: name of variable containing list to be appended to
+#  data: string: data to be appended
+_log4sh_listAppend()
+{
+  _log4sh_varName_=$1
+  _log4sh_newData_=$2
+
+  _log4sh_strToEval_="_log4sh_data_=\${${_log4sh_varName_}}"
+  eval "${_log4sh_strToEval_}"
+  eval ${_log4sh_varName_}="${_log4sh_data_:+${_log4sh_data_} }${_log4sh_newData_}"
+
+  unset _log4sh_data_ _log4sh_newData_ _log4sh_strToEval_ _log4sh_varName_
+}
+
+#-----------------------------------------------------------------------------
+# public log4sh functions
+#
+
+# Add a new logger.
+#
+# Args:
+#   logger: string: name of logger
+# Returns:
+#   integer: success of the operation
+log4sh_addLogger()
+{
+  if [ $# -ne 1 ]; then
+    ${_LOG4SH_ERROR_} "'log4sh_addLogger(): invalid argument count'"
+    return ${LOG4SH_ERROR}
+  fi
+  log4sh_logger_=$1
+
+  _logger_isValid "${log4sh_logger_}"
+  if [ $? -eq ${LOG4SH_FALSE} ]; then
+    __log4sh_loggers="${__log4sh_loggers} ${log4sh_logger_}"
+    eval __log4sh_logger_${log4sh_logger_}=''
+    log4sh_return=${LOG4SH_TRUE}
+  else
+    ${_LOG4SH_ERROR_} "'logger already exists (${log4sh_logger_})'"
+    log4sh_return=${LOG4SH_FALSE}
+  fi
+
+  unset log4sh_logger_
+  return ${log4sh_return}
+}
+
+# Reset log4sh to initial defaults.
+#
+# This function leaves dangingling bits all over the place. It resets just
+# enough of the environment so that log4sh forgets about its past.
+#
+# Args:
+#   none
+log4sh_resetConfiguration()
+{
+  if [ -n "${__log4sh_loggers:-}" ]; then
+    for log4sh_logger_ in ${__log4sh_loggers}; do
+      ${_LOG4SH_DEBUG_} "log4sh_logger_=${log4sh_logger_}"
+    done
+  fi
+  __log4sh_loggers=''
+  log4sh_addLogger "${__LOG4SH_LOGGER_ROOT}"
+
+  unset log4sh_logger_
+}
+
+# Determine if named logger is valid.
+#
+# Args:
+#   logger: string: name of logger
+# Returns:
+#   boolean: validity of logger
+_logger_isValid()
+{
+  _log4sh_logger_=$1
+
+  _log4sh_isValid_=${LOG4SH_FALSE}
+  for _log4sh_validLogger_ in ${__log4sh_loggers}; do
+    if [ "${_log4sh_logger_}" = "${_log4sh_validLogger_}" ]; then
+      _log4sh_isValid_=${LOG4SH_TRUE}
+      break
+    fi
+  done
+
+  log4sh_return=${_log4sh_isValid_}
+  unset _log4sh_logger_ _log4sh_isValid_ _log4sh_validLogger_
+  return ${log4sh_return}
+}
+
+# Add a new appender to a logger.
+#
+# Args:
+#   appender: string: name of [logger.]appender
+# Returns:
+#   integer: success of the operation
+logger_addAppender()
+{
+  if [ $# -eq 0 -o $# -gt 2 ]; then
+    ${_LOG4SH_ERROR_} "'logger_addAppender(): invalid argument count'"
+    return ${LOG4SH_ERROR}
+  fi
+  if [ $# -eq 1 ]; then
+    log4sh_logger_=${__LOG4SH_LOGGER_ROOT}
+  else
+    log4sh_logger_=$1
+    shift
+  fi
+  log4sh_appender_=$1
+
+  _logger_isValid "${log4sh_logger_}"
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
+    log4sh_fqla_="${log4sh_logger_}.${log4sh_appender_}"
+    ( _appender_isValid "${log4sh_fqla_}"; )  # variable scoping subshell
+    if [ $? -eq ${LOG4SH_FALSE} ]; then
+      _log4sh_listAppend "__log4sh_logger_${log4sh_logger_}" \
+          "${log4sh_appender_}"
+      log4sh_return=${LOG4SH_TRUE}
+    else
+      ${_LOG4SH_ERROR_} "'appender already exists (${log4sh_fqla_})'"
+      log4sh_return=${LOG4SH_FALSE}
+    fi
+  else
+    ${_LOG4SH_ERROR_} "'invalid logger (${log4sh_logger_})'"
+    log4sh_return=${LOG4SH_FALSE}
+  fi
+
+  unset log4sh_appender_ log4sh_fqla_ log4sh_logger_
+  return ${log4sh_return}
+}
+
+# Determine if named appender is valid.
+#
+# Args:
+#   appender: string: name of [logger.]appender
+# Returns:
+#   boolean: validity of logger
+_appender_isValid()
+{
+  ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
+
+  _log4sh_isValid_=${LOG4SH_FALSE}
+  ( _logger_isValid "${log4sh_logger_}"; )  # variable scoping subshell
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
+    _log4sh_strToEval_="_log4sh_appenders_=\${__log4sh_logger_${log4sh_logger_}}"
+    eval "${_log4sh_strToEval_}"
+    for _log4sh_validAppender_ in ${_log4sh_appenders_}; do
+      ${_LOG4SH_DEBUG_} "_log4sh_validAppender_=${_log4sh_validAppender_}"
+      if [ "${log4sh_appender_}" = "${_log4sh_validAppender_}" ]; then
+        _log4sh_isValid_=${LOG4SH_TRUE}
+        break
+      fi
+    done
+  fi
+
+  log4sh_return=${_log4sh_isValid_}
+  unset _log4sh_appenders_ _log4sh_isValid_ _log4sh_strToEval_ \
+      _log4sh_validAppender_
+  ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+  return ${log4sh_return}
+}
+
+# Activate the options for an appender.
+#
+# Args:
+#   appender: string: name of [logger.]appender
+appender_activateOptions()
+{
+  ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
+  ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+}
+
+# Get the appender type for an appender.
+#
+# Args:
+#   appender: string: name of the [logger.]appender
+# Outputs:
+#   string: appender type
+# Returns:
+#   integer: success of the operation
+appender_getType()
+{
+  ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
+  ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+}
+
+# Set the appender type for an appender.
+#
+# Args:
+#   appender: string: name of [logger.]appender
+#   type: string: appender type
+# Returns:
+#   integer: success of the operation
+appender_setType()
+{
+  if [ $# -ne 2 ]; then
+    ${_LOG4SH_ERROR_} "'appender_setType(): invalid argument count'"
+    return ${LOG4SH_ERROR}
+  fi
+  ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
+  log4sh_type_=$1
+
+  ( _appender_isValid "${log4sh_fqla_}"; )  # variable scoping subshell
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
+    # check for valid appender type
+    log4sh_isValid_=${LOG4SH_FALSE}
+    for log4sh_validType_ in ${__log4sh_appenders}; do
+      if [ "${log4sh_type_}" = "${log4sh_validType_}" ]; then
+        log4sh_isValid_=${LOG4SH_TRUE}
+        break
+      fi
+    done
+
+    if [ ${log4sh_isValid_} -eq ${LOG4SH_TRUE} ]; then
+      :
+    else
+      ${_LOG4SH_ERROR_} "'invalid appender type (${log4sh_type_})'"
+      log4sh_return=${LOG4SH_FALSE}
+    fi
+  else
+    ${_LOG4SH_ERROR_} "'invalid appender (${log4sh_fqla_})'"
+    log4sh_return=${LOG4SH_FALSE}
+  fi
+
+  ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+  return ${log4sh_return}
+}
+
+# main() code.
+[ -z "${LOG4SH_DEBUG:-}" ] && _LOG4SH_DEBUG_=':'  # disable debugging
+log4sh_resetConfiguration

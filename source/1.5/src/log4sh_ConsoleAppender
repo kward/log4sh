@@ -1,0 +1,25 @@
+# $Id: log4sh 589 2008-12-30 14:50:53Z sfsetse $
+# vim:et:ft=sh:sts=2:sw=2
+#
+# Copyright 2008 Kate Ward. All Rights Reserved.
+# Released under the LGPL (GNU Lesser General Public License)
+# Author: kate.ward@forestent.com (Kate Ward)
+#
+# log4sh ConsoleAppender.
+#
+# This module implements the ConsoleAppender.
+
+# Register the appender.
+_log4sh_register_ConsoleAppender()
+{
+  ${_LOG4SH_INFO_} 'ConsoleAppender registered'
+}
+
+# Add an instance of the appender.
+_log4sh_instantiate_ConsoleAppender()
+{
+  :
+}
+
+# register the appender
+_log4sh_register_appender ConsoleAppender

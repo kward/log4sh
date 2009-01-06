@@ -14,6 +14,12 @@ Fixed off-by-one in exit value for scripts exits caught with trap.
 Major directory restructuring. Simplifying to match that of shUnit2 and
 shFlags.
 
+Upgraded shUnit2 to 2.1.5.
+
+The code base is split from one large script into smaller more manageable
+pieces that also allow for easier testing and for future expansion (say a
+DatabaseAppender perhaps).
+
 
 Changes with 1.5.0 (since 1.4.0)
 --------------------------------
