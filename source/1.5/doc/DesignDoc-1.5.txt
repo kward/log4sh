@@ -72,5 +72,42 @@ Actions to support
   FileAppender needs to support a filename.
 - Handler for accepting a logging message.
 
+Brainstorming
+-------------
+
+First and foremost, my new coding standards should be followed!
+
+When an appender is loaded, it needs to be registered so log4sh knows it is there and how to handle it. This could be done with a standard function name, much like I look for the test_* functions with shunit2. _log4sh_register_SMTPAppender() for example.
+
+Once registered, it must be possible to instantiate the appender through code or a properties file. The syntax for either should be standardized on the existing log4sh syntax. Therefore, as part of the registration process should add hooks for handling syntax or doing work.
+
+I will assume for now that log4sh is sourced in as a single script as in the past. Doing so allows me to delay the actual loading of the properties file and such a bit. Is this important? Why mention it? Anyway, during the build process, I need to populate a variable (let's call it __LOG4SH_APPENDERS) with a list of all possible appenders that need to be "registered". This registration process should be as fast as possible.
+
+To handle properties processing, I'll need to run through a slew of potential keyword matches that hook the syntax to functionality. The syntax checking needs to be standardized and central so that the individual appenders don't need to implement it. Basically this is the "key = value" structure. Some items will be handled in the base code (e.g. the root appender selection) but the rest should be hooked in. Performance isn't that much of a concern as the reading of a properties file should only happen once.
+
+In this release, I need to support multiple appender groups that can be triggered separately. In 1.4 and below, default group is the 'root' group and it is triggered with the logger_info() type functions. The automatic generation of alias functions (e.g. logger_info() could actually alias _logger_root_info()) or perhaps overloading the logger_info() by using the first argument for differentiation (not backward compatible), or finally with an environment variable (LOG4SH_APP_GROUP='root' _logger_root_info, which logger_info() could actually be.) Interesting...
+
+Currently logger_info() is basically a wrapper around "log INFO message". Continuing to think along the lines above, this doesn't need to change. It could in fact be the log() function that accepts the environment variable stating which appender group should be used. An empty or missing variable would signify the 'root' group, the string 'all' would mean all appenders (the groups need to be looped over), or another string that specifies a group. Utility functions could be created for the individual groups at the user's desire (a factory could generate them) but they wouldn't be there by default. An initial implementation would simply be to document their construction.
+
+One of the performance improvements that came in 1.3 was the sourcing of a static function to do the logging. This code was incredibly ugly, and could really be improved through some sort of template engine. m4 comes to mind, but it isn't always installed on modern systems (although this could be a requirement).
+
+Ah, one quick brain fart here. I never fully added proper support for specifying which sed, awk, and other commands should be used. This needs to be added to the properties file if at all possible.
+
+The syslog appender needs stubs so that a working syslog implementation isn't required. Also, tools like 'logger' and 'ncat' need to be evaled to determine whether they are present so that appropriate error codes can be provided.
+
+One user finally asked about chainsaw. It might be worth looking at it again.
+
+Databases
+---------
+A big request has been for a database appender. Rough thoughts around this are as follows.
+
+I think several database variants need to be supported (e.g. Oracle, MySQL, Postgres, Sybase, and SQLite). I'm going to have to get hold of them, and some different versions.
+
+Probably the only way I can really accomplish what I want in code is by using some sort of pre-compiled tool (e.g. the mysql command) that has the capability to dump data into the database.
+
+Permissions (specifically passwords) are going to be a concern, and the graceful handling of errors as well.
+
+I need a standardized logging schema, and that will mean instructions for all of the different database providers on how to create the table, how to secure it (leave as exercise to user?), and how to write logs to it. In any case, I should look at what log4j uses.
+
 vim:spell
 $Revision: 236 $
