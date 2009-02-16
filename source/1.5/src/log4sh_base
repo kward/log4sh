@@ -32,11 +32,16 @@ __LOG4SH_LEVEL_WARN='WARN'
 __LOG4SH_LEVEL_ERROR='ERROR'
 __LOG4SH_LEVEL_FATAL='FATAL'
 
+__LOG4SH_KV_TYPE='type'
+
 #
-# variables -- see log4sh_resetConfiguration()
+# global variables -- see also log4sh_resetConfiguration()
 #
 
-__log4sh_appenders=''
+__log4sh_appenders=''  # list of valid appenders
+__log4sh_dictFile=''  # internal dictionary of key/value pairs
+__log4sh_tmpDir=''  # temporary directory
+__log4sh_trapsFile=''  # previously defined traps
 
 #
 # macros
@@ -57,8 +62,8 @@ _LOG4SH_ERROR_='eval _log4sh_error --lineno "${LINENO:-}"'
 #
 # Args:
 #    fqla: string: fully qualified [logger.]appender
-_LOG4SH_SPLIT_LOGGER_APPENDER_='eval expr "$1" : ".*\..*" >/dev/null; if [ $? -eq 0 ]; then log4sh_logger_=`expr "$1" : "\(.*\)\..*"`; log4sh_appender_=`expr "$1" : ".*\.\(.*\)"`; else log4sh_logger_=${__LOG4SH_LOGGER_ROOT}; log4sh_appender_=$1; fi; log4sh_fqla_=$1; shift'
-_LOG4SH_CLEANUP_LOGGER_APPENDER_='eval unset log4sh_appender_ log4sh_fqla_ log4sh_logger_'
+_LOG4SH_SPLIT_LOGGER_APPENDER_='eval expr "$1" : ".*\..*" >/dev/null; if [ $? -eq 0 ]; then log4sh_logger_=`expr "$1" : "\(.*\)\..*"`; log4sh_appender_=`expr "$1" : ".*\.\(.*\)"`; else log4sh_logger_=${__LOG4SH_LOGGER_ROOT}; log4sh_appender_=$1; fi; log4sh_fqAppender_="${log4sh_logger_}.${log4sh_appender_}"; shift'
+_LOG4SH_CLEANUP_LOGGER_APPENDER_='eval unset log4sh_appender_ log4sh_fqAppender_ log4sh_logger_'
 
 #-----------------------------------------------------------------------------
 # private log4sh functions
@@ -119,6 +124,118 @@ _log4sh_error()
   unset log4sh_lineno_
 }
 
+# Cleanup function to remove the temporary directory used by log4sh.
+#
+# If there was a previously defined trap for the given signal, log4sh will
+# attempt to call the original trap handler as well so as not to break the
+# parent script.
+#
+# Args:
+#   trap: string: a trap signal (e.g. EXIT)
+_log4sh_cleanup()
+{
+  _log4sh_trap_=$1
+
+  _log4sh_restoreTrap_=${LOG4SH_FALSE}
+  _log4sh_oldTrap_=''
+
+  # match trap to signal value
+  case "${_log4sh_trap_}" in
+    EXIT) _log4sh_signal_=0 ;;
+    INT) _log4sh_signal_=2 ;;
+    TERM) _log4sh_signal_=15 ;;
+  esac
+
+  # do we possibly need to restore a previous trap?
+  if [ -r "${__log4sh_trapsFile}" -a -s "${__log4sh_trapsFile}" ]; then
+    # yes. figure out what we need to do
+    if [ `grep "^trap -- " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
+    then
+      # newer trap command
+      ${_LOG4SH_DEBUG_} 'newer POSIX trap command'
+      _log4sh_restoreTrap_=${LOG4SH_TRUE}
+      _log4sh_oldTrap_=`egrep "(${_log4sh_trap_}|${_log4sh_signal_})$" \
+          "${__log4sh_trapsFile}" |sed "s/^trap -- '\(.*\)' [A-Z]*$/\1/"`
+    elif [ `grep "[0-9]*: " "${__log4sh_trapsFile}" >/dev/null; echo $?` -eq 0 ]
+    then
+      # older trap command
+      ${_LOG4SH_DEBUG_} 'older style trap command'
+      _log4sh_restoreTrap_=${LOG4SH_TRUE}
+      _log4sh_oldTrap_=`grep "^${_log4sh_signal_}: " "${__log4sh_trapsFile}" |\
+        sed 's/^[0-9]*: //'`
+    else
+      # unrecognized trap output
+      _log4sh_error 'unable to restore old traps! unrecognized trap command output'
+    fi
+  fi
+
+  # do our work
+  rm -fr "${__log4sh_tmpDir}"
+
+  # execute the old trap
+  if [ ${_log4sh_restoreTrap_} -eq ${LOG4SH_TRUE} -a -n "${_log4sh_oldTrap_}" ]
+  then
+    ${_LOG4SH_DEBUG_} "'restoring previous trap for (${_log4sh_trap_}) signal'"
+    eval "${_log4sh_oldTrap_}"
+  fi
+
+  # exit for all non-EXIT signals
+  if [ "${_log4sh_trap_}" != 'EXIT' ]; then
+    ${_LOG4SH_WARN_} "'trapped and now handling the (${_log4sh_trap}) signal'"
+    # disable the EXIT trap
+    trap 0
+
+    # add 128 to signal value and exit
+    _log4sh_signal=`expr ${_log4sh_signal_} + 128`
+    exit ${_log4sh_signal_}
+  fi
+
+  unset _log4sh_oldTrap_ _log4sh_signal_ _log4sh_restoreTrap_ _log4sh_trap_
+  return
+}
+
+# Create a secure temporary directory.
+#
+# This function honors the TMPDIR environment variable if set.
+#
+# Args:
+#   none
+# Outputs:
+#   string: path to temporary directory
+# Returns:
+#   integer: success of operation
+_log4sh_mktempDir()
+{
+  _log4sh_tmpPrefix_='log4sh'
+
+  # try the standard mktemp function
+  ( exec mktemp -dqt ${_log4sh_tmpPrefix_}.XXXXXX 2>/dev/null ) && return
+
+  # the standard mktemp didn't work. doing our own.
+  if [ -r '/dev/urandom' ]; then
+    _log4sh_random_=`od -vAn -N4 -tx4 </dev/urandom |sed 's/^[^0-9a-f]*//'`
+  elif [ -n "${RANDOM:-}" ]; then
+    # $RANDOM works
+    _log4sh_random_=${RANDOM}${RANDOM}${RANDOM}$$
+  else
+    # could not get a random number; generating one as best we can
+    _log4sh_date_=`date '+%Y%m%d%H%M%S'`
+    _log4sh_random_=`expr ${_log4sh_date_} / $$`
+    unset _log4sh_date_
+  fi
+
+  _log4sh_tmpDir_="${TMPDIR:-/tmp}/${_log4sh_tmpPrefix_}.${_log4sh_random_}"
+  ( umask 077 && mkdir "${_log4sh_tmpDir_}" ) || {
+    _log4sh_fatal 'could not create temporary directory! exiting'
+    exit 1
+  }
+
+  ${_LOG4SH_DEBUG_} "'created temporary directory (${_log4sh_tmpDir_})'"
+  echo "${_log4sh_tmpDir_}"
+  unset _log4sh_random_ _log4sh_tmpDir_ _log4sh_tmpPrefix_
+  return ${LOG4SH_TRUE}
+}
+
 # Common appender registration.
 #
 # This function must be called to register an appender with the log4sh
@@ -131,7 +248,8 @@ _log4sh_register_appender()
   _log4sh_appender_=$1
 
   __log4sh_appenders="${__log4sh_appenders} ${_log4sh_appender_}"
-  _log4sh_register_${_log4sh_appender_}
+  _appender_register_${_log4sh_appender_}  # call registration callback
+  # TODO: handle failure
 
   unset _log4sh_appender_
 }
@@ -151,9 +269,59 @@ _log4sh_listAppend()
 
   _log4sh_strToEval_="_log4sh_data_=\${${_log4sh_varName_}}"
   eval "${_log4sh_strToEval_}"
-  eval ${_log4sh_varName_}="${_log4sh_data_:+${_log4sh_data_} }${_log4sh_newData_}"
+  eval ${_log4sh_varName_}="'${_log4sh_data_:+${_log4sh_data_} }${_log4sh_newData_}'"
 
   unset _log4sh_data_ _log4sh_newData_ _log4sh_strToEval_ _log4sh_varName_
+}
+
+# Get internal dictionary value.
+#
+# Args:
+#   unnamed_key: string: dictionary key (no spaces allowed)
+# Outputs:
+#   value: string: dictionary value
+# Returns:
+#   integer: success of operation
+_log4sh_getValue()
+{
+  if [ $# -ne 1 ]; then
+    ${_LOG4SH_ERROR_} "'_log4sh_getValue(): invalid argument count'"
+    return ${LOG4SH_ERROR}
+  fi
+
+  # 0=true, 1=false
+  set -x
+  echo 'dict file:' >&2
+  cat "${__log4sh_dictFile}" >&2
+  awk 'BEGIN{found=1}$1==key{print $2;found=0}END{exit found}' key=$1 \
+     "${__log4sh_dictFile}"
+  log4sh_return=$?
+  set +x
+  return ${log4sh_return}
+}
+
+# Set internal dictionary value.
+#
+# Args:
+#   key: string: dictionary key
+#   value: string: dictionary value
+# Returns:
+#   integer: success of operation
+_log4sh_setValue()
+{
+  if [ $# -ne 2 ]; then
+    ${_LOG4SH_ERROR_} "'_log4sh_setValue(): invalid argument count'"
+    return ${LOG4SH_ERROR}
+  fi
+
+  _log4sh_key_=$1
+  _log4sh_value_=$2
+
+  sed -i '' "/^${_log4sh_key_} /d" "${__log4sh_dictFile}"
+  echo "${_log4sh_key_} ${_log4sh_value_}" >>"${__log4sh_dictFile}"
+
+  unset _log4sh_key_ _log4sh_value_
+  return ${LOG4SH_TRUE}  # TODO(20090216:kward): check for some errors?
 }
 
 #-----------------------------------------------------------------------------
@@ -202,6 +370,9 @@ log4sh_resetConfiguration()
       ${_LOG4SH_DEBUG_} "log4sh_logger_=${log4sh_logger_}"
     done
   fi
+
+  cp /dev/null "${__log4sh_dictFile}"  # purge dictionary
+
   __log4sh_loggers=''
   log4sh_addLogger "${__LOG4SH_LOGGER_ROOT}"
 
@@ -209,6 +380,9 @@ log4sh_resetConfiguration()
 }
 
 # Determine if named logger is valid.
+#
+# Note: if this function is called from a private function, it must be done
+# inside a subshell like (...;) due to variable scoping.
 #
 # Args:
 #   logger: string: name of logger
@@ -253,14 +427,16 @@ logger_addAppender()
 
   _logger_isValid "${log4sh_logger_}"
   if [ $? -eq ${LOG4SH_TRUE} ]; then
-    log4sh_fqla_="${log4sh_logger_}.${log4sh_appender_}"
-    ( _appender_isValid "${log4sh_fqla_}"; )  # variable scoping subshell
+    log4sh_fqAppender_="${log4sh_logger_}.${log4sh_appender_}"
+    ( _appender_isValid "${log4sh_fqAppender_}"; )  # variable scoping subshell
     if [ $? -eq ${LOG4SH_FALSE} ]; then
+      # appender doesn't exist; add it
       _log4sh_listAppend "__log4sh_logger_${log4sh_logger_}" \
           "${log4sh_appender_}"
+      appender_setType ${log4sh_fqAppender_} ConsoleAppender
       log4sh_return=${LOG4SH_TRUE}
     else
-      ${_LOG4SH_ERROR_} "'appender already exists (${log4sh_fqla_})'"
+      ${_LOG4SH_ERROR_} "'appender already exists (${log4sh_fqAppender_})'"
       log4sh_return=${LOG4SH_FALSE}
     fi
   else
@@ -268,11 +444,14 @@ logger_addAppender()
     log4sh_return=${LOG4SH_FALSE}
   fi
 
-  unset log4sh_appender_ log4sh_fqla_ log4sh_logger_
+  unset log4sh_appender_ log4sh_fqAppender_ log4sh_logger_
   return ${log4sh_return}
 }
 
 # Determine if named appender is valid.
+#
+# Note: if this function is called from a private function, it must be done
+# inside a subshell like (...;) due to variable scoping.
 #
 # Args:
 #   appender: string: name of [logger.]appender
@@ -303,14 +482,30 @@ _appender_isValid()
   return ${log4sh_return}
 }
 
-# Activate the options for an appender.
+# Determine if appender type is valid.
+#
+# Note: if this function is called from a private function, it must be done
+# inside a subshell like (...;) due to variable scoping.
 #
 # Args:
-#   appender: string: name of [logger.]appender
-appender_activateOptions()
+#   type: string: appender type
+# Returns:
+#   boolean: validity of appender type
+_appender_isValidType()
 {
-  ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
-  ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+  _log4sh_type_=$1
+
+  _log4sh_isValid_=${LOG4SH_FALSE}
+  for _log4sh_validType_ in ${__log4sh_appenders}; do
+    if [ "${_log4sh_type_}" = "${_log4sh_validType_}" ]; then
+      _log4sh_isValid_=${LOG4SH_TRUE}
+      break
+    fi
+  done
+
+  log4sh_return=${_log4sh_isValid_}
+  unset _log4sh_isValid_ _log4sh_type_ _log4sh_validType_
+  return ${log4sh_return}
 }
 
 # Get the appender type for an appender.
@@ -323,14 +518,30 @@ appender_activateOptions()
 #   integer: success of the operation
 appender_getType()
 {
+  if [ $# -ne 1 ]; then
+    ${_LOG4SH_ERROR_} "'appender_getType(): invalid argument count'"
+    return ${LOG4SH_ERROR}
+  fi
   ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
+
+  ( _appender_isValid "${log4sh_fqAppender_}"; )  # subshell required
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
+    ${_LOG4SH_ERROR_} "'invalid appender (${log4sh_fqAppender_})'"
+    ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+    return ${LOG4SH_FALSE}
+  fi
+
+  _log4sh_getValue "${log4sh_fqAppender_}.type"
+  log4sh_return=$?
+
   ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+  return ${log4sh_return}
 }
 
 # Set the appender type for an appender.
 #
 # Args:
-#   appender: string: name of [logger.]appender
+#   fqAppender: string: name of [logger.]appender
 #   type: string: appender type
 # Returns:
 #   integer: success of the operation
@@ -343,32 +554,62 @@ appender_setType()
   ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
   log4sh_type_=$1
 
-  ( _appender_isValid "${log4sh_fqla_}"; )  # variable scoping subshell
-  if [ $? -eq ${LOG4SH_TRUE} ]; then
-    # check for valid appender type
-    log4sh_isValid_=${LOG4SH_FALSE}
-    for log4sh_validType_ in ${__log4sh_appenders}; do
-      if [ "${log4sh_type_}" = "${log4sh_validType_}" ]; then
-        log4sh_isValid_=${LOG4SH_TRUE}
-        break
-      fi
-    done
-
-    if [ ${log4sh_isValid_} -eq ${LOG4SH_TRUE} ]; then
-      :
-    else
-      ${_LOG4SH_ERROR_} "'invalid appender type (${log4sh_type_})'"
-      log4sh_return=${LOG4SH_FALSE}
-    fi
-  else
-    ${_LOG4SH_ERROR_} "'invalid appender (${log4sh_fqla_})'"
-    log4sh_return=${LOG4SH_FALSE}
+  ( _appender_isValid "${log4sh_fqAppender_}"; )
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
+    ${_LOG4SH_ERROR_} "'invalid appender (${log4sh_fqAppender_})'"
+    ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+    return ${LOG4SH_FALSE}
   fi
 
+  ( _appender_isValidType "${log4sh_type_}"; )
+  if [ $? -ne ${LOG4SH_TRUE} ]; then
+    ${_LOG4SH_ERROR_} "'invalid appender type (${log4sh_type_})'"
+    ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+    return ${LOG4SH_FALSE}
+  fi
+
+  # if type valid, instantiate new appender
+  log4sh_return=${LOG4SH_FALSE}
+  while true; do  # while instead of if/then so we can end early
+    _appender_new_${log4sh_type_} ${log4sh_fqAppender_} || break
+    _log4sh_setValue "${log4sh_fqAppender_}.${__LOG4SH_KV_TYPE}" ${log4sh_type_}
+    log4sh_return=${LOG4SH_TRUE}
+    break
+  done
+
+  unset log4sh_type_
   ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
   return ${log4sh_return}
 }
 
+# Activate the options for an appender.
+#
+# Args:
+#   appender: string: name of [logger.]appender
+appender_activateOptions()
+{
+  ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
+  ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
+}
+
+#-----------------------------------------------------------------------------
 # main() code.
+#
+
 [ -z "${LOG4SH_DEBUG:-}" ] && _LOG4SH_DEBUG_=':'  # disable debugging
+
+__log4sh_tmpDir=`_log4sh_mktempDir`
+__log4sh_dictFile="${__log4sh_tmpDir}/dictionary"
+__log4sh_trapsFile="${__log4sh_tmpDir}/traps"
+
+touch "${__log4sh_dictFile}"  # prepare empty dictionary
+trap >"${__log4sh_trapsFile}"  # preserve old trap(s)
+
+# configure traps
+${_LOG4SH_DEBUG_} 'setting traps'
+trap '_log4sh_cleanup EXIT' 0
+trap '_log4sh_cleanup INT' 2
+trap '_log4sh_cleanup TERM' 15
+
+# setup default configuration
 log4sh_resetConfiguration
