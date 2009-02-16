@@ -9,16 +9,17 @@
 #
 # This module implements the ConsoleAppender.
 
-# Register the appender.
-_log4sh_register_ConsoleAppender()
+# Appender registration callback.
+_appender_register_ConsoleAppender()
 {
   ${_LOG4SH_INFO_} 'ConsoleAppender registered'
 }
 
 # Add an instance of the appender.
-_log4sh_instantiate_ConsoleAppender()
+_appender_new_ConsoleAppender()
 {
-  :
+  echo 'this is a test' >&2
+  return ${LOG4SH_FALSE}
 }
 
 # register the appender
