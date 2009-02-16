@@ -112,14 +112,28 @@ th_sgrep()
   unset th_pattern_
 }
 
+# Assert the success of an operation.
+#
+# If an operation is not successful (i.e. it returns a non-zero return code)
+# dump the output of the stderrF to the screen.
+#
+# Args:
+#   message: string: message to output [optional]
+#   result: integer: operation result
 assertSuccess()
 {
+  if [ $# -eq 2 ]; then
+    th_message_=$1
+    shift
+  else
+    th_message_=''
+  fi
   th_result_=$1
 
-  assertEquals ${SHUNIT_TRUE} ${th_result_}
+  assertEquals "${th_message_}" ${SHUNIT_TRUE} ${th_result_}
   [ ${th_result_} -eq ${SHUNIT_TRUE} ] || cat "${stderrF}"
 
-  unset th_result_
+  unset th_message_ th_result_
 }
 
 assertError()
