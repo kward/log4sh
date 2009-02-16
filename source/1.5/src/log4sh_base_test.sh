@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: log4sh_test_file_appender.sh 589 2008-12-30 14:50:53Z sfsetse $
+# $Id$
 # vim:et:ft=sh:sts=2:sw=2
 #
 # Copyright 2008 Kate Ward. All Rights Reserved.
