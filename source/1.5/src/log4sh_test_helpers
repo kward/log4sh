@@ -138,13 +138,19 @@ assertSuccess()
 
 assertError()
 {
-  th_message_=$1
+  if [ $# -eq 2 ]; then
+    th_message_="$1: "
+    shift
+  else
+    th_message_=''
+  fi
+  th_error_=$1
 
   th_file_=${stderrF}
-  grep "^log4sh:ERROR.*${th_message_}" "${th_file_}" >/dev/null
+  grep "^log4sh:ERROR.*${th_error_}" "${th_file_}" >/dev/null
   th_result_=$?
-  assertTrue "missing '${th_message_}' error" ${th_result_}
+  assertTrue "${th_message_}missing '${th_error_}' error" ${th_result_}
   [ ${th_result_} -eq 0 ] || cat "${th_file_}"
 
-  unset th_file_ th_message_ th_result_
+  unset th_file_ th_error_ th_message_ th_result_
 }
