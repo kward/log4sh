@@ -41,7 +41,7 @@ Here is a sample header: ::
   # options, using the current list of long options for reference.
   #
   # Args:
-  #   _flags_optStr: integer: option string type (__FLAGS_OPTSTR_*)
+  #   optStr: integer: option string type (__LOG4SH_OPTSTR_*)
   # Output:
   #   string: generated option string for getopt
   # Returns:
@@ -51,12 +51,12 @@ Variable and Function Names
 ---------------------------
 
 All log4sh specific constants, variables, and functions will be prefixed
-appropriately with 'flags'. This is to distinguish usage in the log4sh code
+appropriately with 'log4sh'. This is to distinguish usage in the log4sh code
 from users own scripts so that the shell name space remains predictable to
 users. The exceptions here are the standard ``assertEquals``, etc. functions.
 
 All non built-in constants and variables will be surrouned with squiggle
-brackets, e.g. '${flags_someVariable}' to improve code readability.
+brackets, e.g. '${log4sh_someVariable}' to improve code readability.
 
 Due to some shells not supporting local variables in functions, care in the
 naming and use of variables, both public and private, is very important.
@@ -65,20 +65,20 @@ all variables are technically global variables in some shells.
 
 ================================  ========================
 **type**                          **sample**
-global public constant            ``FLAGS_TRUE``
-global private constant           ``__FLAGS_SHELL_FLAGS``
-global public variable            not used
-global private variable           ``__flags_someVariable``
-global macro                      ``_FLAGS_SOME_MACRO_``
+global public constant            ``LOG4SH_TRUE``
+global private constant           ``__LOG4SH_SHELL_LOG4SH``
+global public variable            ``log4sh_someVariable__``
+global private variable           ``__log4sh_someVariable``
+global macro                      ``_LOG4SH_SOME_MACRO_``
 public function                   ``assertEquals``
-public function, local variable   ``flags_someVariable_``
-private function                  ``_flags_someFunction``
-private function, local variable  ``_flags_someVariable_``
+public function, local variable   ``log4sh_someVariable_``
+private function                  ``_log4sh_someFunction``
+private function, local variable  ``_log4sh_someVariable_``
 ================================  ========================
 
 Where it makes sense, variables can have the first letter of the second and
 later words capitalized. For example, the local variable name for the total
-number of test cases seen might be ``flags_totalTestsSeen_``.
+number of test cases seen might be ``log4sh_totalTestsSeen_``.
 
 Local Variable Cleanup
 ----------------------
