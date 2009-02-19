@@ -66,7 +66,7 @@ _LOG4SH_SPLIT_LOGGER_APPENDER_='eval expr "$1" : ".*\..*" >/dev/null; if [ $? -e
 _LOG4SH_CLEANUP_LOGGER_APPENDER_='eval unset log4sh_appender_ log4sh_fqAppender_ log4sh_logger_'
 
 #-----------------------------------------------------------------------------
-# private log4sh functions
+# log4sh functions
 #
 
 # Common logging function for log4sh itself.
@@ -324,10 +324,6 @@ _log4sh_setValue()
   return ${LOG4SH_TRUE}  # TODO(20090216:kward): check for some errors?
 }
 
-#-----------------------------------------------------------------------------
-# public log4sh functions
-#
-
 # Add a new logger.
 #
 # Args:
@@ -379,6 +375,10 @@ log4sh_resetConfiguration()
   unset log4sh_logger_
 }
 
+#------------------------------------------------------------------------------
+# logger functions
+#
+
 # Determine if named logger is valid.
 #
 # Note: if this function is called from a private function, it must be done
@@ -408,7 +408,8 @@ _logger_isValid()
 # Add a new appender to a logger.
 #
 # Args:
-#   appender: string: name of [logger.]appender
+#   appender: string: name of appender
+#   logger: string: name of logger to add appender to (optional)
 # Returns:
 #   integer: success of the operation
 logger_addAppender()
@@ -417,18 +418,13 @@ logger_addAppender()
     ${_LOG4SH_ERROR_} "'logger_addAppender(): invalid argument count'"
     return ${LOG4SH_ERROR}
   fi
-  if [ $# -eq 1 ]; then
-    log4sh_logger_=${__LOG4SH_LOGGER_ROOT}
-  else
-    log4sh_logger_=$1
-    shift
-  fi
   log4sh_appender_=$1
+  log4sh_logger_=${2:-${__LOG4SH_LOGGER_ROOT}}
 
-  _logger_isValid "${log4sh_logger_}"
+  ( _logger_isValid "${log4sh_logger_}"; )
   if [ $? -eq ${LOG4SH_TRUE} ]; then
     log4sh_fqAppender_="${log4sh_logger_}.${log4sh_appender_}"
-    ( _appender_isValid "${log4sh_fqAppender_}"; )  # variable scoping subshell
+    ( _appender_isValid "${log4sh_fqAppender_}"; )
     if [ $? -eq ${LOG4SH_FALSE} ]; then
       # appender doesn't exist; add it
       _log4sh_listAppend "__log4sh_logger_${log4sh_logger_}" \
@@ -448,10 +444,88 @@ logger_addAppender()
   return ${log4sh_return}
 }
 
+# Retrieves the list of appenders from appropriate variable.
+#
+# Args:
+#   logger: string: name of logger
+# Output:
+#   string: space separated list of appender names
+# Returns:
+#   integer: undefined
+_logger_getAppenders()
+{
+  _log4sh_strToEval_="echo \"\${__log4sh_logger_${log4sh_logger_}}\""
+  eval "${_log4sh_strToEval_}"
+  unset _log4sh_strToEval_
+}
+
+# Gets the list of appenders for a logger.
+#
+# Args:
+#   logger: string: name of logger (optional)
+# Output:
+#   string: space separated list of appender names
+# Returns:
+#   integer: success of operation
+logger_getAppenders()
+{
+  if [ $# -gt 1 ]; then
+    ${_LOG4SH_ERROR_} "'logger_getAppenders(): invalid argument count'"
+    return ${LOG4SH_ERROR}
+  fi
+  log4sh_logger_=${1:-${__LOG4SH_LOGGER_ROOT}}
+
+  log4sh_return=${LOG4SH_FALSE}
+  ( _logger_isValid "${log4sh_logger_}"; )
+  if [ $? -eq ${LOG4SH_TRUE} ]; then
+    _logger_getAppenders ${log4sh_logger_}
+    log4sh_return=${LOG4SH_TRUE}
+  fi
+
+  unset log4sh_logger_
+  return ${log4sh_return}
+}
+
+# Helper function to send an INFO priority message to the root logger.
+#
+# Args:
+#   msg: string: message to log
+logger_info()
+{
+  log ${__LOG4SH_LEVEL_INFO} "$@"
+}
+
+# The base logging function that sends a message to all appenders of a logger.
+#
+# Args:
+#   priority: string: the logging priority to limit message at
+#   STDIN|msg: string[]: the message to log
+log()
+{
+  if [ $# -ge 1 ]; then
+    ${_LOG4SH_ERROR_} "'log(): invalid argument count'"
+    return ${LOG4SH_ERROR}
+  fi
+  log4sh_priority_=$1
+  shift
+  [ $# -ne 0 ] && log4sh_msg_=$@ || log4sh_msg_=`cat`
+
+  # determine logger
+  [ -z "${log4sh_logger__}" ] \
+      && log4sh_logger_=${__LOG4SH_LOGGER_ROOT} \
+      || log4sh_logger_=${log4sh_logger__}
+
+  unset log4sh_msg_ log4sh_priority_
+}
+
+#------------------------------------------------------------------------------
+# appender functions
+#
+
 # Determine if named appender is valid.
 #
-# Note: if this function is called from a private function, it must be done
-# inside a subshell like (...;) due to variable scoping.
+# Note: This function should always be called inside a subshell like (...;) due
+# to variable scoping.
 #
 # Args:
 #   appender: string: name of [logger.]appender
@@ -462,10 +536,9 @@ _appender_isValid()
   ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
 
   _log4sh_isValid_=${LOG4SH_FALSE}
-  ( _logger_isValid "${log4sh_logger_}"; )  # variable scoping subshell
+  ( _logger_isValid "${log4sh_logger_}"; )
   if [ $? -eq ${LOG4SH_TRUE} ]; then
-    _log4sh_strToEval_="_log4sh_appenders_=\${__log4sh_logger_${log4sh_logger_}}"
-    eval "${_log4sh_strToEval_}"
+    _log4sh_appenders_=`_logger_getAppenders ${log4sh_logger_}`
     for _log4sh_validAppender_ in ${_log4sh_appenders_}; do
       ${_LOG4SH_DEBUG_} "_log4sh_validAppender_=${_log4sh_validAppender_}"
       if [ "${log4sh_appender_}" = "${_log4sh_validAppender_}" ]; then
@@ -476,8 +549,7 @@ _appender_isValid()
   fi
 
   log4sh_return=${_log4sh_isValid_}
-  unset _log4sh_appenders_ _log4sh_isValid_ _log4sh_strToEval_ \
-      _log4sh_validAppender_
+  unset _log4sh_appenders_ _log4sh_isValid_ _log4sh_validAppender_
   ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}
   return ${log4sh_return}
 }
@@ -531,7 +603,7 @@ appender_getType()
     return ${LOG4SH_FALSE}
   fi
 
-  _log4sh_getValue "${log4sh_fqAppender_}.type"
+  _log4sh_getValue "${log4sh_fqAppender_}.${__LOG4SH_KV_TYPE}"
   log4sh_return=$?
 
   ${_LOG4SH_CLEANUP_LOGGER_APPENDER_}

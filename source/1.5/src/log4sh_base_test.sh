@@ -42,6 +42,22 @@ EOF
   assertEquals 'unable to get key value' 123 "${value}"
 }
 
+test_log4sh_addLogger()
+{
+  log4sh_addLogger >"${stdoutF}" 2>"${stderrF}"
+  assertEquals ${LOG4SH_ERROR} $?
+  assertError 'invalid argument count'
+
+  log4sh_addLogger 'root' >"${stdoutF}" 2>"${stderrF}"
+  assertEquals ${LOG4SH_FALSE} $?
+  assertError 'logger already exists'
+
+  log4sh_addLogger 'newLogger' >"${stdoutF}" 2>"${stderrF}"
+  assertEquals ${LOG4SH_TRUE} $?
+  _logger_isValid 'newLogger'
+  assertTrue 'new logger should exist' $?
+}
+
 test__logger_isValid()
 {
   _logger_isValid ''
@@ -52,6 +68,61 @@ test__logger_isValid()
 
   _logger_isValid 'invalid'
   assertFalse 'invalid logger should not exist' $?
+}
+
+test_logger_addAppender()
+{
+  logger_addAppender >"${stdoutF}" 2>"${stderrF}"
+  assertEquals ${LOG4SH_ERROR} $?
+  assertError 'invalid argument count'
+
+  logger_addAppender 'newRootAppender' >"${stdoutF}" 2>"${stderrF}"
+  assertSuccess $?
+  _appender_isValid 'newRootAppender'
+  assertTrue 'newRootAppender should exist' $?
+
+  log4sh_addLogger 'newLogger'
+  logger_addAppender 'newLoggerAppender' 'newLogger' \
+      >"${stdoutF}" 2>"${stderrF}"
+  assertSuccess $?
+  _appender_isValid 'newLogger.newLoggerAppender'
+  assertTrue 'newLogger.newLoggerAppender should exist' $?
+}
+
+test_logger_getAppenders()
+{
+  # root logger
+
+  appenders=`logger_getAppenders 2>"${stderrF}"`
+  assertTrue 'default mode to retrieve root logger should succeed' $?
+  assertNull "${appenders}"
+
+  appenders=`logger_getAppenders root 2>"${stderrF}"`
+  assertTrue 'getting appenders for root logger should succeed' $?
+  assertNull "${appenders}"
+
+  logger_addAppender 'newRootAppender'
+  appenders=`logger_getAppenders 2>"${stderrF}"`
+  assertTrue 'just added the newRootAppender. where is it?' $?
+  assertEquals 'newRootAppender' "${appenders}"
+
+  # invalid logger
+
+  appenders=`logger_getAppenders invalidLogger 2>"${stderrF}"`
+  assertFalse 'getting appenders for an invalid logger should not succeed' $?
+  assertNull "${appenders}"
+
+  # custom
+
+  log4sh_addLogger custom
+  appenders=`logger_getAppenders custom 2>"${stderrF}"`
+  assertTrue 'getting appenders for custom logger should succeed' $?
+  assertNull "${appenders}"
+
+  logger_addAppender newCustomAppender custom
+  appenders=`logger_getAppenders custom 2>"${stderrF}"`
+  assertTrue 'just added the newCustomAppender. where is it?' $?
+  assertEquals 'newCustomAppender' "${appenders}"
 }
 
 test__appender_isValid()
@@ -73,61 +144,26 @@ test__appender_isValidType()
   assertTrue 'registered Dummy appender type should succeed' $?
 }
 
-test_log4sh_addLogger()
-{
-  log4sh_addLogger >"${stdoutF}" 2>"${stderrF}"
-  assertEquals ${LOG4SH_ERROR} $?
-  assertError 'invalid argument count'
-
-  log4sh_addLogger 'root' >"${stdoutF}" 2>"${stderrF}"
-  assertEquals ${LOG4SH_FALSE} $?
-  assertError 'logger already exists'
-
-  log4sh_addLogger 'newLogger' >"${stdoutF}" 2>"${stderrF}"
-  assertEquals ${LOG4SH_TRUE} $?
-  _logger_isValid 'newLogger'
-  assertTrue 'new logger should exist' $?
-}
-
-test_logger_addAppender()
-{
-  logger_addAppender >"${stdoutF}" 2>"${stderrF}"
-  assertEquals ${LOG4SH_ERROR} $?
-  assertError 'invalid argument count'
-
-  logger_addAppender 'newRootAppender' >"${stdoutF}" 2>"${stderrF}"
-  assertSuccess $?
-  _appender_isValid 'newRootAppender'
-  assertTrue 'newRootAppender should exist' $?
-
-  log4sh_addLogger 'newLogger'
-  logger_addAppender 'newLogger' 'newLoggerAppender' \
-      >"${stdoutF}" 2>"${stderrF}"
-  assertSuccess $?
-  _appender_isValid 'newLogger.newLoggerAppender'
-  assertTrue 'newLogger.newLoggerAppender should exist' $?
-}
-
 test_appender_getsetType()
 {
   # getType
-  appender_getType >"${stdoutF}" 2>"${stderrF}"
+  appType=`appender_getType 2>"${stderrF}"`
   assertEquals ${LOG4SH_ERROR} $?
-  assertError 'invalid argument count'
+  assertError 'getType' 'invalid argument count'
 
-  appender_getType 'invalidAppender' >"${stdoutF}" 2>"${stderrF}"
+  appType=`appender_getType 'invalidAppender' 2>"${stderrF}"`
   assertFalse $?
-  assertError 'invalid appender'
+  assertError 'getType' 'invalid appender'
 
   # setType
-  appender_setType 'someAppender' >"${stdoutF}" 2>"${stderrF}"
+  appender_setType >"${stdoutF}" 2>"${stderrF}"
   assertEquals ${LOG4SH_ERROR} $?
-  assertError 'invalid argument count'
+  assertError 'setType' 'invalid argument count'
 
   appender_setType 'invalidAppender' 'DummyAppender' \
       >"${stdoutF}" 2>"${stderrF}"
   assertFalse $?
-  assertError 'invalid appender'
+  assertError 'setType' 'invalid appender'
 
   # default appender type is a ConsoleAppender
   logger_addAppender 'myConsoleAppender'
