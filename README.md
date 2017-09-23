@@ -9,7 +9,7 @@ versions. Now we are in the days of GitHub where everyone can download the
 latest release. The code will be changed to support this model, and specific
 releases will be maintained on branches (or at least that is the plan).
 
-Documentation for each release is included in the `doc/` folder of the release (e.g. [1.5/doc/log4sh.md](https://github.com/kward/log4sh/blob/master/1.5/doc/log4sh.md)).
+Documentation for each release is included in the `doc/` folder of the release (e.g. [1.5/doc/log4sh.md](https://github.com/kward/log4sh/blob/master/1.5/doc/README.md)).
 
 log4sh was originally hosted on Source Forge as
 https://sourceforge.net/p/log4sh/. It moved here to be hosted alongside the

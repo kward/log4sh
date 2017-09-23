@@ -1,6 +1,6 @@
 # log4sh 1.5.x
 
-**Author:** Kate Ward
+**Author:** Kate Ward<br/>
 **Email:** kate.ward@forestent.com
 
 log4sh is a logging framework for shell scripts that works similar to the other wonderful [logging products](http://logging.apache.org/) available from the [Apache Software Foundation](http://www.apache.org/) (e.g. log4j, log4perl). Although not as powerful as the others, it can make the task of adding advanced logging to shell scripts easier, and has much more power than basic "echo" commands. In addition, it can be configured from a `.properties` file so that scripts in a production environment do not need to be altered to change the amount of logging they produce.
@@ -23,11 +23,11 @@ log4sh has been developed under the Bourne Again Shell (`bash`) on macOS, but gr
 - [BASH](http://www.gnu.org/software/bash/) - GNU Bourne Again SHell (`bash`)
 - [DASH](http://gondor.apana.org.au/~herbert/dash/) (`dash`)
 - [Korn Shell](http://www.kornshell.com/) (`ksh`)
-- [pdksh](http://web.cs.mun.ca/~michael/pdksh/) - Public Domain Korn Shell (`pdksh`)
+- [pdksh](https://directory.fsf.org/wiki/Pdksh) - Public Domain Korn Shell (`pdksh`)
 
 ### Credits / Contributors
 
-A list of contributors to `log4sh` can be found in the source archive as `doc/contributors.txt`. I want to personally thank all those who have contributed to make this a better tool.
+A list of contributors to log4sh can be found in the source archive as `doc/contributors.txt`. I want to personally thank all those who have contributed to make this a better tool.
 
 ### Feedback
 
