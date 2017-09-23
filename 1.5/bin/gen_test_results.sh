@@ -1,17 +1,16 @@
 #! /bin/sh
-# $Id: gen_test_results.sh 54 2008-10-21 23:29:23Z kate.ward@forestent.com $
 # vim:et:ft=sh:sts=2:sw=2
 #
 # Copyright 2008 Kate Ward. All Rights Reserved.
-# Released under the LGPL (GNU Lesser General Public License)
+# Released under the Apache 2.0 license.
 #
 # Author: kate.ward@forestent.com (Kate Ward)
+# Repository: https://github.com/kward/log4sh
 #
 # This script runs the provided unit tests and sends the output to the
 # appropriate file.
-#
 
-# treat unset variables as an error
+# Treat unset variables as an error.
 set -u
 
 die()
@@ -23,9 +22,9 @@ die()
 BASE_DIR="`dirname $0`/.."
 LIB_DIR="${BASE_DIR}/lib"
 
-# load libraries
+# Load libraries.
 . ${LIB_DIR}/shflags || die 'unable to load shflags library'
-. ${LIB_DIR}/shlib || die 'unable to load shlib library'
+. ${LIB_DIR}/shlib_relToAbsPath || die 'unable to load shlib library'
 . ${LIB_DIR}/versions || die 'unable to load versions library'
 
 BASE_DIR=`shlib_relToAbsPath "${BASE_DIR}"`
@@ -40,11 +39,11 @@ DEFINE_string output_file "${os_name}-${os_version}.txt" 'output file' o
 DEFINE_string suite 'shunit2_test.sh' 'unit test suite' s
 FLAGS "$@" || exit $?; shift ${FLAGS_ARGC}
 
-# determine output filename
+# Determine output filename.
 output="${FLAGS_output_dir:+${FLAGS_output_dir}/}${FLAGS_output_file}"
 output=`shlib_relToAbsPath "${output}"`
 
-# checks
+# Checks.
 if [ -f "${output}" ]; then
   if [ ${FLAGS_force} -eq ${FLAGS_TRUE} ]; then
     rm -f "${output}"
@@ -55,7 +54,7 @@ if [ -f "${output}" ]; then
 fi
 touch "${output}" 2>/dev/null || die "unable to write to '${output}'"
 
-# run tests
+# Run tests.
 ( cd "${SRC_DIR}"; ./${FLAGS_suite} |tee "${output}" )
 
 echo >&2
