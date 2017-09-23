@@ -5,7 +5,8 @@ works similar to the logging products available from the Apache Software
 Foundataion (eg. log4j, log4perl).
 
 log4sh provides different releases so that users can depend on functionality
-within a release series. It uses the X.Y.Z release numbering system.
+within a release series. It uses a variant of the X.Y.Z
+[Semantic Versioning](http://semver.org/) system.
 
 - X -- major release. Significant functionality has changed, and users of the
   code will definitely require changes to continue using it. These are
@@ -14,7 +15,7 @@ within a release series. It uses the X.Y.Z release numbering system.
   users, stable releases are numbered with even numbers (e.g. 1.4), with
   development releases numbered with odd numbers (e.g. 1.5). Development
   releases possibly include functionality that breaks backwards compatibility.
-- Z -- point release. Bug fixes, and new functionality that remains 100%
+- Z -- patch release. Bug fixes, and minor new functionality that remains 100%
   backwards compatible.
 
 log4sh was originally hosted on Source Forge as
