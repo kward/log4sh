@@ -2,6 +2,13 @@
 
 ## 1.5.1
 
+Replaced `lib/shlib` with `shlib_relToAbsPath` from
+[shlib](https://github.com/kward/shlib).
+
+Upgraded [shUnit2](https://github.com/kward/shunit2) to 2.1.7pre.
+
+Upgraded versions [shlib](https://github.com/kward/shlib) library.
+
 Moving to use Markdown for documentation as this is the standard for GitHub.
 
 Moved repository from [SourceForge](https://sourceforge.net/p/log4sh/) to
@@ -15,8 +22,6 @@ Unset additional variables that were missed.
 Fixed off-by-one in exit value for scripts exits caught with trap.
 
 Major directory restructuring. Simplifying to match that of shUnit2 and shFlags.
-
-Upgraded shUnit2 to 2.1.5.
 
 The code base is split from one large script into smaller more manageable pieces
 that also allow for easier testing and for future expansion (say a
