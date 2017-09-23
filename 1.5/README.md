@@ -7,8 +7,8 @@ The main source code is the single [src/log4sh](src/log4sh) file, which can be
 copied to a destination of your choice, and used without any other files from
 this source repository. The remaining files in `src/` are for unit testing.
 
-Documentation is available in the `doc/` folder as
-[doc/log4sh.md](doc/log4sh.md).
+Documentation for log4sh is available as [doc/log4sh.md](doc/log4sh.md). The
+`doc/` folder holds additional supporting documentation.
 
 ## Testing the code
 
