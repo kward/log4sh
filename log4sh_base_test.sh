@@ -1,12 +1,13 @@
-#! /bin/sh
-# $Id$
+#!/bin/sh
 # vim:et:ft=sh:sts=2:sw=2
 #
-# Copyright 2008 Kate Ward. All Rights Reserved.
-# Released under the LGPL (GNU Lesser General Public License)
-# Author: kate.ward@forestent.com (Kate Ward)
+# Copyright 2008-2018 Kate Ward. All Rights Reserved.
+# Released under the Apache License 2.0 license.
 #
 # log4sh unit test for the ConsoleAppender.
+# https://github.com/kward/log4sh
+#
+# Author: kate.ward@forestent.com (Kate Ward)
 
 # load test helpers
 . ./log4sh_test_helpers
