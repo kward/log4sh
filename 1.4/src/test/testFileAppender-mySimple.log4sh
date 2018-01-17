@@ -1,7 +1,0 @@
-# $Id$
-
-log4sh.rootLogger = INFO, mySimple
-
-log4sh.appender.mySimple = FileAppender
-log4sh.appender.mySimple.Threshold = DEBUG
-log4sh.appender.mySimple.File = ${APP_SIMPLE_FILE}

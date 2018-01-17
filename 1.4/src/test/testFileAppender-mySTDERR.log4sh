@@ -1,6 +1,0 @@
-# $Id$
-
-log4sh.rootLogger = INFO, mySTDERR
-
-log4sh.appender.mySTDERR = FileAppender
-log4sh.appender.mySTDERR.File = STDERR
