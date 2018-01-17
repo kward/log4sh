@@ -1,7 +1,0 @@
-# $Id$
-
-- make logger level's case insensitive??
-
-- support netcat for telnet
-
-- support logger for syslog

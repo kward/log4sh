@@ -1,9 +1,0 @@
-# Set root logger level to DEBUG and its only appender to A1
-log4sh.rootLogger=INFO, A1
-
-# A1 is set to be a ConsoleAppender.
-log4sh.appender.A1=ConsoleAppender
-
-# A1 uses PatternLayout.
-log4sh.appender.A1.layout=PatternLayout
-log4sh.appender.A1.layout.ConversionPattern=%r [%t] %p %c %x - %m%n
