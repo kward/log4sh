@@ -1,4 +1,3 @@
-# $Id$
 # vim:et:ft=sh:sts=2:sw=2
 #
 # Copyright 2008 Kate Ward. All Rights Reserved.
@@ -16,11 +15,11 @@ set -u
 # name of script
 TH_ARGV0=`basename "$0"`
 
-# path to log4sh library. can be overridden by setting LOG4SH_INC.
+# Path to log4sh library. Can be overridden by setting LOG4SH_INC.
 TH_LOG4SH=${LOG4SH_INC:-./log4sh}
 
-# path to shUnit2 library. can be overridden by setting SHUNIT_INC.
-TH_SHUNIT=${SHUNIT_INC:-../lib/shunit2}
+# Path to shUnit2 library. Can be overridden by setting SHUNIT_INC.
+TH_SHUNIT=${SHUNIT_INC:-lib/shunit2}
 
 # path to testdata
 TH_TESTDATA_DIR='testdata'
@@ -91,10 +90,13 @@ th_getDataSect()
   th_sgrep "\\[$1\\]" "$2" |sed '1d'
 }
 
-th_oneTimeSetUp()
-{
-  # these will be cleaned up automatically by shunit2
-  TH_TMPDIR=${shunit_tmpDir}
+th_oneTimeSetUp() {
+  # Load log4sh.
+  # shellcheck disable=SC2034
+  . "${TH_LOG4SH}"
+
+  # These will be cleaned up automatically by shUnit2.
+  TH_TMPDIR=${SHUNIT_TMPDIR}
   stdoutF="${TH_TMPDIR}/stdout"
   stderrF="${TH_TMPDIR}/stderr"
   expectedF="${TH_TMPDIR}/expected"

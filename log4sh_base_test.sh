@@ -4,21 +4,16 @@
 # Copyright 2008-2018 Kate Ward. All Rights Reserved.
 # Released under the Apache License 2.0 license.
 #
-# log4sh unit test for the ConsoleAppender.
-# https://github.com/kward/log4sh
+# log4sh unit test for base functionality.
 #
 # Author: kate.ward@forestent.com (Kate Ward)
+# https://github.com/kward/log4sh
 
-# load test helpers
+# Load test helpers.
 . ./log4sh_test_helpers
 
-#------------------------------------------------------------------------------
-# suite tests
-#
-
-test__log4sh_getsetValue()
-{
-  # getValue
+test__log4sh_getsetValue() {
+  # Test getValue.
   _log4sh_getValue >"${stdoutF}" 2>"${stderrF}"
   assertEquals ${LOG4SH_ERROR} $?
   assertError 'invalid argument count'
@@ -26,7 +21,7 @@ test__log4sh_getsetValue()
   value=`_log4sh_getValue 'missing_key' 2>"${stderrF}"`
   assertFalse 'a missing key should be missed' $?
 
-  # setValue
+  # Test setValue.
   _log4sh_setValue >"${stdoutF}" 2>"${stderrF}"
   assertEquals ${LOG4SH_ERROR} $?
   assertError 'invalid argument count'
@@ -43,8 +38,7 @@ EOF
   assertEquals 'unable to get key value' 123 "${value}"
 }
 
-test_log4sh_addLogger()
-{
+test_log4sh_addLogger() {
   log4sh_addLogger >"${stdoutF}" 2>"${stderrF}"
   assertEquals ${LOG4SH_ERROR} $?
   assertError 'invalid argument count'
@@ -59,8 +53,7 @@ test_log4sh_addLogger()
   assertTrue 'new logger should exist' $?
 }
 
-test__logger_isValid()
-{
+test__logger_isValid() {
   _logger_isValid ''
   assertFalse 'empty logger should fail' $?
 
@@ -71,8 +64,7 @@ test__logger_isValid()
   assertFalse 'invalid logger should not exist' $?
 }
 
-test_logger_addAppender()
-{
+test_logger_addAppender() {
   logger_addAppender >"${stdoutF}" 2>"${stderrF}"
   assertEquals ${LOG4SH_ERROR} $?
   assertError 'invalid argument count'
@@ -90,10 +82,8 @@ test_logger_addAppender()
   assertTrue 'newLogger.newLoggerAppender should exist' $?
 }
 
-test_logger_getAppenders()
-{
-  # root logger
-
+test_logger_getAppenders() {
+  # Root logger.
   appenders=`logger_getAppenders 2>"${stderrF}"`
   assertTrue 'default mode to retrieve root logger should succeed' $?
   assertNull "${appenders}"
@@ -107,14 +97,12 @@ test_logger_getAppenders()
   assertTrue 'just added the newRootAppender. where is it?' $?
   assertEquals 'newRootAppender' "${appenders}"
 
-  # invalid logger
-
+  # Invalid logger.
   appenders=`logger_getAppenders invalidLogger 2>"${stderrF}"`
   assertFalse 'getting appenders for an invalid logger should not succeed' $?
   assertNull "${appenders}"
 
-  # custom
-
+  # Custom logger.
   log4sh_addLogger custom
   appenders=`logger_getAppenders custom 2>"${stderrF}"`
   assertTrue 'getting appenders for custom logger should succeed' $?
@@ -126,14 +114,12 @@ test_logger_getAppenders()
   assertEquals 'newCustomAppender' "${appenders}"
 }
 
-test__appender_isValid()
-{
+test__appender_isValid() {
   _appender_isValid ''
   assertFalse 'empty appender should fail' $?
 }
 
-test__appender_isValidType()
-{
+test__appender_isValidType() {
   _appender_isValidType ''
   assertFalse 'empty type should fail' $?
 
@@ -145,9 +131,8 @@ test__appender_isValidType()
   assertTrue 'registered Dummy appender type should succeed' $?
 }
 
-test_appender_getsetType()
-{
-  # getType
+test_appender_getsetType() {
+  # Test getType.
   appType=`appender_getType 2>"${stderrF}"`
   assertEquals ${LOG4SH_ERROR} $?
   assertError 'getType' 'invalid argument count'
@@ -156,7 +141,7 @@ test_appender_getsetType()
   assertFalse $?
   assertError 'getType' 'invalid appender'
 
-  # setType
+  # Test setType.
   appender_setType >"${stdoutF}" 2>"${stderrF}"
   assertEquals ${LOG4SH_ERROR} $?
   assertError 'setType' 'invalid argument count'
@@ -166,7 +151,7 @@ test_appender_getsetType()
   assertFalse $?
   assertError 'setType' 'invalid appender'
 
-  # default appender type is a ConsoleAppender
+  # Default appender type is a ConsoleAppender.
   logger_addAppender 'myConsoleAppender'
   appType=`appender_getType 'myConsoleAppender' 2>"${stderrF}"`
   assertSuccess 'failed to get myConsoleAppender type' $?
@@ -181,8 +166,7 @@ test_appender_getsetType()
   assertEquals 'DummyAppender' "${appType}"
 }
 
-testSplitLoggerAppenderMacro()
-{
+testSplitLoggerAppenderMacro() {
   set -- 'appender'
   ${_LOG4SH_SPLIT_LOGGER_APPENDER_}
   assertEquals 'root' "${log4sh_logger_}"
@@ -196,34 +180,23 @@ testSplitLoggerAppenderMacro()
   assertEquals 'logger.appender' "${log4sh_fqAppender_}"
 }
 
-#
-# stub functions
-#
 _appender_register_ConsoleAppender() { :; }
 _appender_new_ConsoleAppender() { return ${LOG4SH_TRUE}; }
 
 _appender_register_DummyAppender() { :; }
 _appender_new_DummyAppender() { return ${LOG4SH_TRUE}; }
 
-#------------------------------------------------------------------------------
-# suite functions
-#
-
-oneTimeSetUp()
-{
+oneTimeSetUp() {
   th_oneTimeSetUp
-
-  # load libraries
-  . ./log4sh_base
 
   _log4sh_register_appender ConsoleAppender
 }
 
-setUp()
-{
+setUp() {
   log4sh_resetConfiguration
 }
 
-# load and run shUnit2
+# Load and run shUnit2.
+# shellcheck disable=SC2034
 [ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
-. ${TH_SHUNIT}
+. "${TH_SHUNIT}"
