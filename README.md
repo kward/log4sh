@@ -21,3 +21,9 @@ within a release series. It uses a variant of the X.Y.Z
 log4sh was originally hosted on Source Forge as
 https://sourceforge.net/p/log4sh/. It moved here in Sep 2017 to be hosted
 alongside the other projects by @kward (https://github.com/kward).
+
+**[2021-12-12]** log4sh ***is not*** Log4Shell. log4sh is written in pure shell
+code, and does not use Java in any way, shape, or form. It is therefore ***not
+vulnerable*** to the Log4j exploit mentioned in [CVE-2021-4428](https://www.cve.org/CVERecord?id=CVE-2021-44228), which is also named
+Log4Shell or LogJam. For more information, about the unrelated exploit, see
+https://www.kaspersky.com/blog/log4shell-critical-vulnerability-in-apache-log4j/43124/.
