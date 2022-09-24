@@ -8,25 +8,15 @@
 #
 # log4sh unit test for the ConsoleAppender.
 
-# load test helpers
+# Load test helpers.
 . ./log4sh_test_helpers
 
-#------------------------------------------------------------------------------
-# suite tests
-#
-
-testNothing()
-{
+testNothing() {
   logger_addAppender app
   appender_setType app ConsoleAppender
 }
 
-#------------------------------------------------------------------------------
-# suite functions
-#
-
-oneTimeSetUp()
-{
+oneTimeSetUp() {
   th_oneTimeSetUp
 
   # load libraries
@@ -34,13 +24,12 @@ oneTimeSetUp()
   . ./log4sh_ConsoleAppender
 }
 
-setUp()
-{
-  # reset log4sh
-  #log4sh_resetConfiguration
-  :
+setUp() {
+  # Reset log4sh.
+  log4sh_resetConfiguration
 }
 
-# load and run shUnit2
+# Load and run shUnit2.
+# shellcheck disable=SC2034
 [ -n "${ZSH_VERSION:-}" ] && SHUNIT_PARENT=$0
-. ${TH_SHUNIT}
+. "${TH_SHUNIT}"
